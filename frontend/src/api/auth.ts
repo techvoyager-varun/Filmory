@@ -1,60 +1,76 @@
-import { mock } from "./client";
-import { store } from "./mock-store";
+import { request, setAuthToken, clearAuthToken } from "./client";
 import type { AuthCredentials, RegisterPayload, User } from "@/types/movie";
 
-/** MOCK auth only — no real credential checking until the backend exists. */
+const USER_KEY = "filmory.user";
 
-const DEMO_USER: User = {
-  userId: "demo-user",
-  name: "Demo Viewer",
-  email: "demo@filmory.app",
-  favoriteGenres: ["Sci-Fi", "Drama", "Thriller"],
-  favoriteMovieIds: [109487, 79132, 152081],
-};
-
-/** POST /auth/login */
-export function login({ email }: AuthCredentials): Promise<User> {
-  const user: User = {
-    userId: `user-${email.split("@")[0] || "guest"}`,
-    name: (email.split("@")[0] || "Viewer").replace(/^\w/, (c) => c.toUpperCase()),
-    email,
-    favoriteGenres: [],
-    favoriteMovieIds: [],
-  };
-  store.setUser(user);
-  return mock(user, 500);
+interface AuthResponse {
+  accessToken: string;
+  tokenType: string;
+  user: User;
 }
 
-/** POST /auth/register */
-export function register({ name, email }: RegisterPayload): Promise<User> {
-  const user: User = {
-    userId: `user-${Date.now()}`,
-    name,
-    email,
-    favoriteGenres: [],
-    favoriteMovieIds: [],
-  };
-  store.setUser(user);
-  return mock(user, 550);
+function saveUser(user: User | null): void {
+  if (typeof window === "undefined") return;
+  if (user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(USER_KEY);
+  }
 }
 
-export function loginAsDemo(): Promise<User> {
-  store.setUser(DEMO_USER);
-  return mock(DEMO_USER, 300);
+/** POST /api/auth/login */
+export async function login({ email, password }: AuthCredentials): Promise<User> {
+  const data = await request<AuthResponse>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+  setAuthToken(data.accessToken);
+  saveUser(data.user);
+  return data.user;
+}
+
+/** POST /api/auth/register */
+export async function register({ name, email, password }: RegisterPayload): Promise<User> {
+  const data = await request<AuthResponse>("/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ name, email, password }),
+  });
+  setAuthToken(data.accessToken);
+  saveUser(data.user);
+  return data.user;
+}
+
+/** POST /api/auth/demo */
+export async function loginAsDemo(): Promise<User> {
+  const data = await request<AuthResponse>("/api/auth/demo", {
+    method: "POST",
+  });
+  setAuthToken(data.accessToken);
+  saveUser(data.user);
+  return data.user;
 }
 
 export function getCurrentUser(): User | null {
-  return store.getUser();
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
 }
 
-export function updatePreferences(genres: string[], movieIds: number[]): Promise<User | null> {
-  const user = store.getUser();
-  if (!user) return mock(null, 100);
-  const next: User = { ...user, favoriteGenres: genres, favoriteMovieIds: movieIds };
-  store.setUser(next);
-  return mock(next, 300);
+/** PUT /api/auth/preferences */
+export async function updatePreferences(genres: string[], movieIds: number[]): Promise<User | null> {
+  const user = await request<User>("/api/auth/preferences", {
+    method: "PUT",
+    body: JSON.stringify({ favoriteGenres: genres, favoriteMovieIds: movieIds }),
+  });
+  saveUser(user);
+  return user;
 }
 
 export function logout(): void {
-  store.setUser(null);
+  clearAuthToken();
+  saveUser(null);
 }
