@@ -1,26 +1,55 @@
 /**
- * Single seam between the UI and the data source.
- *
- * Today every api/* function resolves mock data through `mock()`.
- * When the FastAPI backend exists, set VITE_API_BASE_URL and swap each
- * `mock(...)` call for `request(...)` — nothing else in the app changes.
+ * Single seam between the UI and the FastAPI backend.
  */
 
-export const API_BASE_URL = import.meta.env["VITE_API_BASE_URL"] ?? "";
+export const API_BASE_URL = import.meta.env["VITE_API_BASE_URL"] ?? "http://localhost:8000";
 
-/** Simulated network latency so loading states are exercised in the prototype. */
-export function mock<T>(data: T, delay = 320): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(data), delay));
+const TOKEN_KEY = "filmory.token";
+
+export function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setAuthToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearAuthToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(init?.headers as Record<string, string> | undefined),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const url = path.startsWith("http") ? path : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+
+  const response = await fetch(url, {
     ...init,
+    headers,
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed (${response.status}): ${path}`);
+    let errorDetail = `Request failed (${response.status}): ${path}`;
+    try {
+      const errorJson = await response.json();
+      if (errorJson && errorJson.detail) {
+        errorDetail = typeof errorJson.detail === "string" ? errorJson.detail : JSON.stringify(errorJson.detail);
+      }
+    } catch {
+      // ignore json parse error on non-json response
+    }
+    throw new Error(errorDetail);
   }
 
   return (await response.json()) as T;
