@@ -39,9 +39,9 @@ function MovieCardBase({ movie, rank, progress, subtitle, onRemove, className }:
       <Link
         to="/movies/$movieId"
         params={{ movieId: String(movie.movieId) }}
-        className="block rounded-none outline-none ring-primary transition-transform duration-300 focus-visible:ring-2 group-hover/card:-translate-y-1.5 group-hover/card:scale-[1.04]"
+        className="block rounded-md outline-none ring-primary transition-transform duration-300 focus-visible:ring-2 group-hover/card:-translate-y-1.5 group-hover/card:scale-[1.04]"
       >
-        <div className="relative overflow-hidden rounded-none bg-surface-raised shadow-lg shadow-background/60 ring-1 ring-border transition duration-300 group-hover/card:shadow-2xl group-hover/card:ring-gold/40">
+        <div className="relative overflow-hidden rounded-md bg-surface-raised shadow-lg shadow-background/60 ring-1 ring-border transition duration-300 group-hover/card:shadow-2xl group-hover/card:ring-gold/40">
           <Poster
             movie={movie}
             className="brightness-90 transition duration-500 group-hover/card:scale-[1.03] group-hover/card:brightness-110"
@@ -72,8 +72,8 @@ function MovieCardBase({ movie, rank, progress, subtitle, onRemove, className }:
           </div>
 
           {typeof progress === "number" ? (
-            <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-none bg-foreground/25">
-              <div className="h-full rounded-none bg-primary" style={{ width: `${progress}%` }} />
+            <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-full bg-foreground/25">
+              <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
             </div>
           ) : null}
         </div>

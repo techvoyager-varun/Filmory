@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.db_models import Movie
 from app.schemas.schemas import MovieSchema, MoviePageSchema
 from app.ml.recommender import movie_model_to_schema
+from app.ml.tmdb import ensure_movie_posters
 
 router = APIRouter(prefix="/api", tags=["Movies"])
 
@@ -22,7 +23,7 @@ def get_genres():
 @router.get("/movies", response_model=MoviePageSchema)
 def get_movies(
     offset: int = Query(0, ge=0),
-    limit: int = Query(48, ge=1, le=100),
+    limit: int = Query(48, ge=1, le=5000),
     genre: str = Query("All"),
     sort: str = Query("popular"),
     query: str = Query(""),
@@ -50,6 +51,7 @@ def get_movies(
         q = q.order_by(desc(Movie.rating_count), desc(Movie.rating))
 
     movies = q.offset(offset).limit(limit).all()
+    ensure_movie_posters(movies, db)
     return MoviePageSchema(
         movies=[movie_model_to_schema(m) for m in movies],
         total=total,
@@ -63,6 +65,7 @@ def get_movie_by_id(movie_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Movie with ID {movie_id} not found in catalog",
         )
+    ensure_movie_posters([movie], db)
     return movie_model_to_schema(movie)
 
 @router.get("/search", response_model=List[MovieSchema])
@@ -75,7 +78,6 @@ def search_movies(
     if not q_str:
         return []
 
-    # Search title and genres using cast
     results = (
         db.query(Movie)
         .filter(
@@ -92,4 +94,5 @@ def search_movies(
         .limit(limit)
         .all()
     )
+    ensure_movie_posters(results, db)
     return [movie_model_to_schema(m) for m in results]

@@ -55,7 +55,7 @@
 }
 
 :root {
-  --radius: 0;
+  --radius: 0.5rem;
 
 
   /* Charcoal canvas, crimson accent, gold highlight. Dark-only cinematic theme. */

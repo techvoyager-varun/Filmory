@@ -57,7 +57,7 @@ function SearchPage() {
               key={s}
               type="button"
               onClick={() => setQuery(s)}
-              className="rounded-none border border-border bg-surface px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-md border border-border bg-surface px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               {s}
             </button>

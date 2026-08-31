@@ -74,7 +74,7 @@ function MoviesPage() {
             onClick={() => setGenre(g)}
             aria-pressed={genre === g}
             className={cn(
-              "shrink-0 rounded-none border px-3.5 py-1.5 text-sm transition-colors",
+              "shrink-0 rounded-md border px-3.5 py-1.5 text-sm transition-colors",
               genre === g
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-surface text-muted-foreground hover:text-foreground",
@@ -94,7 +94,7 @@ function MoviesPage() {
             onClick={() => setSort(s)}
             aria-pressed={sort === s}
             className={cn(
-              "rounded-none px-3 py-1 capitalize transition-colors",
+              "rounded-md px-3 py-1 capitalize transition-colors",
               sort === s ? "bg-surface-raised text-gold" : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -119,7 +119,7 @@ function MoviesPage() {
               <div className="mt-10 flex justify-center">
                 <Button
                   variant="secondary"
-                  className="rounded-none border border-border bg-surface-raised px-8"
+                  className="rounded-md border border-border bg-surface-raised px-8"
                   disabled={isFetching}
                   onClick={() => setLimit((l) => l + PAGE_SIZE)}
                 >

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     # ML parameters
     CANDIDATE_K: int = 100
     TOP_K: int = 10
-    MIN_INTERACTIONS_FOR_PERSONALIZATION: int = 5
+    MIN_INTERACTIONS_FOR_PERSONALIZATION: int = 2
     NCF_WEIGHT: float = 0.55
     TRANSFORMER_WEIGHT: float = 0.25
     GENRE_WEIGHT: float = 0.20

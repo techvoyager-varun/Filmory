@@ -31,6 +31,13 @@ export function UserDataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    if (!user) {
+      setMyList([]);
+      setHistory([]);
+      setLikes([]);
+      setLoading(false);
+      return;
+    }
     const [list, hist, liked] = await Promise.all([
       interactionsApi.getMyList(userId),
       interactionsApi.getHistory(userId),
@@ -40,7 +47,7 @@ export function UserDataProvider({ children }: { children: ReactNode }) {
     setHistory(hist);
     setLikes(liked);
     setLoading(false);
-  }, [userId]);
+  }, [user, userId]);
 
   useEffect(() => {
     void refresh();

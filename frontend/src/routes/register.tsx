@@ -89,7 +89,7 @@ function RegisterPage() {
         <Button
           type="submit"
           disabled={pending}
-          className="w-full rounded-none bg-primary py-6 font-semibold hover:bg-primary-glow"
+          className="w-full rounded-md bg-primary py-6 font-semibold hover:bg-primary-glow"
         >
           {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
           Create account

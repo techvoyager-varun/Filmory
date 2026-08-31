@@ -38,8 +38,8 @@ function HistoryPage() {
             title="Nothing watched yet"
             description="Press Play on any movie and it will show up here."
             action={
-              <Button asChild className="rounded-none bg-primary hover:bg-primary-glow">
-                <Link to="/">Go to home</Link>
+              <Button asChild className="rounded-md bg-primary hover:bg-primary-glow">
+                <Link to="/movies">Browse movies</Link>
               </Button>
             }
           />
@@ -47,7 +47,7 @@ function HistoryPage() {
           history.map((entry) => (
             <article
               key={entry.movie.movieId}
-              className="flex items-center gap-4 rounded-none border border-border bg-surface/70 p-3 transition-colors hover:bg-surface-raised/70"
+              className="flex items-center gap-4 rounded-lg border border-border bg-surface/70 p-3 shadow-md transition-colors hover:bg-surface-raised/70"
             >
               <Link
                 to="/movies/$movieId"
@@ -58,7 +58,7 @@ function HistoryPage() {
                   src={entry.movie.posterUrl}
                   alt={`${entry.movie.title} poster`}
                   loading="lazy"
-                  className="h-24 w-16 rounded-none object-cover"
+                  className="h-24 w-16 rounded-md object-cover shadow-sm"
                 />
               </Link>
 
@@ -76,8 +76,8 @@ function HistoryPage() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   Watched {new Date(entry.watchedAt).toLocaleString()}
                 </p>
-                <div className="mt-2 h-1 w-40 overflow-hidden rounded-none bg-muted">
-                  <div className="h-full rounded-none bg-primary" style={{ width: `${entry.progress}%` }} />
+                <div className="mt-2 h-1 w-40 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${entry.progress}%` }} />
                 </div>
               </div>
 
@@ -85,7 +85,7 @@ function HistoryPage() {
 
               <Button
                 onClick={() => void play(entry.movie)}
-                className="rounded-none bg-primary hover:bg-primary-glow"
+                className="rounded-md bg-primary hover:bg-primary-glow"
               >
                 <Play className="size-4 fill-current" aria-hidden />
                 Play again

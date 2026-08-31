@@ -19,7 +19,7 @@ export function PlayButton({ movie, size = "lg" }: { movie: Movie; size?: Size }
           e.stopPropagation();
           void play(movie);
         }}
-        className="size-9 rounded-none bg-foreground text-background hover:bg-foreground/85"
+        className="size-9 rounded-md bg-foreground text-background hover:bg-foreground/85"
       >
         <Play className="size-4 fill-current" aria-hidden />
       </Button>
@@ -30,7 +30,7 @@ export function PlayButton({ movie, size = "lg" }: { movie: Movie; size?: Size }
     <Button
       size={size === "lg" ? "lg" : "default"}
       onClick={() => void play(movie)}
-      className="glow-primary rounded-none h-10 px-4 text-sm md:h-11 md:px-6 md:text-base bg-primary font-semibold text-primary-foreground hover:bg-primary-glow"
+      className="glow-primary rounded-md h-10 px-4 text-sm md:h-11 md:px-6 md:text-base bg-primary font-semibold text-primary-foreground hover:bg-primary-glow"
     >
       <Play className="size-4 fill-current" aria-hidden />
       Play
@@ -54,8 +54,8 @@ export function LikeButton({ movie, size = "lg" }: { movie: Movie; size?: Size }
         void toggleLike(movie);
       }}
       className={cn(
-        "rounded-none border border-border bg-surface-raised/80 hover:bg-surface-raised",
-        size !== "icon" &&' h-10 px-4 text-sm md:h-11 md:px-6 md:text-base',
+        "rounded-md border border-border bg-surface-raised/80 hover:bg-surface-raised",
+        size !== "icon" && "h-10 px-4 text-sm md:h-11 md:px-6 md:text-base",
         size === "icon" && "size-9",
       )}
     >
@@ -81,8 +81,8 @@ export function MyListButton({ movie, size = "lg" }: { movie: Movie; size?: Size
         void toggleMyList(movie);
       }}
       className={cn(
-        "rounded-none border border-border bg-surface-raised/80 hover:bg-surface-raised",
-        size !== "icon" &&' h-10 px-4 text-sm md:h-11 md:px-6 md:text-base',
+        "rounded-md border border-border bg-surface-raised/80 hover:bg-surface-raised",
+        size !== "icon" && "h-10 px-4 text-sm md:h-11 md:px-6 md:text-base",
         size === "icon" && "size-9",
       )}
     >

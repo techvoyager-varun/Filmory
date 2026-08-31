@@ -39,8 +39,8 @@ function ProfilePage() {
   return (
     <div className="pb-14 pt-24 md:pt-28">
       <section className="mx-auto max-w-[1600px] px-4 md:px-10">
-        <div className="flex flex-col gap-6 rounded-none border border-border bg-surface/70 p-6 md:flex-row md:items-center md:p-8">
-          <span className="flex size-20 items-center justify-center rounded-none bg-primary text-3xl font-extrabold text-primary-foreground">
+        <div className="flex flex-col gap-6 rounded-xl border border-border bg-surface/70 p-6 shadow-xl md:flex-row md:items-center md:p-8">
+          <span className="flex size-20 items-center justify-center rounded-full bg-primary text-3xl font-extrabold text-primary-foreground shadow-md">
             {user.name.charAt(0).toUpperCase()}
           </span>
 
@@ -53,7 +53,7 @@ function ProfilePage() {
                 user.favoriteGenres.map((g) => (
                   <span
                     key={g}
-                    className="rounded-none border border-border bg-surface-raised px-3 py-1 text-xs text-gold"
+                    className="rounded-md border border-border bg-surface-raised px-3 py-1 text-xs text-gold"
                   >
                     {g}
                   </span>
@@ -71,7 +71,7 @@ function ProfilePage() {
             <Stat label="Watched" value={history.length} />
           </div>
 
-          <Button variant="secondary" className="rounded-none" onClick={logout}>
+          <Button variant="secondary" className="rounded-md" onClick={logout}>
             Sign out
           </Button>
         </div>

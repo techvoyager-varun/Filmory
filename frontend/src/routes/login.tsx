@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logoUrl from "@/assets/filmory-logo.png";
+import { FilmoryLogo } from "@/components/FilmoryLogo";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -70,7 +70,7 @@ function LoginPage() {
         <Button
           type="submit"
           disabled={pending !== null}
-          className="w-full rounded-none bg-primary py-6 font-semibold hover:bg-primary-glow"
+          className="w-full rounded-md bg-primary py-6 font-semibold hover:bg-primary-glow"
         >
           {pending === "form" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
           Login
@@ -86,7 +86,7 @@ function LoginPage() {
             toast.success("Signed in as Demo Viewer");
             void navigate({ to: "/" });
           }}
-          className="w-full rounded-none border border-border py-6"
+          className="w-full rounded-md border border-border py-6"
         >
           {pending === "demo" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
           Continue as Demo User
@@ -118,10 +118,9 @@ export function AuthShell({
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%)]"
       />
-      <div className="relative w-full max-w-md rounded-none border border-border bg-surface/80 p-8 backdrop-blur-xl">
-        <div className="mb-6 flex items-center gap-2 font-display text-xl font-extrabold">
-          <img src={logoUrl} alt="" aria-hidden width={28} height={28} className="size-7" />
-          Film<span className="text-gradient-brand">ory</span>
+      <div className="relative w-full max-w-md rounded-xl border border-border bg-surface/80 p-8 shadow-2xl backdrop-blur-xl">
+        <div className="mb-6 flex items-center">
+          <FilmoryLogo size={32} className="h-8 w-auto" />
         </div>
         <h1 className="text-2xl font-bold">{title}</h1>
         <p className="mb-6 mt-1 text-sm text-muted-foreground">{subtitle}</p>
