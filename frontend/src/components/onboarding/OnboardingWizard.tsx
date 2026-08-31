@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
 import { getGenres, getMovies } from "@/api/movies";
 import { Button } from "@/components/ui/button";
@@ -45,8 +45,7 @@ export function OnboardingWizard() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-24 pt-28 md:px-10">
-      <span className="inline-flex items-center gap-1.5 rounded-none border border-border bg-surface px-3 py-1 text-xs font-semibold text-gold">
-        <Sparkles className="size-3.5" aria-hidden />
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1 text-xs font-semibold text-gold">
         Step {step + 1} of {STEPS.length} — {STEPS[step]}
       </span>
 
@@ -55,7 +54,7 @@ export function OnboardingWizard() {
           <div
             key={label}
             className={cn(
-              "h-1 flex-1 rounded-none transition-colors",
+              "h-1 flex-1 rounded-full transition-colors",
               i <= step ? "bg-primary" : "bg-surface-raised",
             )}
           />
@@ -81,7 +80,7 @@ export function OnboardingWizard() {
                     aria-pressed={active}
                     onClick={() => setGenres((g) => toggle(g, genre))}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-none border px-4 py-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                      "inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                       active
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border bg-surface text-muted-foreground hover:text-foreground",
@@ -148,7 +147,7 @@ export function OnboardingWizard() {
                 genres.map((g) => (
                   <span
                     key={g}
-                    className="rounded-none border border-primary/50 bg-primary/10 px-3 py-1 text-sm text-foreground"
+                    className="rounded-md border border-primary/50 bg-primary/10 px-3 py-1 text-sm text-foreground"
                   >
                     {g}
                   </span>
@@ -169,7 +168,7 @@ export function OnboardingWizard() {
                       src={m.posterUrl}
                       alt={`${m.title} poster`}
                       loading="lazy"
-                      className="aspect-[2/3] w-full rounded-none object-cover"
+                      className="aspect-[2/3] w-full rounded-md object-cover"
                     />
                     <figcaption className="mt-1 truncate text-xs text-muted-foreground">
                       {m.title}
@@ -189,7 +188,7 @@ export function OnboardingWizard() {
           <Button
             variant="secondary"
             onClick={() => setStep((s) => s - 1)}
-            className="rounded-none border border-border bg-surface-raised/80 px-6 py-6"
+            className="rounded-md border border-border bg-surface-raised/80 px-6 py-6"
           >
             <ArrowLeft className="size-4" aria-hidden />
             Back
@@ -200,7 +199,7 @@ export function OnboardingWizard() {
           <Button
             disabled={!canContinue}
             onClick={() => setStep((s) => s + 1)}
-            className="rounded-none bg-primary px-8 py-6 font-semibold hover:bg-primary-glow"
+            className="rounded-md bg-primary px-8 py-6 font-semibold hover:bg-primary-glow"
           >
             {step === 0 ? "Get started" : "Continue"}
             <ArrowRight className="size-4" aria-hidden />
@@ -209,7 +208,7 @@ export function OnboardingWizard() {
           <Button
             disabled={saving}
             onClick={() => void finish()}
-            className="rounded-none bg-primary px-8 py-6 font-semibold hover:bg-primary-glow"
+            className="rounded-md bg-primary px-8 py-6 font-semibold hover:bg-primary-glow"
           >
             {saving ? "Saving…" : "Looks good"}
           </Button>
@@ -218,7 +217,7 @@ export function OnboardingWizard() {
         <Button
           variant="ghost"
           onClick={() => navigate({ to: "/" })}
-          className="rounded-none px-6 py-6 text-muted-foreground"
+          className="rounded-md px-6 py-6 text-muted-foreground"
         >
           Skip for now
         </Button>
@@ -242,7 +241,7 @@ function WelcomeStep() {
           "Review and confirm your profile",
         ].map((item, i) => (
           <li key={item} className="flex items-center gap-3">
-            <span className="flex size-7 items-center justify-center rounded-none bg-primary/15 text-xs font-bold text-primary">
+            <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
               {i + 1}
             </span>
             {item}
@@ -268,7 +267,7 @@ function PosterPick({
       aria-pressed={active}
       onClick={onToggle}
       className={cn(
-        "group relative overflow-hidden rounded-none border-2 text-left outline-none transition focus-visible:ring-2 focus-visible:ring-primary",
+        "group relative overflow-hidden rounded-md border-2 text-left outline-none transition focus-visible:ring-2 focus-visible:ring-primary",
         active ? "border-primary" : "border-transparent hover:border-border",
       )}
     >
@@ -277,12 +276,12 @@ function PosterPick({
         alt={`${movie.title} poster`}
         loading="lazy"
         className={cn(
-          "aspect-[2/3] w-full object-cover transition",
+          "aspect-[2/3] w-full rounded-sm object-cover transition",
           active ? "brightness-110" : "brightness-75 group-hover:brightness-100",
         )}
       />
       {active ? (
-        <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-none bg-primary text-primary-foreground">
+        <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-sm bg-primary text-primary-foreground">
           <Check className="size-3" aria-hidden />
         </span>
       ) : null}

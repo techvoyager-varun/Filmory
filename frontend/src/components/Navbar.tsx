@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logoUrl from "@/assets/filmory-logo.png";
+import { FilmoryLogo } from "@/components/FilmoryLogo";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, Menu, Search, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,11 +45,8 @@ export function Navbar() {
       )}
     >
       <nav className="mx-auto flex h-16 max-w-[1600px] items-center gap-6 px-4 md:px-10">
-        <Link to="/" className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight">
-          <img src={logoUrl} alt="" aria-hidden width={28} height={28} className="size-7" />
-          <span>
-            Film<span className="text-gradient-brand">ory</span>
-          </span>
+        <Link to="/" className="flex items-center font-display text-lg font-extrabold tracking-tight">
+          <FilmoryLogo size={32} className="h-8 w-auto" />
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
@@ -60,7 +57,7 @@ export function Navbar() {
               activeOptions={{ exact: link.to === "/" }}
               activeProps={{ className: "text-foreground" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="rounded-none px-3 py-1.5 text-sm font-medium transition-colors hover:text-foreground"
+              className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:text-foreground"
             >
               {link.label}
             </Link>
@@ -73,7 +70,7 @@ export function Navbar() {
             variant="ghost"
             aria-label="Search movies"
             onClick={() => navigate({ to: "/search" })}
-            className="rounded-none"
+            className="rounded-md"
           >
             <Search className="size-4" aria-hidden />
           </Button>
@@ -83,16 +80,16 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="hidden items-center gap-2 rounded-none px-2 md:inline-flex"
+                  className="hidden items-center gap-2 rounded-md px-2 md:inline-flex"
                   aria-label="Open profile menu"
                 >
-                  <span className="flex size-7 items-center justify-center rounded-none bg-primary text-xs font-bold text-primary-foreground">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
                   <span className="max-w-24 truncate text-sm">{user?.name}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuContent align="end" className="w-52 rounded-md">
                 <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -119,10 +116,10 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
-              <Button asChild variant="ghost" size="sm" className="rounded-none">
+              <Button asChild variant="ghost" size="sm" className="rounded-md">
                 <Link to="/login">Login</Link>
               </Button>
-              <Button asChild size="sm" className="rounded-none bg-primary hover:bg-primary-glow">
+              <Button asChild size="sm" className="rounded-md bg-primary hover:bg-primary-glow">
                 <Link to="/register">Register</Link>
               </Button>
             </div>
@@ -130,7 +127,7 @@ export function Navbar() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button size="icon" variant="ghost" className="rounded-none md:hidden" aria-label="Open menu">
+              <Button size="icon" variant="ghost" className="rounded-md md:hidden" aria-label="Open menu">
                 <Menu className="size-5" aria-hidden />
               </Button>
             </SheetTrigger>
@@ -143,7 +140,7 @@ export function Navbar() {
                       key={link.to}
                       to={link.to}
                       onClick={() => setOpen(false)}
-                      className="rounded-none px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       activeProps={{ className: "bg-muted text-foreground" }}
                       activeOptions={{ exact: link.to === "/" }}
                     >

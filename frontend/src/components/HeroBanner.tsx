@@ -49,7 +49,7 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
 
       <div
         key={movie.movieId}
-        className="absolute right-6 top-1/2 hidden w-[19rem] -translate-y-1/2 animate-fade-in border border-gold/25 shadow-[0_30px_80px_rgba(0,0,0,0.7)] lg:block"
+        className="absolute right-6 top-1/2 hidden w-[19rem] -translate-y-1/2 animate-fade-in overflow-hidden rounded-lg border border-gold/25 shadow-[0_30px_80px_rgba(0,0,0,0.7)] lg:block"
       >
         <Poster movie={movie} eager />
       </div>
@@ -70,7 +70,7 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
           </span>
 
 
-          <h1 className="mt-3 text-3xl font-extrabold leading-[1] drop-shadow-[0_6px_30px_rgba(0,0,0,0.65)] sm:text-4xl md:mt-4 md:text-6xl lg:text-7xl">
+          <h1 className="mt-3 text-2xl font-extrabold leading-[1.15] drop-shadow-[0_6px_30px_rgba(0,0,0,0.65)] sm:text-3xl md:mt-4 md:text-4xl lg:text-4xl xl:text-5xl max-w-xl">
             {movie.title}
           </h1>
 
@@ -101,7 +101,7 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
               asChild
               size="lg"
               variant="secondary"
-              className="h-10 rounded-none border border-border bg-surface-raised/80 px-4 text-sm hover:bg-surface-raised md:h-11 md:px-6 md:text-base"
+              className="h-10 rounded-md border border-border bg-surface-raised/80 px-4 text-sm hover:bg-surface-raised md:h-11 md:px-6 md:text-base"
             >
               <Link to="/movies/$movieId" params={{ movieId: String(movie.movieId) }}>
                 <Info className="size-4" aria-hidden />
@@ -122,7 +122,7 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
               aria-current={i === index}
               onClick={() => setIndex(i)}
               className={cn(
-                "h-1.5 rounded-none transition-all duration-300",
+                "h-1.5 rounded-full transition-all duration-300",
                 i === index ? "w-8 bg-primary" : "w-3 bg-foreground/30 hover:bg-foreground/60",
               )}
             />

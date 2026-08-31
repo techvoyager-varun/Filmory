@@ -18,6 +18,7 @@ from app.models.db_models import (
     UserPreference,
 )
 from app.schemas.schemas import ScoredMovieSchema, MovieSchema
+from app.ml.tmdb import ensure_movie_posters
 
 def movie_model_to_schema(movie: Movie) -> MovieSchema:
     return MovieSchema(
@@ -242,6 +243,7 @@ def get_personalized_recommendations(
 
     # Hydrate movie details from PostgreSQL database
     db_movies = db.query(Movie).filter(Movie.movie_id.in_(selected_movie_ids)).all()
+    ensure_movie_posters(db_movies, db)
     movie_dict = {m.movie_id: m for m in db_movies}
 
     results: List[ScoredMovieSchema] = []
@@ -338,6 +340,7 @@ def get_similar_movies(movie_id: int, db: Session, top_k: int = 14) -> List[Scor
     similar_movie_ids = [model_service.idx2movie[idx] for idx in top_indices_list if idx in model_service.idx2movie]
     
     db_movies = db.query(Movie).filter(Movie.movie_id.in_(similar_movie_ids)).all()
+    ensure_movie_posters(db_movies, db)
     movie_dict = {m.movie_id: m for m in db_movies}
 
     results = []
@@ -426,6 +429,7 @@ def get_cold_start_recommendations(
             movie_ids = [m_id for m_id, _ in sorted_movies]
             
             db_movies = db.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
+            ensure_movie_posters(db_movies, db)
             movie_dict = {m.movie_id: m for m in db_movies}
             
             results = []
@@ -467,6 +471,7 @@ def get_popular_movies(db: Session, limit: int = 20) -> List[ScoredMovieSchema]:
         .limit(limit)
         .all()
     )
+    ensure_movie_posters(movies, db)
     return [
         ScoredMovieSchema(
             movieId=m.movie_id,
@@ -492,6 +497,7 @@ def get_trending_movies(db: Session, limit: int = 20) -> List[ScoredMovieSchema]
         .limit(limit)
         .all()
     )
+    ensure_movie_posters(trending_db, db)
     return [
         ScoredMovieSchema(
             movieId=m.movie_id,
@@ -518,6 +524,7 @@ def get_movies_by_genre(genre: str, db: Session, limit: int = 20) -> List[Scored
         .limit(limit)
         .all()
     )
+    ensure_movie_posters(movies, db)
 
     return [
         ScoredMovieSchema(

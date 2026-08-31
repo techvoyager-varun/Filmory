@@ -5,7 +5,7 @@ export function RatingBadge({ rating, className }: { rating: number; className?:
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-none bg-background/70 px-2 py-0.5 text-xs font-semibold text-gold backdrop-blur",
+        "inline-flex items-center gap-1 rounded-md bg-background/70 px-2 py-0.5 text-xs font-semibold text-gold backdrop-blur",
         className,
       )}
     >
@@ -20,7 +20,7 @@ export function MatchBadge({ score, className }: { score: number; className?: st
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-none bg-primary/90 px-2 py-0.5 text-xs font-bold text-primary-foreground",
+        "inline-flex items-center rounded-md bg-primary/90 px-2 py-0.5 text-xs font-bold text-primary-foreground",
         className,
       )}
     >

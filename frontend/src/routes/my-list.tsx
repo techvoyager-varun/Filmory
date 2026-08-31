@@ -40,7 +40,7 @@ function MyListPage() {
             title="Your list is empty"
             description="Add movies with the + button on any card to build your watchlist."
             action={
-              <Button asChild className="rounded-none bg-primary hover:bg-primary-glow">
+              <Button asChild className="rounded-md bg-primary hover:bg-primary-glow">
                 <Link to="/movies">Browse movies</Link>
               </Button>
             }

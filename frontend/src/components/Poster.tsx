@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Movie } from "@/types/movie";
 
@@ -30,7 +31,9 @@ export function Poster({
   className?: string;
   eager?: boolean;
 }) {
-  if (movie.posterUrl) {
+  const [error, setError] = useState(false);
+
+  if (movie.posterUrl && !error) {
     return (
       <img
         src={movie.posterUrl}
@@ -39,6 +42,7 @@ export function Poster({
         decoding="async"
         width={500}
         height={750}
+        onError={() => setError(true)}
         className={cn("aspect-[2/3] w-full object-cover", className)}
       />
     );
@@ -77,13 +81,16 @@ export function Poster({
 
 /** Full-bleed backdrop; falls back to the generated gradient. */
 export function Backdrop({ movie, className }: { movie: Movie; className?: string }) {
-  if (movie.backdropUrl) {
+  const [error, setError] = useState(false);
+
+  if (movie.backdropUrl && !error) {
     return (
       <img
         src={movie.backdropUrl}
         alt=""
         aria-hidden
         decoding="async"
+        onError={() => setError(true)}
         className={cn("size-full object-cover", className)}
       />
     );

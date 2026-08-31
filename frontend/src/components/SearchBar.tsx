@@ -26,7 +26,7 @@ export function SearchBar({
         aria-label="Search movies"
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="h-13 rounded-none border-border bg-surface/80 pl-11 pr-11 text-base backdrop-blur placeholder:text-muted-foreground focus-visible:ring-primary"
+        className="h-13 rounded-lg border-border bg-surface/80 pl-11 pr-11 text-base backdrop-blur placeholder:text-muted-foreground focus-visible:ring-primary"
       />
       {value ? (
         <Button
@@ -34,7 +34,7 @@ export function SearchBar({
           variant="ghost"
           aria-label="Clear search"
           onClick={() => onChange("")}
-          className="absolute right-2 top-1/2 size-8 -translate-y-1/2 rounded-none"
+          className="absolute right-2 top-1/2 size-8 -translate-y-1/2 rounded-md"
         >
           <X className="size-4" aria-hidden />
         </Button>

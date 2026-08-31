@@ -60,7 +60,7 @@ function MovieDetailsPage() {
           title="We couldn't find that movie"
           description="It may have been removed from the catalog."
           action={
-            <Button asChild className="rounded-none bg-primary">
+            <Button asChild className="rounded-md bg-primary">
               <Link to="/movies">Browse all movies</Link>
             </Button>
           }
@@ -78,7 +78,7 @@ function MovieDetailsPage() {
         <div className="hero-scrim absolute inset-0" />
 
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col gap-8 px-4 pb-14 pt-28 md:flex-row md:px-10 md:pt-40">
-          <div className="w-40 shrink-0 shadow-2xl shadow-background md:w-60">
+          <div className="w-40 shrink-0 overflow-hidden rounded-lg shadow-2xl shadow-background ring-1 ring-border md:w-60">
             <Poster movie={movie} eager />
           </div>
 
