@@ -1,4 +1,4 @@
-# 🎬 Filmory — AI-Powered Movie Recommendation Platform
+# Filmory — AI-Powered Movie Recommendation Platform
 
 <p align="center">
   <strong>A cinematic movie discovery and recommendation platform powered by Deep Learning (Neural Collaborative Filtering + Sequential Transformer) trained on the MovieLens catalog.</strong>
@@ -17,7 +17,7 @@
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **Filmory** is an end-to-end, production-grade movie streaming discovery platform designed to deliver hyper-personalized movie recommendations in real-time. It marries modern deep learning recommendation systems with a responsive, Netflix-style cinematic user interface.
 
@@ -28,29 +28,29 @@ Unlike simple popularity or tag-based recommendation engines, Filmory leverages 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-### 🧠 Deep Learning Recommendation Engine
+### Deep Learning Recommendation Engine
 - **3-Stage Ensemble Architecture**:
   $$\text{Final Score} = 0.55 \cdot \text{Score}_{\text{NCF}} + 0.25 \cdot \text{Score}_{\text{Transformer}} + 0.20 \cdot \text{Score}_{\text{Genre}}$$
 - **Sequential Transformer Scoring**: Predicts the user's next movie based on their last 20 watch sequence steps.
-- **Cold-Start Onboarding Engine**: Cosine similarity KNN against 41,547 user taste profiles for new users with fewer than 5 interactions.
+- **Cold-Start Onboarding Engine**: Cosine similarity KNN against 41,547 user taste profiles for new users with fewer than 2 interactions.
 - **Item-to-Item Similarity Rails**: Vector cosine similarity between learned NCF embeddings and 20-dimensional genre vectors.
 - **Real-Time Feedback Loop**: Every play, like, or list addition dynamically updates user preference vectors in PostgreSQL without needing full model retraining.
 - **AI Recommendation Breakdown**: Inspectable match confidence scores with detailed NCF, Transformer, and Genre affinity breakdowns on every recommended title.
 
-### 🎭 Netflix-Grade Cinematic Frontend
-- **Hero Spotlight**: Dynamic banner with trailers, synopsis, genre tags, and quick-action buttons.
-- **Personalized Rails**: "Top AI Picks For You", "Trending Now", "Popular Titles", "Because You Watched...", and Genre-specific shelves.
-- **Interactive Search & Filtering**: Instant search by title/genre with sorting (`Popular`, `Rating`, `Year`, `Title`).
-- **Interactive Onboarding Wizard**: Beautiful multi-step genre and movie picker for new accounts.
-- **Watchlist ("My List") & History**: Saved titles and chronological watch history with optimistic UI updates.
-- **User Taste Profile**: Breakdown of favorite genres, interaction stats, and AI user persona.
+### Netflix-Grade Cinematic Frontend
+- **Hero Spotlight**: Dynamic banner with synopsis, metadata, and quick-action buttons.
+- **Personalized Rails**: "Recommended For You", "Top 10 This Week", "Popular Titles", "Because You Watched...", and Genre-specific shelves.
+- **Interactive Search & Filtering**: Instant search across 27,278 titles by title/genre with sorting (`Popular`, `Rating`, `Year`, `Title`).
+- **Interactive Onboarding Wizard**: Multi-step genre and movie taste picker for new accounts.
+- **Watchlist ("My List") & History**: Saved titles and chronological watch history with real-time updates.
+- **User Taste Profile**: Breakdown of favorite genres, interaction stats, and AI persona.
 - **One-Click Demo Mode**: Jump straight into a pre-configured profile mapped to MovieLens User `2847` for instant testing.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TB
@@ -91,18 +91,19 @@ flowchart TB
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 Filmory/
 ├── backend/
 │   ├── app/
 │   │   ├── config.py                 # Pydantic environment configuration
-│   │   ├── database.py               # SQLAlchemy async/sync session management
+│   │   ├── database.py               # SQLAlchemy session management
 │   │   ├── main.py                   # FastAPI app entry & lifespan loader
 │   │   ├── ml/
 │   │   │   ├── architectures.py      # PyTorch NCF & Transformer model classes
 │   │   │   ├── model_service.py      # In-memory model artifact loader & cache
+│   │   │   ├── tmdb.py               # Real-time TMDB poster & metadata resolver
 │   │   │   └── recommender.py        # 3-stage candidate retrieval & ranking logic
 │   │   ├── models/
 │   │   │   └── db_models.py          # SQLAlchemy ORM models
@@ -114,7 +115,8 @@ Filmory/
 │   │   ├── schemas/
 │   │   │   └── schemas.py            # Pydantic v2 validation schemas
 │   │   └── scripts/
-│   │       └── seed_movies.py        # Seeds 27,278 MovieLens catalog & Demo user
+│   │       ├── seed_movies.py        # Seeds 27,278 MovieLens catalog & Demo user
+│   │       └── enrich_database_posters.py # Multithreaded TMDB poster enrichment
 │   ├── ml/                           # Trained PyTorch .pth models & mappings
 │   │   ├── ncf_baseline.pth
 │   │   ├── ncf_hybrid.pth
@@ -154,7 +156,7 @@ Filmory/
 
 ---
 
-## 🛠️ Complete Setup Guide (From Scratch)
+## Complete Setup Guide (From Scratch)
 
 ### Prerequisites
 - **Python**: `3.10` or higher
@@ -228,10 +230,10 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 > **Backend Service Status:**
-> - 🌐 **API Root**: [http://localhost:8000](http://localhost:8000)
-> - 📖 **Interactive Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
-> - 📋 **ReDoc Documentation**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
-> - 💓 **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
+> - **API Root**: [http://localhost:8000](http://localhost:8000)
+> - **Interactive Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+> - **ReDoc Documentation**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+> - **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 
@@ -250,11 +252,11 @@ npm run dev
 ```
 
 > **Frontend Service Status:**
-> - 🎬 **App URL**: [http://localhost:5173](http://localhost:5173) (or `http://localhost:8080`)
+> - **App URL**: [http://localhost:5173](http://localhost:5173) (or `http://localhost:8080`)
 
 ---
 
-## 🧪 Running Automated Tests
+## Running Automated Tests
 
 Run the complete backend test suite covering authentication, movie catalog filtering, interaction recording, and recommendation flows:
 
@@ -265,7 +267,7 @@ python -m pytest -v tests
 
 ---
 
-## 📡 REST API Reference
+## REST API Reference
 
 | Category | Method | Endpoint | Description |
 | :--- | :--- | :--- | :--- |
@@ -294,7 +296,7 @@ python -m pytest -v tests
 
 ---
 
-## 🤖 Deep Learning Models & Technical Specifications
+## Deep Learning Models & Technical Specifications
 
 | Model / Matrix | Architecture Details | Purpose |
 | :--- | :--- | :--- |
@@ -306,7 +308,7 @@ python -m pytest -v tests
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework**: React 19, TypeScript
@@ -327,6 +329,6 @@ python -m pytest -v tests
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
