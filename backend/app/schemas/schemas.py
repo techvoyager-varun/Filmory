@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 class MovieSchema(BaseModel):
@@ -19,6 +19,16 @@ class ScoredMovieSchema(MovieSchema):
     ncfScore: Optional[float] = None
     transformerScore: Optional[float] = None
     genreScore: Optional[float] = None
+    # ---- Stage 4 (DAMR) transparency fields ----
+    momentumScore: Optional[float] = None       # taste-momentum alignment bonus component
+    agreementScore: Optional[float] = None      # expert-agreement confidence factor
+    qualityScore: Optional[float] = None        # Bayesian quality prior [0..1]
+    diversityPenalty: Optional[float] = None    # max similarity to already-picked items
+    expertWeights: Optional[Dict[str, float]] = None  # drift-adaptive gate output
+    userState: Optional[Dict[str, Any]] = None  # drift / focus / maturity / freshness
+    variant: Optional[str] = None               # which Stage-4 variant produced this list
+    rank: Optional[int] = None                  # 1-based position in the final list
+    listDiversity: Optional[float] = None       # intra-list diversity (ILD) of the final list
 
 class MoviePageSchema(BaseModel):
     movies: List[MovieSchema]
