@@ -1,0 +1,79 @@
+{
+  "protocol": "Temporal leave-one-out: for each user the last interaction is the test positive, combined with 99 uniformly sampled unseen negatives; rank of the positive is evaluated at K=10. NCF-paper style protocol (He et al., 2017).",
+  "num_users_evaluated": 2000,
+  "num_negatives": 99,
+  "k": 10,
+  "seed": 42,
+  "generated_at": "2026-09-05T15:01:03.631999Z",
+  "dataset": {
+    "num_users_total": 41547,
+    "num_items": 22836,
+    "num_genres": 20
+  },
+  "results": {
+    "Popularity": {
+      "HR@10": 0.8765,
+      "NDCG@10": 0.5851,
+      "MRR": 0.5021,
+      "AUC": 0.9632,
+      "ILD@10": 0.8281,
+      "Coverage@10": 0.0044
+    },
+    "NCF Baseline": {
+      "HR@10": 0.3975,
+      "NDCG@10": 0.1924,
+      "MRR": 0.1578,
+      "AUC": 0.7927,
+      "ILD@10": 0.8281,
+      "Coverage@10": 0.0044
+    },
+    "NCF Hybrid": {
+      "HR@10": 0.244,
+      "NDCG@10": 0.1021,
+      "MRR": 0.0919,
+      "AUC": 0.7297,
+      "ILD@10": 0.8308,
+      "Coverage@10": 0.0044
+    },
+    "Transformer": {
+      "HR@10": 0.389,
+      "NDCG@10": 0.2095,
+      "MRR": 0.1774,
+      "AUC": 0.732,
+      "ILD@10": 0.8302,
+      "Coverage@10": 0.0044
+    },
+    "Genre": {
+      "HR@10": 0.1135,
+      "NDCG@10": 0.0551,
+      "MRR": 0.0611,
+      "AUC": 0.5266,
+      "ILD@10": 0.8302,
+      "Coverage@10": 0.0044
+    },
+    "Static Ensemble": {
+      "HR@10": 0.16,
+      "NDCG@10": 0.0716,
+      "MRR": 0.0701,
+      "AUC": 0.5842,
+      "ILD@10": 0.83,
+      "Coverage@10": 0.0044
+    },
+    "Static + MMR": {
+      "HR@10": 0.267,
+      "NDCG@10": 0.1184,
+      "MRR": 0.0998,
+      "AUC": 0.6619,
+      "ILD@10": 0.8283,
+      "Coverage@10": 0.0044
+    },
+    "DAMR (ours)": {
+      "HR@10": 0.261,
+      "NDCG@10": 0.1152,
+      "MRR": 0.097,
+      "AUC": 0.6403,
+      "ILD@10": 0.8294,
+      "Coverage@10": 0.0044
+    }
+  }
+}

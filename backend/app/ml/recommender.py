@@ -1,3 +1,4 @@
+import datetime as _dt
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -7,6 +8,14 @@ from sqlalchemy import desc, cast, String
 
 from app.config import settings
 from app.ml.model_service import model_service
+from app.ml.damr import (
+    TasteProfile,
+    adaptive_weights,
+    damr_rerank,
+    estimate_user_state,
+    switches_for_variant,
+    intra_list_diversity,
+)
 from app.models.db_models import (
     User,
     Movie,
@@ -120,19 +129,86 @@ def get_user_recent_sequence(user: User, db: Session, max_len: int = 20) -> List
     return item_indices
 
 
+def build_taste_profile(user: User, db: Session) -> TasteProfile:
+    """
+    Build the DAMR user state (drift / focus / maturity / freshness) and the
+    momentum vector from the user's timestamped interaction history.
+
+    History source, in order of preference:
+      1. `interactions` rows of type play/like (real, timestamped).
+      2. Fallback for mapped training users: their MovieLens training sequence,
+         spread synthetically over the last 90 days (most recent item = now).
+    """
+    history: List[Tuple[int, _dt.datetime]] = []
+
+    rows = (
+        db.query(Interaction.movie_id, Interaction.timestamp)
+        .filter(Interaction.user_id == user.id, Interaction.type.in_(["play", "like"]))
+        .order_by(Interaction.timestamp.asc())
+        .all()
+    )
+    history = [
+        (model_service.movie2idx[m_id], ts)
+        for m_id, ts in rows
+        if m_id in model_service.movie2idx
+    ]
+
+    if not history and user.model_user_id is not None:
+        seq = model_service.user_sequences.get(user.model_user_id, []) or []
+        mapped = [model_service.movie2idx[m] for m in seq if m in model_service.movie2idx]
+        if mapped:
+            now = _dt.datetime.utcnow()
+            step = _dt.timedelta(days=90.0 / max(1, len(mapped)))
+            history = [
+                (idx, now - step * (len(mapped) - k))
+                for k, idx in enumerate(mapped)
+            ]
+
+    base_profile = None
+    if user.model_user_id is not None and model_service.user_genre_matrix is not None:
+        u_idx = model_service.user2idx.get(user.model_user_id)
+        if u_idx is not None and u_idx < len(model_service.user_genre_matrix):
+            base_profile = model_service.user_genre_matrix[u_idx]
+
+    return estimate_user_state(history, base_profile=base_profile)
+
+
+def get_taste_state(user: User, db: Session) -> Dict[str, Any]:
+    """Full taste-state payload for the profile page / demo (radar chart data)."""
+    profile = build_taste_profile(user, db)
+    # Run the gate explicitly so the UI shows the weights DAMR would use right now
+    # (state.weights is otherwise only filled during actual re-ranking).
+    w = adaptive_weights(profile.state)
+    profile.state.weights = (float(w[0]), float(w[1]), float(w[2]))
+    return {
+        "userId": str(user.id),
+        "modelMapped": user.model_user_id is not None,
+        "state": profile.state.to_dict(),
+        "vectors": profile.vectors_to_lists(),
+        "genres": [model_service.idx2genre.get(i, str(i)) for i in range(len(profile.g_long))],
+        "weights": profile.state.to_dict()["weights"],
+    }
+
+
 @torch.no_grad()
 def get_personalized_recommendations(
     user: Optional[User],
     db: Session,
     candidate_k: int = 100,
     top_k: int = 10,
+    variant: str = "damr",
 ) -> Tuple[str, List[ScoredMovieSchema]]:
     """
-    Full 3-Stage Personalized Recommendation Flow:
-    1. Hybrid NCF Candidate Generation -> Top 100
-    2. Sequential Transformer Scoring
-    3. Fresh Genre Preference Re-ranking
-    -> Final Top 10
+    Full 4-Stage Personalized Recommendation Flow:
+    1. Hybrid NCF Candidate Generation      -> Top 100 candidates + s_NCF
+    2. Sequential Transformer Scoring       -> s_TR
+    3. Fresh Genre Preference Signal        -> s_GEN
+    4. DAMR Re-Ranker (Drift-Aware Momentum):
+         drift-adaptive expert fusion + taste-momentum bonus
+         + expert-agreement confidence + Bayesian quality prior + MMR diversity
+       -> Final Top 10
+    Set variant="mmr" for static fusion + quality + diversity, or
+    variant="static" for the original fixed-weight ensemble (legacy).
     """
     model_service.load_all()
 
@@ -222,7 +298,7 @@ def get_personalized_recommendations(
         genre_scores = torch.zeros(actual_candidate_k, device=model_service.device)
 
     # ==========================================
-    # ENSEMBLE RE-RANKING
+    # FUSION: Static ensemble of the three expert scores (Stage 1-3)
     # ==========================================
     w_ncf = settings.NCF_WEIGHT
     w_trans = settings.TRANSFORMER_WEIGHT
@@ -234,44 +310,126 @@ def get_personalized_recommendations(
         w_genre * genre_scores
     )
 
-    # Take Top_K (default 10)
+    # ==========================================
+    # STAGE 4: DAMR — Drift-Aware Momentum Re-Ranker
+    # ==========================================
+    # variant = "damr" (proposed) | "mmr" (static + quality + diversity) |
+    #           "static" (pure 0.55/0.25/0.20 ensemble, legacy behaviour)
+    variant = (variant or settings.RERANK_VARIANT).lower()
     actual_top_k = min(top_k, actual_candidate_k)
-    final_top_values, final_top_indices = torch.topk(final_scores, k=actual_top_k)
 
-    selected_item_indices = top_100_item_indices[final_top_indices].cpu().tolist()
-    selected_movie_ids = [model_service.idx2movie[idx] for idx in selected_item_indices if idx in model_service.idx2movie]
+    if variant == "static":
+        # Legacy path: raw ensemble scores -> straight top-k. No Stage 4.
+        final_top_values, final_top_indices = torch.topk(final_scores, k=actual_top_k)
+        selected_item_indices = top_100_item_indices[final_top_indices].cpu().tolist()
+        # int(): idx2movie values are numpy.int64, which some DB drivers cannot bind
+        selected_movie_ids = [int(model_service.idx2movie[idx]) for idx in selected_item_indices if idx in model_service.idx2movie]
 
-    # Hydrate movie details from PostgreSQL database
-    db_movies = db.query(Movie).filter(Movie.movie_id.in_(selected_movie_ids)).all()
-    ensure_movie_posters(db_movies, db)
-    movie_dict = {m.movie_id: m for m in db_movies}
+        db_movies = db.query(Movie).filter(Movie.movie_id.in_(selected_movie_ids)).all()
+        ensure_movie_posters(db_movies, db)
+        movie_dict = {m.movie_id: m for m in db_movies}
 
-    results: List[ScoredMovieSchema] = []
-    for i, m_id in enumerate(selected_movie_ids):
-        if m_id in movie_dict:
-            m = movie_dict[m_id]
-            f_score = float(final_top_values[i].item())
-            n_score = float(top_100_ncf_scores[final_top_indices[i]].item())
-            t_score = float(transformer_scores[final_top_indices[i]].item())
-            g_score = float(genre_scores[final_top_indices[i]].item())
-            
-            results.append(
-                ScoredMovieSchema(
-                    movieId=m.movie_id,
-                    title=m.title,
-                    genres=m.genres if isinstance(m.genres, list) else [],
-                    year=m.year or 0,
-                    rating=float(m.rating or 0.0),
-                    runtime=m.runtime or 0,
-                    posterUrl=m.poster_url or "",
-                    backdropUrl=m.backdrop_url or "",
-                    description=m.description or "",
-                    score=round(f_score, 4),
-                    ncfScore=round(n_score, 4),
-                    transformerScore=round(t_score, 4),
-                    genreScore=round(g_score, 4),
+        results: List[ScoredMovieSchema] = []
+        for i, m_id in enumerate(selected_movie_ids):
+            if m_id in movie_dict:
+                m = movie_dict[m_id]
+                results.append(
+                    ScoredMovieSchema(
+                        movieId=m.movie_id,
+                        title=m.title,
+                        genres=m.genres if isinstance(m.genres, list) else [],
+                        year=m.year or 0,
+                        rating=float(m.rating or 0.0),
+                        runtime=m.runtime or 0,
+                        posterUrl=m.poster_url or "",
+                        backdropUrl=m.backdrop_url or "",
+                        description=m.description or "",
+                        score=round(float(final_top_values[i].item()), 4),
+                        ncfScore=round(float(top_100_ncf_scores[final_top_indices[i]].item()), 4),
+                        transformerScore=round(float(transformer_scores[final_top_indices[i]].item()), 4),
+                        genreScore=round(float(genre_scores[final_top_indices[i]].item()), 4),
+                        variant="static",
+                    )
                 )
+        return "personalized", results
+
+    # --- Build the Stage 4 candidate pool from the ensemble scores ---------
+    pool_k = min(settings.RERANK_POOL_SIZE, actual_candidate_k)
+    pool_values, pool_positions = torch.topk(final_scores, k=pool_k)
+    pool_item_indices = top_100_item_indices[pool_positions]  # model item indices
+    pool_ncf = top_100_ncf_scores[pool_positions]
+    pool_tr = transformer_scores[pool_positions]
+    pool_gen = genre_scores[pool_positions]
+
+    # int(): idx2movie values are numpy.int64, which some DB drivers cannot bind
+    pool_movie_ids = [int(model_service.idx2movie[int(i)]) for i in pool_item_indices.tolist() if int(i) in model_service.idx2movie]
+    if not pool_movie_ids:
+        return "popular", get_popular_movies(db, limit=top_k)
+
+    db_movies = db.query(Movie).filter(Movie.movie_id.in_(pool_movie_ids)).all()
+    movie_by_id = {m.movie_id: m for m in db_movies}
+    # NOTE: the movies table stores ratings on a 0-10 scale; the Bayesian prior
+    # and the schema expose the original 0-5 MovieLens scale, so halve it here.
+    pool_ratings = [
+        float(movie_by_id[m].rating) / 2.0 if (m in movie_by_id and movie_by_id[m].rating is not None) else None
+        for m in pool_movie_ids
+    ]
+    pool_counts = [
+        int(movie_by_id[m].rating_count) if (m in movie_by_id and movie_by_id[m].rating_count is not None) else None
+        for m in pool_movie_ids
+    ]
+
+    # --- Estimate the user's taste state + momentum (Step 1) ---------------
+    profile = build_taste_profile(user, db)
+
+    # --- DAMR re-ranking (Steps 2-5) ----------------------------------------
+    ranked = damr_rerank(
+        cand_idxs=pool_item_indices,
+        s_ncf=pool_ncf,
+        s_tr=pool_tr,
+        s_gen=pool_gen,
+        profile=profile,
+        ratings=pool_ratings,
+        counts=pool_counts,
+        top_k=actual_top_k,
+        **switches_for_variant(variant),
+    )
+
+    selected_movie_ids = [int(model_service.idx2movie[entry["modelIdx"]]) for entry in ranked if entry["modelIdx"] in model_service.idx2movie]
+    ensure_movie_posters(db_movies, db)
+    movie_dict = movie_by_id
+
+    results = []
+    for entry in ranked:
+        m = movie_dict.get(model_service.idx2movie.get(entry["modelIdx"]))
+        if m is None:
+            continue
+        results.append(
+            ScoredMovieSchema(
+                movieId=m.movie_id,
+                title=m.title,
+                genres=m.genres if isinstance(m.genres, list) else [],
+                year=m.year or 0,
+                rating=float(m.rating or 0.0),
+                runtime=m.runtime or 0,
+                posterUrl=m.poster_url or "",
+                backdropUrl=m.backdrop_url or "",
+                description=m.description or "",
+                score=entry["score"],
+                ncfScore=entry["ncfScore"],
+                transformerScore=entry["transformerScore"],
+                genreScore=entry["genreScore"],
+                momentumScore=entry["momentumScore"],
+                agreementScore=entry["agreementScore"],
+                qualityScore=entry["qualityScore"],
+                diversityPenalty=entry["diversityPenalty"],
+                expertWeights=entry["expertWeights"],
+                userState=entry["userState"],
+                variant=variant,
+                rank=len(results) + 1,
+                listDiversity=round(intra_list_diversity([e["modelIdx"] for e in ranked]), 4) if len(results) == 0 else None,
             )
+        )
 
     return "personalized", results
 
@@ -337,7 +495,7 @@ def get_similar_movies(movie_id: int, db: Session, top_k: int = 14) -> List[Scor
     top_values, top_indices = torch.topk(sim_scores, k=top_k)
     top_indices_list = top_indices.cpu().tolist()
     
-    similar_movie_ids = [model_service.idx2movie[idx] for idx in top_indices_list if idx in model_service.idx2movie]
+    similar_movie_ids = [int(model_service.idx2movie[idx]) for idx in top_indices_list if idx in model_service.idx2movie]
     
     db_movies = db.query(Movie).filter(Movie.movie_id.in_(similar_movie_ids)).all()
     ensure_movie_posters(db_movies, db)
