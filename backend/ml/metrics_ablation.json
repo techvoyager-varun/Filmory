@@ -1,0 +1,119 @@
+{
+  "protocol": "Temporal leave-one-out: for each user the last interaction is the test positive, combined with 99 uniformly sampled unseen negatives; rank of the positive is evaluated at K=10. NCF-paper style protocol (He et al., 2017).",
+  "num_users_evaluated": 500,
+  "num_negatives": 99,
+  "k": 10,
+  "seed": 42,
+  "generated_at": "2026-09-05T15:03:19.693518Z",
+  "dataset": {
+    "num_users_total": 41547,
+    "num_items": 22836,
+    "num_genres": 20
+  },
+  "results": {
+    "Popularity": {
+      "HR@10": 0.886,
+      "NDCG@10": 0.5921,
+      "MRR": 0.5074,
+      "AUC": 0.9634,
+      "ILD@10": 0.8237,
+      "Coverage@10": 0.0044
+    },
+    "NCF Baseline": {
+      "HR@10": 0.394,
+      "NDCG@10": 0.1927,
+      "MRR": 0.1591,
+      "AUC": 0.7893,
+      "ILD@10": 0.8256,
+      "Coverage@10": 0.0044
+    },
+    "NCF Hybrid": {
+      "HR@10": 0.268,
+      "NDCG@10": 0.1124,
+      "MRR": 0.0971,
+      "AUC": 0.743,
+      "ILD@10": 0.8298,
+      "Coverage@10": 0.0044
+    },
+    "Transformer": {
+      "HR@10": 0.402,
+      "NDCG@10": 0.2343,
+      "MRR": 0.2038,
+      "AUC": 0.7303,
+      "ILD@10": 0.8304,
+      "Coverage@10": 0.0044
+    },
+    "Genre": {
+      "HR@10": 0.116,
+      "NDCG@10": 0.0585,
+      "MRR": 0.066,
+      "AUC": 0.5251,
+      "ILD@10": 0.8288,
+      "Coverage@10": 0.0044
+    },
+    "Static Ensemble": {
+      "HR@10": 0.182,
+      "NDCG@10": 0.0873,
+      "MRR": 0.0828,
+      "AUC": 0.5887,
+      "ILD@10": 0.8313,
+      "Coverage@10": 0.0044
+    },
+    "Static + MMR": {
+      "HR@10": 0.284,
+      "NDCG@10": 0.1239,
+      "MRR": 0.101,
+      "AUC": 0.6672,
+      "ILD@10": 0.8301,
+      "Coverage@10": 0.0044
+    },
+    "DAMR (ours)": {
+      "HR@10": 0.268,
+      "NDCG@10": 0.1168,
+      "MRR": 0.0966,
+      "AUC": 0.6356,
+      "ILD@10": 0.8267,
+      "Coverage@10": 0.0044
+    },
+    "DAMR \u2212adaptive": {
+      "HR@10": 0.246,
+      "NDCG@10": 0.1085,
+      "MRR": 0.094,
+      "AUC": 0.6568,
+      "ILD@10": 0.83,
+      "Coverage@10": 0.0044
+    },
+    "DAMR \u2212momentum": {
+      "HR@10": 0.28,
+      "NDCG@10": 0.1198,
+      "MRR": 0.0969,
+      "AUC": 0.6382,
+      "ILD@10": 0.8275,
+      "Coverage@10": 0.0044
+    },
+    "DAMR \u2212agreement": {
+      "HR@10": 0.302,
+      "NDCG@10": 0.1304,
+      "MRR": 0.1039,
+      "AUC": 0.6478,
+      "ILD@10": 0.8266,
+      "Coverage@10": 0.0044
+    },
+    "DAMR \u2212quality": {
+      "HR@10": 0.284,
+      "NDCG@10": 0.1242,
+      "MRR": 0.1019,
+      "AUC": 0.6429,
+      "ILD@10": 0.8277,
+      "Coverage@10": 0.0044
+    },
+    "DAMR \u2212diversity": {
+      "HR@10": 0.302,
+      "NDCG@10": 0.1389,
+      "MRR": 0.1115,
+      "AUC": 0.6356,
+      "ILD@10": 0.8278,
+      "Coverage@10": 0.0044
+    }
+  }
+}

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRecommendations } from "@/api/recommendations";
 import { MovieRow } from "@/components/MovieRow";
 import { RequireAuth } from "@/components/RequireAuth";
+import { TasteDriftCard } from "@/components/TasteDriftCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
@@ -76,6 +77,8 @@ function ProfilePage() {
           </Button>
         </div>
       </section>
+
+      <TasteDriftCard />
 
       <div className="mt-6">
         <MovieRow
