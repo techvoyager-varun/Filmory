@@ -273,3 +273,30 @@ def test_bayesian_quality():
     assert abs(bayesian_quality(4.0, 10_000_000) - 4.0 / 5.0) < 1e-3
     # few votes: pulled toward the global prior
     assert abs(bayesian_quality(5.0, 5) - settings.BAYES_C / 5.0) < 0.05
+
+
+def test_positional_state_is_clock_free():
+    """Positional estimator: no timestamps in, freshness always 0.
+
+    Single-genre history -> drift 0; shifting-genre history -> drift > 0 and a
+    non-zero momentum vector. Deterministic given the same positions.
+    """
+    from app.ml.damr import estimate_user_state_from_positions
+
+    single = estimate_user_state_from_positions([0, 4, 8])  # all genre-0 items
+    assert single.state.freshness == 0.0
+    assert abs(single.state.drift) < 1e-6  # float32 rounding only
+    assert single.state.maturity > 0.0
+    assert float(single.momentum.norm()) < 1e-6
+
+    shifted = estimate_user_state_from_positions([0, 0, 0, 1, 1, 1, 2, 2])
+    assert shifted.state.freshness == 0.0
+    assert shifted.state.drift > 0.0
+    assert float(shifted.momentum.norm()) > 0.0
+
+    again = estimate_user_state_from_positions([0, 0, 0, 1, 1, 1, 2, 2])
+    assert again.state.drift == shifted.state.drift
+
+    empty = estimate_user_state_from_positions([])
+    assert empty.state.freshness == 0.0
+    assert empty.state.drift == 0.0

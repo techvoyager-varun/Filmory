@@ -1,0 +1,75 @@
+{
+  "recorded_at": "2026-09-14T15:06:52.475299+00:00",
+  "training_code_available": false,
+  "training_split_available": false,
+  "interaction_timestamps_available": false,
+  "leakage_status": "DIAGNOSTIC \u2014 shipped checkpoints were trained on ALL interactions (docs/DAMR.md section 6). Creating a holdout split after training does not remove held-out information from weights, user_genre_matrix rows (exact full-sequence histograms), or user_interacted sets. Learned-model numbers are OPTIMISTIC. Clean generalization claims require retraining on a documented clean split.",
+  "mitigations_applied_by_evaluator": [
+    "user profiles, genre vectors, popularity counts and DAMR states are rebuilt strictly from train-only histories (S[:-2]); shipped user_genre_matrix rows are NOT used as model inputs",
+    "DAMR state uses the clock-free positional estimator with freshness disabled (no timestamps exist); labelled 'positional'",
+    "Bayesian quality prior disabled (movies_metadata.csv carries no ratings/counts; no training-only per-item quality signal exists)",
+    "retrieval mixture tuned on validation items, frozen, then applied to disjoint test users/items"
+  ],
+  "files": {
+    "ml/ncf_baseline.pth": {
+      "sha256": "5a2dccb07c3e6c91f082d1de35f2b66912897e27b46f67fd6ec355a817890946",
+      "bytes": 2076819
+    },
+    "ml/ncf_hybrid.pth": {
+      "sha256": "e4b6dea7cc53ab14e80e3b5519c1d91948995c765f9d4d0ad65fc4ef24afa1cf",
+      "bytes": 2083381
+    },
+    "ml/sequential_transformer.pth": {
+      "sha256": "93bf372c6520c605507b3f2feb7c6b50caf90f8a6cb1f786f27e552c0af458bb",
+      "bytes": 8112589
+    },
+    "ml/user_sequences.pkl": {
+      "sha256": "865bdea9cf7a007dec25118a55405f6cdeefdf442935ce0b5567178c0119955a",
+      "bytes": 17812402
+    },
+    "ml/user_interacted.pkl": {
+      "sha256": "ecbd94ea8df2f75dc3f61887bb1149ae9ede4ae67793e55acb9c95176b8db320",
+      "bytes": 17812402
+    },
+    "ml/movie_genre_matrix.pt": {
+      "sha256": "975bbec5d7ade9138e648ae75e04719a4825cf8bf36d7dad60cf06b18b8ee48b",
+      "bytes": 1828534
+    },
+    "ml/user_genre_matrix.pt": {
+      "sha256": "7e579512401e9ddccf3534dbdd98bce9b40f77db31330d445a09d28d22e0877a",
+      "bytes": 3325359
+    },
+    "ml/model_config.json": {
+      "sha256": "ff4f49e1c609b01dd1959048e029bb24efe32b9a3352ed8748baabe9ad01a4c9",
+      "bytes": 347
+    },
+    "ml/movie2idx.pkl": {
+      "sha256": "abbe6da3c6d741e37a170b4b4047bcee99ac828f3744540048836ed34d0c8a57",
+      "bytes": 502345
+    },
+    "ml/user2idx.pkl": {
+      "sha256": "5094075e4d7e14022da5804edc9db5455d093436d7bb78acacc1b6e7d8d3b908",
+      "bytes": 914079
+    },
+    "ml/idx2movie.pkl": {
+      "sha256": "8131f1897c95512d712281610ce5da68d641950189df77112ce57e75e880960a",
+      "bytes": 502345
+    },
+    "ml/idx2user.pkl": {
+      "sha256": "69611709bb6681154fbf6f7e9f0ccbf045cd8552594005d115b606797d1eddda",
+      "bytes": 914079
+    },
+    "ml/genre2idx.pkl": {
+      "sha256": "67ef9b8a1e757a07d866994c98ebe7355b907946702c3d7c88e4b1da2f2c9120",
+      "bytes": 264
+    },
+    "ml/idx2genre.pkl": {
+      "sha256": "825d41d669e2db8e3a0c287f497dbd886c1542c739b8b6dfab2b699759174b2c",
+      "bytes": 264
+    },
+    "ml/movies_metadata.csv": {
+      "sha256": "cc86c1bc3d4d7c950a77fddc9c2add839de2836d825a1dd4301ad6d737c232b7",
+      "bytes": 1370263
+    }
+  }
+}

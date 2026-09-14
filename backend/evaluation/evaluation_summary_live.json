@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "benchmark": "assistant_queries.jsonl",
+    "num_queries": 21,
+    "mode": "live-gemini",
+    "model": "gemini-3.6-flash",
+    "llm_successful_extractions": 16,
+    "extraction_source_counts": {
+      "llm": 16,
+      "llm_error_fallback": 7
+    }
+  },
+  "routing_accuracy": 1.0,
+  "constraint_extraction_recall_mean": 0.8,
+  "resolution_recall_mean": 0.9,
+  "constraint_compliance_mean": 1.0,
+  "evidence_reference_validity": 1.0,
+  "clarification_accuracy": 1.0,
+  "honest_empty_accuracy": 1.0,
+  "followup_accuracy": 1.0,
+  "latency_p50_ms": 7043.51,
+  "latency_p95_ms": 14025.22,
+  "llm_ms_p50": 3366.9,
+  "llm_ms_p95": 5141.0
+}

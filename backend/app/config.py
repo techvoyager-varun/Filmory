@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     # GenAI Assistant — "Ask Filmory"
     # ==========================================================
     GEMINI_API_KEY: str = ""                           # from .env
-    GEMINI_CHAT_MODEL: str = "gemini-2.5-flash"        # fast + accurate (v2.5)
+    GEMINI_CHAT_MODEL: str = "gemini-3.6-flash"        # fast + accurate (v3.6)
     GEMINI_EMBEDDING_MODEL: str = "text-embedding-004" # for semantic search
     ASSISTANT_MAX_HISTORY: int = 20                    # max messages per session context
     ASSISTANT_TIMEOUT_S: float = 15.0                  # LLM call timeout
