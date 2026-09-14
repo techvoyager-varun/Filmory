@@ -699,3 +699,180 @@ def get_movies_by_genre(genre: str, db: Session, limit: int = 20) -> List[Scored
         )
         for m in movies
     ]
+
+
+@torch.no_grad()
+def rerank_candidate_pool_with_damr(
+    candidate_movies: List[Movie],
+    user: Optional[User],
+    db: Session,
+    top_k: int = 10,
+    variant: str = "damr",
+) -> Tuple[List[ScoredMovieSchema], Dict[str, Any]]:
+    """
+    Pass an arbitrary candidate pool (e.g. from semantic or metadata search) through
+    the true 4-Stage Personalization & DAMR Re-Ranking pipeline:
+      1. NCF Hybrid scoring for candidate items (or Bayesian prior for unmapped)
+      2. Sequential Transformer scoring based on user recent sequence
+      3. Dynamic user genre-preference alignment scoring
+      4. DAMR Re-Ranking (drift-adaptive expert fusion + momentum + agreement + Bayesian prior + MMR)
+
+    Returns:
+      (scored_movies, audit_metrics)
+    """
+    model_service.load_all()
+    if not candidate_movies:
+        return [], {
+            "total_candidates": 0,
+            "mapped_candidates": 0,
+            "unmapped_candidates": 0,
+            "variant": variant,
+            "expert_weights": {},
+            "user_state": {},
+            "final_movie_ids": [],
+        }
+
+    variant = (variant or settings.RERANK_VARIANT).lower()
+    total_cands = len(candidate_movies)
+
+    # 1. Resolve model item indices for candidates
+    mapped_count = 0
+    item_indices = []
+    for m in candidate_movies:
+        midx = model_service.movie2idx.get(m.movie_id)
+        if midx is not None:
+            item_indices.append(int(midx))
+            mapped_count += 1
+        else:
+            item_indices.append(0)
+
+    cand_item_tensor = torch.tensor(item_indices, dtype=torch.long, device=model_service.device)
+    unmapped_count = total_cands - mapped_count
+
+    # 2. Stage 1: NCF Hybrid Scoring
+    user_idx = 0
+    if user and user.model_user_id is not None:
+        user_idx = model_service.user2idx.get(user.model_user_id, 0)
+
+    user_genre_vector = build_user_genre_vector(user, db) if user else torch.zeros(
+        model_service.config.get("num_genres", 20), device=model_service.device
+    )
+
+    if model_service.ncf_hybrid is not None and model_service.movie_genre_matrix is not None:
+        ncf_scores = model_service.ncf_hybrid.score_candidate_items(
+            user_idx_int=user_idx,
+            candidate_item_indices=cand_item_tensor,
+            user_genre_vector=user_genre_vector,
+            movie_genre_matrix=model_service.movie_genre_matrix,
+            device=model_service.device,
+        )
+    elif model_service.ncf_baseline is not None:
+        user_tensor = torch.full((total_cands,), user_idx, dtype=torch.long, device=model_service.device)
+        ncf_scores = model_service.ncf_baseline(user_tensor, cand_item_tensor)
+    else:
+        ncf_scores = torch.full((total_cands,), 0.5, device=model_service.device)
+
+    # Unmapped items use normalized rating prior as NCF proxy
+    for i, m in enumerate(candidate_movies):
+        if m.movie_id not in model_service.movie2idx:
+            ncf_scores[i] = float(m.rating or 3.5) / 10.0
+
+    # 3. Stage 2: Sequential Transformer Scoring
+    user_seq = get_user_recent_sequence(user, db, max_len=model_service.config.get("transformer_max_len", 20)) if user else []
+    if model_service.sequential_transformer is not None and user_seq:
+        transformer_scores = model_service.sequential_transformer.score_candidates_with_sequence(
+            sequence_item_indices=user_seq,
+            candidate_item_indices=cand_item_tensor,
+            device=model_service.device,
+        )
+    else:
+        transformer_scores = torch.full((total_cands,), 0.3, device=model_service.device)
+
+    # 4. Stage 3: Fresh Genre Re-ranking Signal
+    if model_service.movie_genre_matrix is not None:
+        cand_genre_matrix = model_service.movie_genre_matrix[cand_item_tensor].to(model_service.device)
+        genre_scores = torch.mv(cand_genre_matrix, user_genre_vector)
+        if genre_scores.max() > 0:
+            genre_scores = genre_scores / genre_scores.max()
+    else:
+        genre_scores = torch.full((total_cands,), 0.5, device=model_service.device)
+
+    # 5. Build user profile and inputs for DAMR
+    profile = build_taste_profile(user, db) if user else TasteProfile(
+        short_term_weights={},
+        long_term_weights={},
+        interaction_timestamps=[],
+        active_genre_count=0,
+        total_interactions=0,
+    )
+
+    pool_ratings = [
+        float(m.rating) / 2.0 if m.rating is not None else None
+        for m in candidate_movies
+    ]
+    pool_counts = [
+        int(m.rating_count) if m.rating_count is not None else None
+        for m in candidate_movies
+    ]
+
+    actual_top_k = min(top_k, total_cands)
+    unique_cand_idxs = torch.arange(total_cands, dtype=torch.long, device=model_service.device)
+
+    ranked = damr_rerank(
+        cand_idxs=unique_cand_idxs,
+        s_ncf=ncf_scores,
+        s_tr=transformer_scores,
+        s_gen=genre_scores,
+        profile=profile,
+        ratings=pool_ratings,
+        counts=pool_counts,
+        top_k=actual_top_k,
+        **switches_for_variant(variant),
+    )
+
+    ensure_movie_posters(candidate_movies, db)
+
+    results: List[ScoredMovieSchema] = []
+    for entry in ranked:
+        cand_idx = entry["modelIdx"]
+        if 0 <= cand_idx < len(candidate_movies):
+            m = candidate_movies[cand_idx]
+            results.append(
+                ScoredMovieSchema(
+                    movieId=m.movie_id,
+                    title=m.title,
+                    genres=m.genres if isinstance(m.genres, list) else [],
+                    year=m.year or 0,
+                    rating=float(m.rating or 0.0),
+                    runtime=m.runtime or 0,
+                    posterUrl=m.poster_url or "",
+                    backdropUrl=m.backdrop_url or "",
+                    description=m.description or "",
+                    score=entry["score"],
+                    ncfScore=entry["ncfScore"],
+                    transformerScore=entry["transformerScore"],
+                    genreScore=entry["genreScore"],
+                    momentumScore=entry["momentumScore"],
+                    agreementScore=entry["agreementScore"],
+                    qualityScore=entry["qualityScore"],
+                    diversityPenalty=entry["diversityPenalty"],
+                    expertWeights=entry["expertWeights"],
+                    userState=entry["userState"],
+                    variant=variant,
+                    rank=len(results) + 1,
+                    listDiversity=round(intra_list_diversity([e["modelIdx"] for e in ranked]), 4) if len(results) == 0 else None,
+                )
+            )
+
+    audit_metrics = {
+        "total_candidates": total_cands,
+        "mapped_candidates": mapped_count,
+        "unmapped_candidates": unmapped_count,
+        "variant": variant,
+        "expert_weights": ranked[0]["expertWeights"] if ranked else {},
+        "user_state": ranked[0]["userState"] if ranked else {},
+        "final_movie_ids": [r.movieId for r in results],
+    }
+
+    return results, audit_metrics
+

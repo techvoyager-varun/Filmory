@@ -9,6 +9,7 @@ from app.routers.auth import router as auth_router
 from app.routers.movies import router as movies_router
 from app.routers.recommendations import router as recommendations_router
 from app.routers.interactions import router as interactions_router
+from app.routers.assistant import router as assistant_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -68,6 +69,7 @@ app.include_router(auth_router)
 app.include_router(movies_router)
 app.include_router(recommendations_router)
 app.include_router(interactions_router)
+app.include_router(assistant_router)
 
 @app.get("/health", tags=["Health"])
 def health_check():

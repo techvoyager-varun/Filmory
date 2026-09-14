@@ -24,6 +24,9 @@ export function Footer() {
           <Link to="/search" className="hover:text-foreground">
             Search
           </Link>
+          <Link to="/ask-filmory" className="hover:text-foreground">
+            Ask Filmory
+          </Link>
           <Link to="/my-list" className="hover:text-foreground">
             My List
           </Link>

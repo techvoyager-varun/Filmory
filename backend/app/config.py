@@ -57,6 +57,18 @@ class Settings(BaseSettings):
     BAYES_M: int = 500                 # minimum-votes threshold
     BAYES_C: float = 3.5               # global mean rating prior
 
+    # ==========================================================
+    # GenAI Assistant — "Ask Filmory"
+    # ==========================================================
+    GEMINI_API_KEY: str = ""                           # from .env
+    GEMINI_CHAT_MODEL: str = "gemini-2.5-flash"        # fast + accurate (v2.5)
+    GEMINI_EMBEDDING_MODEL: str = "text-embedding-004" # for semantic search
+    ASSISTANT_MAX_HISTORY: int = 20                    # max messages per session context
+    ASSISTANT_TIMEOUT_S: float = 15.0                  # LLM call timeout
+    ASSISTANT_RATE_LIMIT: int = 20                     # max messages per minute per user
+    SEMANTIC_SEARCH_TOP_K: int = 30                    # candidates from vector search
+    SEMANTIC_SEARCH_ENABLED: bool = False               # enable when pgvector is installed
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property

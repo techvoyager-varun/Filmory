@@ -1,5 +1,10 @@
+import sys
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from app.main import app
 
 def test_health():
@@ -79,20 +84,13 @@ def test_cold_start():
 
 def test_authenticated_recommendations_and_interactions():
     with TestClient(app) as client:
-        # 1. Register a dedicated test user
-        test_email = "test_eval_user@filmory.app"
+        import uuid
+        test_email = f"test_{uuid.uuid4().hex[:8]}@filmory.app"
         reg_res = client.post(
             "/api/auth/register",
             json={"name": "Test Eval", "email": test_email, "password": "password123"},
         )
-        if reg_res.status_code == 409:
-            login_res = client.post(
-                "/api/auth/login",
-                json={"email": test_email, "password": "password123"},
-            )
-            token = login_res.json()["accessToken"]
-        else:
-            token = reg_res.json()["accessToken"]
+        token = reg_res.json()["accessToken"]
 
         headers = {"Authorization": f"Bearer {token}"}
 
