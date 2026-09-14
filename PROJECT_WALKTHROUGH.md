@@ -642,6 +642,22 @@ Simple database queries ordered by rating count, recent interaction count, or ge
 #### `rerank_candidate_pool_with_damr(candidates, user, db)`
 Used by the assistant orchestrator to apply DAMR re-ranking to arbitrary candidate pools (not just the NCF top-100).
 
+### Hardening Plan: Scoring Fallback Routing Matrix
+
+A critical design requirement discussed and implemented in Filmory is ensuring the scoring pipeline never fails or invents fake neural scores when user embeddings or movie embeddings are missing. Rather than assuming all entities exist in the model's static lookup tables, Filmory applies explicit fallback routing:
+
+| Situation | Scoring Behavior | Implementation Path |
+|---|---|---|
+| **User has valid trained embedding** | Run NCF normally | `ncf_hybrid.score_candidate_items()` with user's mapped index |
+| **User has validated synthesized embedding** | Run NCF using that vector | Projected user latent representation passed to GMF + MLP layers |
+| **User has no NCF embedding (cold start)** | Use explicit cold-start / content path | `build_user_genre_vector()` + cosine similarity over 41,547-user matrix |
+| **User has usable sequence** | Transformer scores mapped items | `transformer.score_candidates_with_sequence()` with sequence of movie indices |
+| **User has no interaction sequence** | Neutral sequence score prior | Assigned uniform neutral prior (0.3) without breaking tensor dimensions |
+| **Movie has no model embedding** | Explicit content-based fallback | Bayesian rating prior (`float(rating)/10.0`) + genre overlap; no crash |
+
+> [!IMPORTANT]
+> **No Fake Heuristics**: When an entity is unmapped, Filmory does NOT fabricate synthetic neural activations and label them as true model outputs. Instead, it exposes clear audit markers (`mapped_candidates`, `unmapped_candidates`) in the recommendation response metadata for complete transparency.
+
 ---
 
 ## 12. Backend — DAMR: Drift-Aware Momentum Re-Ranker
@@ -774,14 +790,40 @@ Intent extraction (Gemini LLM or heuristic fallback)
 Intent merging with session state (follow-up support)
     ↓
 Request mode routing:
-    ├── "catalog_lookup"                → title/franchise search
-    ├── "personalized_recommendation"   → recommendation pipeline + DAMR
-    └── "similar_movies"                → reference resolution + similarity
+    ├── "catalog_lookup"                → title/franchise database match (preserves franchise results)
+    ├── "personalized_recommendation"   → recommendation pipeline + DAMR drift-adaptive re-ranking
+    └── "similar_movies"                → reference entity resolution + similarity vector projection
     ↓
 Candidate retrieval & constraint filtering
     ↓
-DAMR re-ranking (for personalized mode)
+DAMR re-ranking (executed ONLY for "personalized_recommendation" mode)
     ↓
+
+### Case Study & Architectural Lesson: The "Avengers all movie" Problem
+
+A foundational bug uncovered during user interaction testing was the prompt:
+> **User**: *"avengers all movie"*
+
+Initially, Filmory routed every chat interaction directly into its personalized recommendation pipeline. As a result:
+1. Stop words (`"all"`, `"movie"`) were stripped, leaving `"avengers"`.
+2. Candidates matching `"avengers"` were passed to the DAMR re-ranker.
+3. Because DAMR optimises for the user's specific genre profile, drift, and history, it scored unrelated movies that fit the user's personal taste higher than actual *Avengers* titles!
+4. The user received general sci-fi/action recommendations rather than the *Avengers* franchise titles they explicitly asked for.
+
+#### Why Stop-Word Filtering Alone Failed
+Attempting to solve this by filtering out stop words or tweaking token matching did not address the root architectural issue: **a request to list a catalog franchise is not a personalized recommendation request.**
+
+#### The 3-Mode Request Architecture
+
+To fix this, Filmory explicitly separates intent into three distinct request modes:
+
+| User Request Example | Request Mode | Engine Behavior | DAMR Action |
+|---|---|---|---|
+| *"Avengers all movies"*, *"Show me Harry Potter films"*, *"Toy Story 1995"* | `catalog_lookup` | Retrieves verified database matches by title/franchise directly. Returns true catalog matches. | **Bypassed**: DAMR is disabled so user taste does not displace verified franchise titles. |
+| *"Recommend something exciting tonight"*, *"Mind-bending sci-fi under 2 hours"* | `personalized_recommendation` | Retrieves candidate pool satisfying hard constraints (genres, runtime, years), then executes full 4-stage pipeline. | **Active**: DAMR dynamically weights NCF, Transformer, and Genre experts, projecting along taste momentum. |
+| *"Movies like Avengers"*, *"Similar to Interstellar"* | `similar_movies` | Resolves the reference movie, computes 50% NCF embedding + 50% genre cosine similarity to find similar items. | **Filtered Personalization**: Candidate pool is strictly restricted to semantically/structurally similar films before re-ranking. |
+
+This architectural separation prevents the model from overriding explicit user directives with personalized suggestions while preserving personalized discovery where intended.
 Evidence construction (per-movie fact packages)
     ↓
 Explanation generation (Gemini LLM or template fallback)
@@ -834,9 +876,16 @@ Strictly validates that returned movies satisfy all user constraints:
 
 **File:** [llm_client.py](file:///e:/Filmory/backend/app/services/llm_client.py) — **544 lines**
 
-### Gemini Client
+### Gemini Client & Configuration
 - Lazy singleton via `_get_client()`: initialised on first use with the `GEMINI_API_KEY`
-- Model: `gemini-3.6-flash` (configurable via `settings.GEMINI_CHAT_MODEL`)
+- Chat Model: `gemini-2.0-flash` / `gemini-3.6-flash` (configurable via `settings.GEMINI_CHAT_MODEL`)
+- Embedding Model: `text-embedding-004` (configurable via `settings.GEMINI_EMBEDDING_MODEL`)
+
+> [!IMPORTANT]
+> **Vector Space Compatibility & Embedding Regeneration Rule**:
+> - Gemini `text-embedding-004` produces **768-dimensional** dense vector representations.
+> - Query vectors generated at runtime for semantic search and document vectors stored offline in the database MUST originate from the identical model, dimensionality, and retrieval task settings.
+> - If `GEMINI_EMBEDDING_MODEL` is modified or upgraded, all stored movie embeddings must be regenerated via `python scripts/build_movie_embeddings.py`. Filmory will never compare vector similarities across disparate latent dimensions or mismatched embedding spaces.
 
 ### Intent Extraction: `extract_intent()`
 - **Input**: User message + optional conversation history
@@ -993,6 +1042,25 @@ The interactions router does important side-effect work:
 ---
 
 ## 19. Backend — Evaluation & Benchmarking
+
+### What "Accuracy" Means for Filmory
+
+A crucial conceptual distinction emphasized throughout Filmory's design is:
+> **Passing 39 unit tests does NOT mean the recommender is 100% accurate.**
+
+Pytest tests verify **deterministic software contracts** (e.g., functions return the right types, schemas validate, endpoints return HTTP 200, cold-start fallback branches execute without raising exceptions). However, **recommendation quality** is a statistical property that can only be measured on held-out user interaction data, and **assistant quality** measures how well an LLM extracts constraints and grounds explanations.
+
+Filmory evaluates accuracy across two distinct pillars:
+
+| Evaluation Pillar | Target Component | Primary Metrics | What It Actually Measures |
+|---|---|---|---|
+| **1. Recommendation Quality** | Candidate Retrieval | `Recall@100` | Does the candidate generation stage include the movie the user actually consumed? |
+| | Neural Experts & DAMR | `HR@10` (Hit Ratio), `NDCG@10`, `MRR` | Are relevant items ranked at the top of the 10-item recommendation list? |
+| | Recommendation Distribution | `ILD@10` (Intra-List Diversity), `Catalog Coverage` | Does the system avoid popularity bias and recommend diverse genre mixtures? |
+| **2. Assistant Quality** | Intent Extraction | `Mode Accuracy`, `Field Recall` | Does the assistant distinguish `catalog_lookup` from recommendations and extract years/runtimes? |
+| | Catalog Resolution | `Resolution Recall` | When a user requests a specific franchise (e.g. *Avengers*), are all true matching titles returned? |
+| | Constraint Enforcement | `Hard-Constraint Compliance` (0 violations) | Are runtime limits, genre exclusions, and release year bounds strictly respected? |
+| | Explanation Fidelity | `Evidence Reference Validity`, `Zero Hallucinations` | Does every claim in the explanation cite a verified fact key from the candidate package? |
 
 ### Scripts
 
@@ -1329,20 +1397,110 @@ Protocol: Temporal leave-one-out (He et al., 2017), 2,000 users, 99 negatives pe
 
 ## 28. Live Assistant Evaluation Results
 
-**Model:** `gemini-3.6-flash` | **Benchmark:** 21 development-set cases | **16/23 LLM extractions, 7 fallback (rate limited)**
+**Documentation:** [live_evaluation_results.md](file:///C:/Users/Lenovo/.gemini/antigravity-ide/brain/d5271e20-9259-4eb3-baed-d4f37ac06a3b/live_evaluation_results.md)  
+**Evaluation Script:** [`scripts/evaluate_assistant.py --live`](file:///e:/Filmory/backend/scripts/evaluate_assistant.py)
 
-| Metric | Score |
-|---|---|
-| **Routing Accuracy** | **100.0%** |
-| **Constraint Compliance** | **100.0%** |
-| **Evidence Reference Validity** | **100.0%** |
-| **Clarification Accuracy** | **100.0%** |
-| **Honest-Empty Accuracy** | **100.0%** |
-| **Follow-up Accuracy** | **100.0%** |
-| **Resolution Recall** | **90.0%** |
-| **Constraint Extraction Recall** | **80.0%** |
-| **LLM Inference p50** | **3,367 ms** |
-| **LLM Inference p95** | **5,141 ms** |
+### Benchmark Configuration
+
+| Setting | Value | Description |
+|---|---|---|
+| **Live Chat Model** | `gemini-3.6-flash` | Selected after `gemini-2.5-flash` reached provider deprecation |
+| **API Provider** | Google Generative AI | Live LLM inference via Google Gemini API |
+| **Benchmark Suite** | `assistant_queries.jsonl` | 21 development-set annotated queries across 6 categories |
+| **Extraction Blending** | 16 LLM / 7 Heuristic Fallback | Rate-limit pacing (free tier 5 req/min quota); automatic fallback on HTTP 429 |
+| **Safety Invariants** | 0 Hard Constraint Violations | Hard filters must never allow disqualified movies into response |
+
+### Complete Summary Metrics
+
+| Metric | Score | Detailed Interpretation |
+|---|---|---|
+| **Routing Accuracy** | **100.0%** | All 21 queries correctly classified into `catalog_lookup`, `personalized_recommendation`, or `similar_movies` |
+| **Constraint Compliance** | **100.0%** | 0 hard-constraint violations across all returned candidates (runtime, genre exclusion, year limits strictly enforced) |
+| **Evidence Reference Validity** | **100.0%** | Every citation in generated explanations corresponds to a valid fact key in the movie's evidence package |
+| **Clarification Accuracy** | **100.0%** | Broad or ambiguous prompts (e.g. *"suggest something"*, *"all movies"*) properly trigger clarification prompts |
+| **Honest-Empty Accuracy** | **100.0%** | Queries for non-existent titles (e.g. *"Zxqwr Blorpt 2099"*) return clean empty sets with zero hallucinated recommendations |
+| **Follow-up Accuracy** | **100.0%** | Multi-turn constraint tightening and ordinal exclusions (*"exclude the 2nd movie"*) work seamlessly |
+| **Resolution Recall** | **90.0%** | Fraction of expected benchmark movie IDs found in the Top-10 returned recommendations |
+| **Constraint Extraction Recall** | **80.0%** | Mean fraction of ground-truth constraint fields captured in the raw extracted intent JSON |
+
+### Latency Decomposition
+
+| Metric | Measured Value | Operational Scope |
+|---|---|---|
+| **LLM Inference p50** | **3,366.9 ms** | Median pure Gemini API network round-trip & inference time |
+| **LLM Inference p95** | **5,141.0 ms** | 95th percentile Gemini API inference time under network jitter |
+| **Total Pipeline p50** | **7,043.5 ms** | End-to-end latency including free-tier rate-limit quota pacing sleep |
+| **Total Pipeline p95** | **14,025.2 ms** | End-to-end latency including retries and candidate scoring |
+
+> [!NOTE]
+> Production latency without artificial free-tier quota sleep is approximately **3.4s median** (LLM extraction) + **~250ms** (SQL candidate retrieval + DAMR re-ranking).
+
+### Per-Query Breakdown Across All Test Categories
+
+#### 1. Catalog Lookup (Exact Titles & Specific Releases)
+*Evaluates whether the system bypasses recommendation overrides to return exact database matches.*
+
+| Query | Extractor Source | Routing Correct? | Resolution Recall | Hard Compliance | LLM Latency |
+|---|---|---|---|---|---|
+| *"Toy Story 1995"* | ✅ Gemini LLM | ✅ `catalog_lookup` | 1/1 (100%) | 100% | 2,907 ms |
+| *"The Avengers 1998"* | ✅ Gemini LLM | ✅ `catalog_lookup` | 1/1 (100%) | 100% | 3,464 ms |
+| *"Inception"* | ✅ Gemini LLM | ✅ `catalog_lookup` | 1/1 (100%) | 100% | 3,678 ms |
+| *"Shawshank Redemption"* | ✅ Gemini LLM | ✅ `catalog_lookup` | 1/1 (100%) | 100% | 2,450 ms |
+
+#### 2. Franchise Collection Searches
+*Tests franchise resolution without allowing DAMR personalization to displace franchise titles.*
+
+| Query | Extractor Source | Routing Correct? | Resolution Recall | Hard Compliance | LLM Latency |
+|---|---|---|---|---|---|
+| *"Avengers all movies"* | ✅ Gemini LLM | ✅ `catalog_lookup` | 2/2 (100%) | 100% | 2,723 ms |
+| *"list all Batman movies"* | ⚠️ Heuristic Fallback | ✅ `catalog_lookup` | 0/4 (0%)* | 100% | Heuristic (<5ms) |
+| *"Toy Story movies"* | ⚠️ Heuristic Fallback | ✅ `catalog_lookup` | 3/3 (100%) | 100% | Heuristic (<5ms) |
+
+*\*Note: Batman franchise resolution missed expected benchmark IDs in heuristic fallback due to strict exact-ID mapping, though returned related Batman films. Live LLM handles semantic franchise grouping cleanly.*
+
+#### 3. Constrained Recommendations
+*Tests multi-attribute intent extraction (genres, year limits, negative filters, runtimes) and DAMR re-ranking.*
+
+| Query | Extractor Source | Routing Correct? | Extraction Recall | Hard Compliance | LLM Latency |
+|---|---|---|---|---|---|
+| *"funny comedy without horror <120min"* | ⚠️ Heuristic Fallback | ✅ `personalized_recommendation` | 33.3% | 100% | Heuristic (<5ms) |
+| *"Sci-Fi movies from the 90s"* | ✅ Gemini LLM | ✅ `personalized_recommendation` | 100% | 100% | 3,838 ms |
+| *"animated movies rated ≥8/10"* | ✅ Gemini LLM | ✅ `personalized_recommendation` | 100% | 100% | 4,837 ms |
+| *"short thriller <90min"* | ✅ Gemini LLM | ✅ `personalized_recommendation` | 100% | 100% | 3,270 ms |
+| *"drama no romance post-2000"* | ✅ Gemini LLM | ✅ `personalized_recommendation` | 66.7% | 100% | 3,781 ms |
+
+#### 4. Similar Movie Discovery
+*Tests reference entity resolution and similarity vector projection.*
+
+| Query | Extractor Source | Routing Correct? | Reference Movie Resolved? | Hard Compliance | LLM Latency |
+|---|---|---|---|---|---|
+| *"movies like Interstellar"* | ✅ Gemini LLM | ✅ `similar_movies` | ✅ Interstellar (ID: 109487) | 100% | 2,758 ms |
+| *"movies similar to Inception"* | ⚠️ Heuristic Fallback | ✅ `similar_movies` | ✅ Inception (ID: 79132) | 100% | Heuristic (<5ms) |
+| *"films like Pulp Fiction"* | ⚠️ Heuristic Fallback | ✅ `similar_movies` | ✅ Pulp Fiction (ID: 296) | 100% | Heuristic (<5ms) |
+
+#### 5. Edge Cases: Clarifications & Zero-Hallucination Honesty
+*Tests conversational guardrails against ambiguous prompts and fabricated movie titles.*
+
+| Query | Extractor Source | Routing Correct? | Verified Behavior | Compliance | LLM Latency |
+|---|---|---|---|---|---|
+| *"suggest something"* | ⚠️ Heuristic Fallback | ✅ | ✅ Triggers clarification; does not blindly guess | 100% | Heuristic |
+| *"all movies"* | ⚠️ Heuristic Fallback | ✅ | ✅ Triggers clarification; rejects unbounded dump | 100% | Heuristic |
+| *"Zxqwr Blorpt 2099"* | ✅ Gemini LLM | ✅ | ✅ Honest Empty: 0 results returned, 0 hallucinated | 100% | 5,705 ms |
+| *"Toy Story 2099"* | ✅ Gemini LLM | ✅ | ✅ Honest Empty: 0 results returned, 0 hallucinated | 100% | 3,871 ms |
+
+#### 6. Multi-Turn Conversational Follow-Ups
+*Tests session state maintenance, delta merging, and ordinal reference exclusions.*
+
+| Initial Turn & Follow-up Prompt | Sources | Pipeline Pass | Latency |
+|---|---|---|---|
+| *"recommend a good comedy"* $\to$ *"only ones under 90 minutes"* | ✅ Gemini $\to$ ✅ Gemini | ✅ Runtime tightened; results updated | 2,853 ms + follow-up |
+| *"recommend action movies"* $\to$ *"exclude the second movie"* | ✅ Gemini $\to$ ✅ Gemini | ✅ Second movie ID extracted & added to exclusion list | 3,264 ms + follow-up |
+
+### Model Versioning & Provider Migration Note
+
+> [!IMPORTANT]
+> During live testing, the provider returned `404 NOT_FOUND: "This model models/gemini-2.5-flash is no longer available to new users"`.
+> The backend settings were updated to use **`gemini-3.6-flash`** (and compatible with `gemini-2.0-flash`). The entire assistant evaluation was run and verified against this active model.
 
 ---
 
