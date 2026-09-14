@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AskFilmoryRouteImport } from './routes/ask-filmory'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ModelRouteImport } from './routes/model'
@@ -24,6 +25,11 @@ import { Route as MoviesMovieIdRouteImport } from './routes/movies.$movieId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AskFilmoryRoute = AskFilmoryRouteImport.update({
+  id: '/ask-filmory',
+  path: '/ask-filmory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistoryRoute = HistoryRouteImport.update({
@@ -79,6 +85,7 @@ const MoviesMovieIdRoute = MoviesMovieIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ask-filmory': typeof AskFilmoryRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/model': typeof ModelRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ask-filmory': typeof AskFilmoryRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/model': typeof ModelRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ask-filmory': typeof AskFilmoryRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/model': typeof ModelRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ask-filmory'
     | '/history'
     | '/login'
     | '/model'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ask-filmory'
     | '/history'
     | '/login'
     | '/model'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ask-filmory'
     | '/history'
     | '/login'
     | '/model'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AskFilmoryRoute: typeof AskFilmoryRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
   ModelRoute: typeof ModelRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ask-filmory': {
+      id: '/ask-filmory'
+      path: '/ask-filmory'
+      fullPath: '/ask-filmory'
+      preLoaderRoute: typeof AskFilmoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/history': {
@@ -257,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AskFilmoryRoute: AskFilmoryRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
   ModelRoute: ModelRoute,

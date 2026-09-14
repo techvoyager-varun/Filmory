@@ -147,3 +147,60 @@ class UserPreference(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
 
     user = relationship("User", back_populates="preferences")
+
+
+# ---------------------------------------------------------------------------
+# GenAI Assistant — conversational session + message storage
+# ---------------------------------------------------------------------------
+class AssistantSession(Base):
+    __tablename__ = "assistant_sessions"
+
+    id = Column(String(36), primary_key=True)  # UUID
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    active_intent = Column(JSON, default=dict, nullable=False)  # Accumulated filters
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
+
+    user = relationship("User")
+    messages = relationship("AssistantMessageRecord", back_populates="session", cascade="all, delete-orphan",
+                            order_by="AssistantMessageRecord.created_at")
+
+
+class AssistantMessageRecord(Base):
+    __tablename__ = "assistant_messages"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    session_id = Column(String(36), ForeignKey("assistant_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    role = Column(String(20), nullable=False)  # "user" | "assistant"
+    content = Column(Text, nullable=False)
+    intent_snapshot = Column(JSON, nullable=True)
+    movie_ids = Column(JSON, default=list)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    session = relationship("AssistantSession", back_populates="messages")
+
+
+class AssistantFeedback(Base):
+    __tablename__ = "assistant_feedback"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    session_id = Column(String(36), ForeignKey("assistant_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    message_id = Column(Integer, nullable=True)
+    movie_id = Column(BigInteger, nullable=True)
+    feedback_type = Column(String(50), nullable=False)  # helpful | not_helpful | wrong_movie | bad_explanation
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+
+class MovieTextEmbedding(Base):
+    __tablename__ = "movie_text_embeddings"
+
+    movie_id = Column(BigInteger, ForeignKey("movies.movie_id", ondelete="CASCADE"), primary_key=True)
+    embedding_model = Column(String(100), nullable=False)
+    embedding_dimension = Column(Integer, nullable=False)
+    document_hash = Column(String(64), nullable=False, index=True)  # SHA-256
+    indexed_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    movie = relationship("Movie")
+
+

@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/movies", label: "Movies" },
+  { to: "/ask-filmory", label: "Ask Filmory" },
   { to: "/my-list", label: "My List" },
   { to: "/search", label: "Search" },
 ] as const;
