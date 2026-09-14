@@ -172,26 +172,49 @@ Implicit-feedback recommenders are **not** measured with classification accuracy
 user–item pairs are negatives). The standard protocol (NCF paper, SASRec) is *temporal
 leave-one-out*:
 
-- for each user, hold out their **last** interaction as the test positive;
-- sample **99** uniformly-drawn unseen movies as negatives;
-- rank the 100 items and record where the positive landed.
+- for each user, hold out their **last** interaction as the test positive (and the
+  second-to-last as a validation item for tuning);
+- Track A ranks the positive against the **full catalogue** (candidate Recall@100,
+  end-to-end HR@10/NDCG@10 — a retrieval miss is a pipeline miss);
+- Track B ranks 1 positive + **99** uniformly-drawn unseen negatives (diagnostic
+  ablation on identical candidates).
 
-Reported metrics: **HR@K, NDCG@K, MRR, AUC** (accuracy) and **ILD@K, catalogue coverage**
-(beyond-accuracy). Known protocol caveats, stated honestly in the report:
+Reported metrics: **HR@K, NDCG@K** (Wilson 95% intervals for rates, bootstrap for
+means), **ILD@K, catalogue coverage** (beyond-accuracy). Validity notes, stated
+honestly in the report (`evaluation/provenance.json`, `evaluation_summary.json`):
 
+- **Checkpoint provenance (diagnostic, not clean).** No training script or training
+  split ships with this repository, and the shipped checkpoints were trained on all
+  interactions (including held-out targets). Post-hoc splitting cannot remove that
+  information from weights or from training-derived artifacts (`user_genre_matrix`
+  rows are exact full-sequence histograms). Learned-model numbers are therefore
+  **optimistic diagnostics**; clean generalization claims require retraining on a
+  documented clean split. The evaluator removes every avoidable leak it controls
+  (train-only profiles/genre vectors/popularity; shipped genre-matrix rows are never
+  used as inputs) and tunes retrieval on validation items before touching test users.
+- **No timestamps exist** (order-only sequences), so DAMR state uses the clock-free
+  *positional* estimator (`estimate_user_state_from_positions`, freshness disabled) —
+  a simulation heuristic, never evidence of real temporal behaviour.
+- **Quality prior disabled.** `movies_metadata.csv` carries no ratings/counts, so no
+  training-only per-item quality signal exists; every ablation rung runs with
+  `use_quality=False`, labelled accordingly.
 - uniform negatives are easier for popularity — the Popularity baseline is reported
   precisely to make this visible;
-- the shipped checkpoints were trained on all interactions (including the held-out one), so
-  the learned models' numbers are optimistic; a strictly clean number requires retraining on
-  the leave-one-out split.
+- assistant "evidence-reference validity" checks reference validity only; claim-level
+  factual support requires manual annotation and is reported as not evaluated.
+  `assistant_queries.jsonl` is the development set; `assistant_queries_hidden.jsonl`
+  is the held-out test set; runs are labelled `offline-fallback` / `live-gemini`.
 
 Reproduce:
 
 ```bash
 cd backend
-python scripts/evaluate.py --num-users 2000            # main table → ml/metrics.json
-python scripts/evaluate.py --num-users 500 --ablation \
-       --out ml/metrics_ablation.json                  # ablation table
+.venv\Scripts\python scripts/record_provenance.py
+.venv\Scripts\python scripts/prepare_evaluation_split.py --num-users 1000 --seed 42
+.venv\Scripts\python scripts/evaluate_recommender.py --tune-users 100 --sample-users 200
+.venv\Scripts\python scripts/evaluate_assistant.py --benchmark evaluation/assistant_queries.jsonl
+.venv\Scripts\python scripts/evaluate_assistant.py --benchmark evaluation/assistant_queries_hidden.jsonl --out assistant_per_query_hidden.jsonl
+.venv\Scripts\python scripts/summarize_evaluation.py
 python -m pytest tests/test_damr.py -v                 # unit tests (no artifacts needed)
 ```
 

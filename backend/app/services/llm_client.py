@@ -45,6 +45,27 @@ def _get_client() -> genai.Client:
     return _client
 
 
+# Last extraction path taken by extract_intent (for evaluation auditing).
+# One of: "llm" | "llm_unparseable" | "llm_error_fallback" | "fallback".
+# Read via last_extraction_source(). Never raises.
+_last_source: str = "fallback"
+# Wall-clock ms spent inside the most recent generate_content call (intent).
+# 0.0 when the last extraction did not reach the API. Read via
+# last_call_latency_ms(). Lets evaluators separate inference latency from
+# quota-pacing sleeps.
+_last_latency_ms: float = 0.0
+
+
+def last_extraction_source() -> str:
+    """Return how the most recent extract_intent call produced its delta."""
+    return _last_source
+
+
+def last_call_latency_ms() -> float:
+    """Return API time (ms) of the most recent intent call, 0.0 if none."""
+    return _last_latency_ms
+
+
 # ---------------------------------------------------------------------------
 # System prompts
 # ---------------------------------------------------------------------------
@@ -148,8 +169,32 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
             clarification_question="What kind of movies are you looking for? You can ask for a specific genre, decade, or franchise like 'Avengers'.",
         )
 
-    # 2. Similar movies check: "movies like X", "similar to X", "like X"
-    similar_match = re.search(r"^(?:show\s+(?:me\s+)?)?(?:movies?\s+like|films?\s+like|similar\s+to|like)\s+(.+)$", msg_lower)
+    # 1b. Ordinal exclusion follow-ups ("exclude the second movie", "skip the 3rd one").
+    # Checked early so a follow-up is never misread as a title search. The mode
+    # is left unset so _merge_intents preserves the session's request_mode.
+    _ordinals = {
+        "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5,
+        "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10,
+    }
+    _ord_match = re.search(
+        r"(?:exclude|remove|skip|hide|drop|don'?t show|not)\s+(?:the\s+)?"
+        r"(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|\d+(?:st|nd|rd|th)?)"
+        r"\s+(?:movie|film|one|result|option|pick|choice|recommendation)",
+        msg_lower,
+    )
+    if _ord_match:
+        _raw_ord = _ord_match.group(1)
+        _num = _ordinals.get(_raw_ord)
+        if _num is None:
+            _num = int(re.sub(r"(st|nd|rd|th)$", "", _raw_ord))
+        return IntentDelta(target_ordinal_exclusion=_num)
+
+    # 2. Similar movies check: "movies like X", "similar to X", "like X",
+    #    "movies similar to X", "films similar to X"
+    similar_match = re.search(
+        r"^(?:show\s+(?:me\s+)?)?(?:movies?\s+like|films?\s+like|movies?\s+similar\s+to|films?\s+similar\s+to|similar\s+to|like)\s+(.+)$",
+        msg_lower,
+    )
     if similar_match:
         target_ref = similar_match.group(1).strip()
         return IntentDelta(
@@ -159,7 +204,17 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
         )
 
     # 3. Franchise / Catalog lookup: e.g. "avengers all movie", "all avengers movies", "the avengers 1998"
-    suffix_match = re.search(r"^(.+?)\s+(?:all\s+movies?|all\s+films?|movies?|films?|series|franchise)$", msg_lower)
+    # A leading request verb ("recommend action movies") signals discovery, not a
+    # franchise name — skip the suffix heuristic then and let genre parsing handle it.
+    _looks_like_request = bool(
+        re.match(
+            r"^(?:recommend|show(?:\s+me)?|give(?:\s+me)?|find|suggest|please|get\s+me|i\s+want|i\s+would\s+like|can\s+you|could\s+you)\b",
+            msg_lower,
+        )
+    )
+    suffix_match = None
+    if not _looks_like_request:
+        suffix_match = re.search(r"^(.+?)\s+(?:all\s+movies?|all\s+films?|movies?|films?|series|franchise)$", msg_lower)
     if suffix_match:
         title_candidate = suffix_match.group(1).strip()
         year_match = re.search(r"\b(19\d\d|20\d\d)\b", title_candidate)
@@ -184,8 +239,30 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
                 semantic_query=title_candidate,
             )
 
+    # 3b. Year-range expressions ("after 2000", "before 1990", "from the 90s").
+    # These describe discovery filters — not an exact-title year — so they route
+    # to personalized_recommendation and skip the exact-year title branch below.
+    _range_min: Optional[int] = None
+    _range_max: Optional[int] = None
+    _after_m = re.search(r"(?:after|post|since|newer\s+than)\s+(19\d\d|20\d\d)\b", msg_lower)
+    if _after_m:
+        _range_min = int(_after_m.group(1))
+    _before_m = re.search(r"(?:before|pre|older\s+than|up\s+to)\s+(19\d\d|20\d\d)\b", msg_lower)
+    if _before_m:
+        _range_max = int(_before_m.group(1))
+    _dec_m = re.search(r"\b(?:from|of|in|during)?\s*(?:the\s+)?((?:19|20)?\d0)s\b", msg_lower)
+    if _dec_m and _range_min is None and _range_max is None:
+        _dec_raw = _dec_m.group(1)
+        _dec_full = int(_dec_raw) if len(_dec_raw) == 4 else int(f"19{_dec_raw}")
+        # Two-digit decades ("90s") refer to the 1900s; "2000s" is explicit.
+        if len(_dec_raw) == 2 and _dec_raw != "00":
+            _dec_full = 1900 + int(_dec_raw)
+        elif _dec_raw == "00":
+            _dec_full = 2000
+        _range_min, _range_max = _dec_full, _dec_full + 9
+
     year_match = re.search(r"^(.+?)\s+\b(19\d\d|20\d\d)\b$", msg_lower)
-    if year_match:
+    if year_match and _range_min is None and _range_max is None:
         title_candidate = year_match.group(1).strip()
         yr = int(year_match.group(2))
         return IntentDelta(
@@ -196,18 +273,91 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
             max_year=yr,
         )
 
-    # 4. Genre extraction
-    known_genres = [
-        "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
-        "Drama", "Fantasy", "Horror", "Mystery", "Romance", "Sci-Fi",
-        "Thriller", "War", "Western",
-    ]
-    preferred = [g for g in known_genres if re.search(rf"\b{g.lower()}\b", msg_lower)]
-    if preferred:
+    # 4. Genre extraction (also picks up explicit runtime caps like "under 90 minutes"
+    #    and year ranges like "after 2000" / "from the 90s")
+    # Canonical genre names always count. Looser colloquial aliases ("funny",
+    # "animated", "scary"...) only count alongside other discovery signals, so
+    # bare short titles ("Funny Games", "Scary Movie") still route to catalog lookup.
+    _genre_aliases: dict[str, list[str]] = {
+        "Action": ["action"],
+        "Adventure": ["adventure"],
+        "Animation": ["animation", "animated", "anime", "cartoon"],
+        "Comedy": ["comedy", "comedies", "funny", "humor", "humour"],
+        "Crime": ["crime"],
+        "Documentary": ["documentary", "documentaries", "docuseries"],
+        "Drama": ["drama"],
+        "Fantasy": ["fantasy"],
+        "Horror": ["horror", "scary", "creepy", "horror movie"],
+        "Mystery": ["mystery"],
+        "Romance": ["romance", "romantic"],
+        "Sci-Fi": ["sci-fi", "scifi", "sci fi", "science fiction"],
+        "Thriller": ["thriller"],
+        "War": ["war"],
+        "Western": ["western"],
+    }
+    _words = re.findall(r"[a-z]+", msg_lower)
+    _has_discovery = (
+        _looks_like_request
+        or len(_words) > 4
+        or bool(
+            re.search(
+                r"\b(without|excluding|except|under|over|rated|rating|after|before|since|minutes?|hours?|decade|\d0s)\b",
+                msg_lower,
+            )
+        )
+    )
+    preferred = []
+    for g, aliases in _genre_aliases.items():
+        strict_hit = re.search(rf"\b{re.escape(aliases[0])}\b", msg_lower)
+        loose_hit = any(
+            re.search(rf"\b{re.escape(a)}\b", msg_lower) for a in aliases[1:]
+        )
+        if strict_hit or (loose_hit and _has_discovery):
+            preferred.append(g)
+    runtime_cap: Optional[int] = None
+    _rt_match = re.search(
+        r"(?:under|less than|below|max|within|up to|shorter than)\s+(\d+)\s*(hours?|hrs?|minutes?|mins?)",
+        msg_lower,
+    )
+    if _rt_match:
+        _amount = int(_rt_match.group(1))
+        _unit = _rt_match.group(2)
+        runtime_cap = _amount * 60 if _unit.startswith("hour") or _unit.startswith("hr") else _amount
+    if preferred or runtime_cap is not None or _range_min is not None or _range_max is not None:
+        _set_fields: dict = {}
+        if runtime_cap is not None:
+            _set_fields["max_runtime_minutes"] = runtime_cap
+        if _range_min is not None:
+            _set_fields["min_year"] = _range_min
+        if _range_max is not None:
+            _set_fields["max_year"] = _range_max
         return IntentDelta(
             request_mode="personalized_recommendation",
             preferred_genres=preferred,
             semantic_query=msg_trimmed,
+            max_runtime_minutes=runtime_cap,
+            min_year=_range_min,
+            max_year=_range_max,
+            set_fields=_set_fields,
+        )
+
+    # 5. Vague / content-free requests ("suggest something", "anything good?").
+    # The message carries no title, genre, year, or reference — ask for clarification
+    # instead of misreading filler as a catalog title.
+    _request_verbs = {
+        "suggest", "show", "find", "give", "get", "recommend", "recommendation",
+        "recommendations", "watch", "see", "explore", "browse", "play",
+        "please", "me", "something", "anything", "whatever", "stuff",
+        "good", "best", "nice", "great", "cool", "fun", "interesting",
+        "movie", "movies", "film", "films", "a", "an", "the", "some", "to",
+        "for", "me", "i", "want", "like", "need", "tonight", "now",
+    }
+    _tokens = re.findall(r"[a-z]+", msg_lower)
+    if _tokens and all(t in _request_verbs for t in _tokens):
+        return IntentDelta(
+            request_mode="catalog_lookup",
+            needs_clarification=True,
+            clarification_question="What kind of movies are you looking for? You can ask for a specific genre, decade, or franchise like 'Avengers'.",
         )
 
     return IntentDelta(
@@ -224,7 +374,11 @@ def extract_intent(
     """
     Call Gemini to parse a user's natural-language movie request into
     a structured IntentDelta. Falls back to heuristic IntentDelta on failure.
+    The path taken is recorded in last_extraction_source().
     """
+    global _last_source
+    global _last_latency_ms
+    _last_latency_ms = 0.0
     client = _get_client()
 
     messages: list[genai_types.Content] = []
@@ -249,6 +403,9 @@ def extract_intent(
     )
 
     try:
+        import time as _time
+
+        _t0 = _time.monotonic()
         response = client.models.generate_content(
             model=settings.GEMINI_CHAT_MODEL,
             contents=messages,
@@ -259,6 +416,7 @@ def extract_intent(
                 response_mime_type="application/json",
             ),
         )
+        _last_latency_ms = (_time.monotonic() - _t0) * 1000.0
 
         raw_text = response.text.strip()
         logger.debug("LLM intent response: %s", raw_text[:500])
@@ -266,10 +424,12 @@ def extract_intent(
         # Parse and validate through Pydantic
         data = json.loads(raw_text)
         delta = IntentDelta.model_validate(data)
+        _last_source = "llm"
         return delta
 
     except json.JSONDecodeError as e:
         logger.warning("Failed to parse LLM intent JSON: %s", e)
+        _last_source = "llm_unparseable"
         return IntentDelta(
             semantic_query=user_message,
             needs_clarification=True,
@@ -278,6 +438,7 @@ def extract_intent(
     except Exception as e:
         logger.error("LLM intent extraction failed: %s", e, exc_info=True)
         # Graceful fallback to heuristic intent parsing
+        _last_source = "llm_error_fallback"
         return fallback_extract_intent(user_message)
 
 

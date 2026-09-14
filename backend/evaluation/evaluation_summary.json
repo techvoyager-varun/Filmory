@@ -1,0 +1,332 @@
+{
+  "generated_at": "2026-09-14T15:09:36.446621+00:00",
+  "status": "DIAGNOSTIC \u2014 learned-model numbers are optimistic (checkpoints trained on all interactions); see provenance.json",
+  "split": {
+    "protocol": "temporal_leave_last_out",
+    "reference": "Kang & McAuley 2018 (SASRec), He et al. 2017 (NCF)",
+    "created_at": "2026-09-14T14:30:15.495977+00:00",
+    "random_seed": 42,
+    "total_evaluated_users": 1000,
+    "num_negatives_per_user": 99,
+    "total_catalog_items": 22836,
+    "history_stats": {
+      "min": 17,
+      "mean": 129.11,
+      "max": 5488
+    }
+  },
+  "provenance": {
+    "recorded": true,
+    "leakage_status": "DIAGNOSTIC \u2014 shipped checkpoints were trained on ALL interactions (docs/DAMR.md section 6). Creating a holdout split after training does not remove held-out information from weights, user_genre_matrix rows (exact full-sequence histograms), or user_interacted sets. Learned-model numbers are OPTIMISTIC. Clean generalization claims require retraining on a documented clean split."
+  },
+  "recommender": {
+    "track_a": {
+      "retrieval_recall@100": {
+        "popularity": {
+          "mean": 0.235,
+          "ci95_lo": 0.1816,
+          "ci95_hi": 0.2984,
+          "n": 200
+        },
+        "baseline": {
+          "mean": 0.285,
+          "ci95_lo": 0.2269,
+          "ci95_hi": 0.3512,
+          "n": 200
+        },
+        "hybrid": {
+          "mean": 0.0,
+          "ci95_lo": 0.0,
+          "ci95_hi": 0.0188,
+          "n": 200
+        },
+        "mixture": {
+          "mean": 0.26,
+          "ci95_lo": 0.2041,
+          "ci95_hi": 0.3249,
+          "n": 200
+        }
+      },
+      "end_to_end": {
+        "candidate_recall_100": {
+          "mean": 0.26,
+          "ci95_lo": 0.2041,
+          "ci95_hi": 0.3249,
+          "n": 200
+        },
+        "HR@10": {
+          "mean": 0.005,
+          "ci95_lo": 0.0009,
+          "ci95_hi": 0.0278,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.0016,
+          "ci95_lo": 0.0,
+          "ci95_hi": 0.0047,
+          "n": 200
+        },
+        "latency_p50_ms": 8.93,
+        "latency_p95_ms": 15.02
+      },
+      "state_variant": [
+        "positional"
+      ],
+      "quality_prior": [
+        "disabled (no training-only per-item ratings available)"
+      ],
+      "users": 200
+    },
+    "track_b_ablation": {
+      "DAMR gate+momentum": {
+        "HR@10": {
+          "mean": 0.365,
+          "ci95_lo": 0.3014,
+          "ci95_hi": 0.4337,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.166,
+          "ci95_lo": 0.1341,
+          "ci95_hi": 0.2015,
+          "n": 200
+        },
+        "ILD@10_mean": 0.7971,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.96,
+        "users": 200
+      },
+      "DAMR gate+momentum+agreement": {
+        "HR@10": {
+          "mean": 0.36,
+          "ci95_lo": 0.2967,
+          "ci95_hi": 0.4286,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.1627,
+          "ci95_lo": 0.1323,
+          "ci95_hi": 0.1981,
+          "n": 200
+        },
+        "ILD@10_mean": 0.7947,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.97,
+        "users": 200
+      },
+      "DAMR gate-only": {
+        "HR@10": {
+          "mean": 0.34,
+          "ci95_lo": 0.2779,
+          "ci95_hi": 0.4081,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.1555,
+          "ci95_lo": 0.1253,
+          "ci95_hi": 0.1922,
+          "n": 200
+        },
+        "ILD@10_mean": 0.7972,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.97,
+        "users": 200
+      },
+      "Fixed Ensemble": {
+        "HR@10": {
+          "mean": 0.25,
+          "ci95_lo": 0.1951,
+          "ci95_hi": 0.3143,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.1142,
+          "ci95_lo": 0.0851,
+          "ci95_hi": 0.1464,
+          "n": 200
+        },
+        "ILD@10_mean": 0.7686,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.95,
+        "users": 200
+      },
+      "Full DAMR": {
+        "HR@10": {
+          "mean": 0.395,
+          "ci95_lo": 0.3298,
+          "ci95_hi": 0.4641,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.1674,
+          "ci95_lo": 0.1374,
+          "ci95_hi": 0.2022,
+          "n": 200
+        },
+        "ILD@10_mean": 0.9385,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 7.47,
+        "users": 200
+      },
+      "NCF Baseline": {
+        "HR@10": {
+          "mean": 0.895,
+          "ci95_lo": 0.8448,
+          "ci95_hi": 0.9303,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.6054,
+          "ci95_lo": 0.5631,
+          "ci95_hi": 0.6517,
+          "n": 200
+        },
+        "ILD@10_mean": 0.8617,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.87,
+        "users": 200
+      },
+      "NCF Hybrid": {
+        "HR@10": {
+          "mean": 0.38,
+          "ci95_lo": 0.3156,
+          "ci95_hi": 0.4489,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.1557,
+          "ci95_lo": 0.1242,
+          "ci95_hi": 0.1896,
+          "n": 200
+        },
+        "ILD@10_mean": 0.7684,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.35,
+        "users": 200
+      },
+      "Popularity": {
+        "HR@10": {
+          "mean": 0.8,
+          "ci95_lo": 0.7391,
+          "ci95_hi": 0.8495,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.5255,
+          "ci95_lo": 0.4773,
+          "ci95_hi": 0.5723,
+          "n": 200
+        },
+        "ILD@10_mean": 0.8591,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.31,
+        "users": 200
+      },
+      "Transformer": {
+        "HR@10": {
+          "mean": 0.38,
+          "ci95_lo": 0.3156,
+          "ci95_hi": 0.4489,
+          "n": 200
+        },
+        "NDCG@10": {
+          "mean": 0.2098,
+          "ci95_lo": 0.1707,
+          "ci95_hi": 0.2518,
+          "n": 200
+        },
+        "ILD@10_mean": 0.8673,
+        "ILD_similarity": "sim(i,j) = 0.5*cos(NCF-hybrid item emb) + 0.5*cos(genre vectors), ILD = mean pairwise (1 - sim), diagonal excluded, top-10 lists",
+        "catalog_coverage_pct": 6.41,
+        "users": 200
+      }
+    },
+    "ild_range_flags": []
+  },
+  "assistant": {
+    "dev": {
+      "queries": 21,
+      "assistant_modes": [
+        "offline-fallback"
+      ],
+      "routing_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.8454,
+        "ci95_hi": 1.0,
+        "n": 21
+      },
+      "constraint_extraction_recall_mean": 0.8167,
+      "resolution_recall_mean": 0.9,
+      "constraint_compliance_mean": 1.0,
+      "evidence_reference_validity": {
+        "mean": 1.0,
+        "ci95_lo": 0.8454,
+        "ci95_hi": 1.0,
+        "n": 21
+      },
+      "claim_factual_support": "not evaluated (requires manual claim annotation)",
+      "clarification_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.8454,
+        "ci95_hi": 1.0,
+        "n": 21
+      },
+      "honest_empty_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.8454,
+        "ci95_hi": 1.0,
+        "n": 21
+      },
+      "followup_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.3424,
+        "ci95_hi": 1.0,
+        "n": 2
+      },
+      "latency_p50_ms": 104.13,
+      "latency_p95_ms": 586.06
+    },
+    "hidden": {
+      "queries": 15,
+      "assistant_modes": [
+        "offline-fallback"
+      ],
+      "routing_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.7961,
+        "ci95_hi": 1.0,
+        "n": 15
+      },
+      "constraint_extraction_recall_mean": 0.8571,
+      "resolution_recall_mean": 0.8333,
+      "constraint_compliance_mean": 1.0,
+      "evidence_reference_validity": {
+        "mean": 1.0,
+        "ci95_lo": 0.7961,
+        "ci95_hi": 1.0,
+        "n": 15
+      },
+      "claim_factual_support": "not evaluated (requires manual claim annotation)",
+      "clarification_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.7961,
+        "ci95_hi": 1.0,
+        "n": 15
+      },
+      "honest_empty_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.7961,
+        "ci95_hi": 1.0,
+        "n": 15
+      },
+      "followup_accuracy": {
+        "mean": 1.0,
+        "ci95_lo": 0.3424,
+        "ci95_hi": 1.0,
+        "n": 2
+      },
+      "latency_p50_ms": 89.98,
+      "latency_p95_ms": 441.12
+    }
+  }
+}

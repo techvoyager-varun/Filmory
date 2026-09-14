@@ -217,6 +217,84 @@ def estimate_user_state(
 
 
 # ---------------------------------------------------------------------------
+# Step 1 (variant) — clock-free position-decayed user-state estimation
+# ---------------------------------------------------------------------------
+def estimate_user_state_from_positions(
+    history_items: Sequence[int],
+    base_profile: Optional[torch.Tensor] = None,
+    num_genres: Optional[int] = None,
+    tau_items: float = 7.0,
+) -> TasteProfile:
+    """
+    Clock-free alternative to :func:`estimate_user_state` for settings where no
+    trustworthy interaction timestamps exist (e.g. released MovieLens sequences
+    that preserve order only).
+
+    The short-term profile uses *positional* exponential decay — the most recent
+    item has weight 1, the item ``k`` positions back has weight
+    ``exp(-k / tau_items)`` — instead of wall-clock decay. ``freshness`` is
+    identically ``0.0`` because recency relative to "now" is unobservable
+    without a prediction timestamp.
+
+    This is a *simulation heuristic*, not evidence of real temporal behaviour:
+    decay reflects invented spacing (sequence position), never actual activity.
+    Label any experiment using it as ``state_variant="positional"``.
+    """
+    genre_matrix = model_service.movie_genre_matrix
+    if genre_matrix is None:
+        g = torch.zeros(num_genres or 20)
+        return TasteProfile(UserState(), g, g.clone(), torch.zeros_like(g))
+
+    G = genre_matrix.float()
+    num_genres = num_genres or G.shape[1]
+    items = [int(i) for i in history_items if 0 <= int(i) < G.shape[0]]
+    n = len(items)
+
+    g_long_raw = torch.zeros(num_genres, device=G.device)
+    g_short_raw = torch.zeros(num_genres, device=G.device)
+    for pos, item_idx in enumerate(items):
+        age_pos = float(n - 1 - pos)
+        gvec = G[item_idx]
+        g_long_raw += gvec
+        g_short_raw += math.exp(-age_pos / tau_items) * gvec
+
+    if base_profile is not None:
+        bp = base_profile.detach().to(G.device).float()
+        if bp.dim() != 1 or bp.shape[0] != num_genres:
+            bp = bp.flatten()[:num_genres]
+        g_long_raw += F.normalize(bp, dim=0) * max(1, n) * 0.5
+
+    if g_long_raw.sum() > 0:
+        G_long = F.normalize(g_long_raw, dim=0)
+    else:
+        G_long = F.normalize(g_short_raw, dim=0) if g_short_raw.sum() > 0 else g_long_raw
+    if g_short_raw.sum() > 0:
+        G_short = F.normalize(g_short_raw, dim=0)
+    else:
+        G_short = G_long.clone()
+
+    if G_long.sum() > 0 and G_short.sum() > 0:
+        cos = float(torch.dot(G_short, G_long).clamp(-1.0, 1.0))
+        drift = 1.0 - cos
+    else:
+        drift = 0.0
+    focus = 1.0 - _entropy(G_short) / math.log(num_genres) if num_genres > 1 and G_short.sum() > 0 else 0.0
+    focus = max(0.0, focus)
+    maturity = min(1.0, math.log1p(n) / math.log1p(max(2, settings.DAMR_N_REF)))
+    freshness = 0.0  # unobservable without a prediction timestamp
+
+    state = UserState(
+        drift=drift,
+        focus=focus,
+        maturity=maturity,
+        freshness=freshness,
+        n_interactions=n,
+    )
+    momentum = G_short - G_long
+    return TasteProfile(state, G_long, G_short, momentum)
+
+
+# ---------------------------------------------------------------------------
 # Step 2 — drift-adaptive expert weighting
 # ---------------------------------------------------------------------------
 def compute_logit_base() -> Tuple[float, float, float]:

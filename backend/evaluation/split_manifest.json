@@ -2,7 +2,7 @@
   "metadata": {
     "protocol": "temporal_leave_last_out",
     "reference": "Kang & McAuley 2018 (SASRec), He et al. 2017 (NCF)",
-    "created_at": "2026-09-10T00:38:57.813372Z",
+    "created_at": "2026-09-14T14:30:15.495977+00:00",
     "random_seed": 42,
     "total_evaluated_users": 1000,
     "num_negatives_per_user": 99,
