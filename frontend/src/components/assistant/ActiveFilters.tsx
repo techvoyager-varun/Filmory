@@ -1,4 +1,4 @@
-import { Filter, Sparkles, Tag, Clock, Star, Calendar, Ban, Film, X } from "lucide-react";
+import { Filter, Search, Heart, Tag, Clock, Star, Calendar, Ban, Film, X } from "lucide-react";
 import type { MovieIntent } from "@/types/assistant";
 import { cn } from "@/lib/utils";
 
@@ -76,7 +76,7 @@ export function ActiveFilters({ intent, sessionId, onFilterRemoved, className }:
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
         {intent.semantic_query ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2.5 py-1 text-gold">
-            <Sparkles className="h-3 w-3" />
+            <Search className="h-3 w-3" />
             <span className="font-medium">"{intent.semantic_query}"</span>
             {sessionId && <RemoveButton filterKey="semantic_query" />}
           </span>
@@ -84,7 +84,7 @@ export function ActiveFilters({ intent, sessionId, onFilterRemoved, className }:
 
         {intent.mood ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-primary">
-            <Sparkles className="h-3 w-3" />
+            <Heart className="h-3 w-3" />
             <span>Mood: {intent.mood}</span>
             {sessionId && <RemoveButton filterKey="mood" />}
           </span>

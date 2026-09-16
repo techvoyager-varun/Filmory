@@ -7,9 +7,7 @@ import {
   ListOrdered,
   MoveRight,
   Radar,
-  Sparkles,
   TrendingUp,
-  Wand2,
 } from "lucide-react";
 import { getModelMetrics } from "@/api/recommendations";
 import type { ModelMetrics } from "@/types/movie";
@@ -40,7 +38,7 @@ export default function ModelPage() {
       {/* ------------------------------------------------ header */}
       <header className="border-l-2 border-gold/70 pl-4">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gold">
-          <Sparkles className="size-3.5" /> AI transparency
+          <Layers className="size-3.5" /> Model transparency
         </p>
         <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight md:text-4xl">
           How Filmory Recommends

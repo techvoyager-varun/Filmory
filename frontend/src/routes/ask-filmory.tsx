@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { PlusCircle, MessageSquare, Trash2, Sparkles, PanelLeft, Bot } from "lucide-react";
+import { PlusCircle, MessageSquare, Trash2, PanelLeft, Film } from "lucide-react";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ChatPanel } from "@/components/assistant/ChatPanel";
 import { Button } from "@/components/ui/button";
@@ -153,15 +153,15 @@ function AskFilmoryPage() {
           </Button>
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 border border-gold/30 text-gold shadow-sm">
-              <Bot className="h-5 w-5" />
+              <Film className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight md:text-2xl text-foreground">
                   Ask Filmory
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full bg-gold/10 border border-gold/30 px-2 py-0.5 text-[10px] font-semibold text-gold">
-                  <Sparkles className="h-2.5 w-2.5" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/10 border border-gold/30 px-2.5 py-0.5 text-[10px] font-semibold text-gold">
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold" />
                   Gemini + DAMR
                 </span>
               </div>
