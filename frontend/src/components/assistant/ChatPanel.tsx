@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Sparkles, Bot, User as UserIcon, AlertCircle, HelpCircle, Info } from "lucide-react";
+import { Film, User as UserIcon, AlertCircle, HelpCircle, Info } from "lucide-react";
 import { ChatInput } from "./ChatInput";
 import { ActiveFilters } from "./ActiveFilters";
 import { AssistantMovieCards } from "./AssistantMovieCards";
@@ -48,7 +48,7 @@ export function ChatPanel({
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-gold/20 via-primary/20 to-surface-raised border border-gold/30 shadow-inner">
-              <Sparkles className="h-8 w-8 text-gold animate-pulse" />
+              <Film className="h-8 w-8 text-gold" />
             </div>
             <div className="max-w-md space-y-2">
               <h2 className="text-xl font-bold tracking-tight text-foreground">
@@ -75,7 +75,7 @@ export function ChatPanel({
               >
                 {!isUser && (
                   <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-xl bg-gold/10 border border-gold/30 text-gold shadow-sm mt-0.5">
-                    <Bot className="h-4 w-4" />
+                    <Film className="h-4 w-4" />
                   </div>
                 )}
 
@@ -145,7 +145,7 @@ export function ChatPanel({
         {isLoading && (
           <div className="flex gap-3 justify-start text-sm">
             <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-xl bg-gold/10 border border-gold/30 text-gold shadow-sm animate-pulse">
-              <Bot className="h-4 w-4" />
+              <Film className="h-4 w-4" />
             </div>
             <div className="rounded-2xl rounded-tl-sm bg-surface-raised border border-border/80 px-4 py-3 text-muted-foreground flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-full bg-gold animate-bounce" />

@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
 import { FilmoryLogo } from "@/components/FilmoryLogo";
 
 export function Footer() {
@@ -33,8 +32,7 @@ export function Footer() {
           <Link to="/history" className="hover:text-foreground">
             History
           </Link>
-          <Link to="/model" className="flex items-center gap-1.5 hover:text-foreground">
-            <Sparkles className="size-3.5 text-gold" />
+          <Link to="/model" className="hover:text-foreground">
             How it recommends
           </Link>
         </nav>

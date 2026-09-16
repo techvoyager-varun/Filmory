@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Loader2, CornerDownLeft } from "lucide-react";
+import { Send, Loader2, CornerDownLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -68,9 +68,8 @@ export function ChatInput({
     <div className={cn("w-full space-y-3", className)}>
       {/* Quick Prompt Chips */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-        <span className="flex items-center gap-1 text-muted-foreground whitespace-nowrap pl-1">
-          <Sparkles className="h-3 w-3 text-gold" />
-          <span>Try:</span>
+        <span className="text-muted-foreground whitespace-nowrap pl-1 font-medium">
+          Try:
         </span>
         {QUICK_PROMPTS.map((prompt) => (
           <button
