@@ -3,13 +3,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from urllib.parse import quote_plus, urlparse, urlunparse
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+psycopg://postgres:Varunalwar%40025@localhost:5432/filmory"
-    SECRET_KEY: str = "filmory_super_secret_jwt_key_2026_production_grade"
+    # Secrets must be provided via environment / .env — no real credentials in code.
+    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/filmory"
+    SECRET_KEY: str = "change-me-in-.env"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     FRONTEND_ORIGIN: str = "http://localhost:5173"
     PORT: int = 8000
     HOST: str = "0.0.0.0"
+    # TMDB API key for on-the-fly poster/backdrop enrichment.
+    TMDB_API_KEY: str = ""
 
     # ML parameters
     CANDIDATE_K: int = 100

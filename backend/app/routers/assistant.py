@@ -4,11 +4,15 @@ API router for the Ask Filmory conversational assistant.
 All endpoints require JWT authentication — the user is derived from the
 token, never from the request body.
 """
+import threading
+import time
+from collections import defaultdict, deque
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.core.deps import get_current_user
 from app.database import get_db
 from app.models.db_models import User
@@ -31,6 +35,32 @@ from app.services.assistant_orchestrator import (
 
 router = APIRouter(prefix="/api/assistant", tags=["Assistant"])
 
+# ---------------------------------------------------------------------------
+# Simple in-memory per-user rate limiter (sliding window, 1 minute).
+# Enforces settings.ASSISTANT_RATE_LIMIT on the /chat endpoint to prevent
+# abuse of the LLM API (cost/quota protection).
+# ---------------------------------------------------------------------------
+_rate_lock = threading.Lock()
+_chat_timestamps: dict[int, deque] = defaultdict(deque)
+
+
+def _enforce_chat_rate_limit(user_id: int) -> None:
+    limit = settings.ASSISTANT_RATE_LIMIT
+    if limit <= 0:
+        return
+    now = time.monotonic()
+    window = 60.0
+    with _rate_lock:
+        timestamps = _chat_timestamps[user_id]
+        while timestamps and now - timestamps[0] > window:
+            timestamps.popleft()
+        if len(timestamps) >= limit:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded. Please wait a moment before sending another message.",
+            )
+        timestamps.append(now)
+
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(
@@ -38,6 +68,7 @@ def chat(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    _enforce_chat_rate_limit(current_user.id)
     """
     Main chat endpoint. Send a natural-language movie request and receive
     personalized recommendations with evidence-grounded explanations.
@@ -63,12 +94,14 @@ def chat(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while processing your request.",
         )
+    except HTTPException:
+        raise
     except Exception as e:
         import logging
         logging.getLogger("filmory.assistant").error("Chat endpoint error: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while processing your request: {str(e)}",
+            detail="An error occurred while processing your request.",
         )
 
 

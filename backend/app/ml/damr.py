@@ -53,7 +53,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, asdict, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import torch
@@ -158,7 +158,7 @@ def estimate_user_state(
 
     G = genre_matrix.float()
     num_genres = num_genres or G.shape[1]
-    now = _to_naive_utc(now) if now is not None else datetime.utcnow()
+    now = _to_naive_utc(now) if now is not None else datetime.now(timezone.utc).replace(tzinfo=None)
     n = len(history)
 
     g_long_raw = torch.zeros(num_genres, device=G.device)

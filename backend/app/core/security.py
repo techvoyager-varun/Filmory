@@ -13,10 +13,11 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 def create_access_token(subject: str | int, expires_delta: Optional[datetime.timedelta] = None) -> str:
+    now = datetime.datetime.now(datetime.timezone.utc)
     if expires_delta:
-        expire = datetime.datetime.utcnow() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = now + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode: dict[str, Any] = {"sub": str(subject), "exp": expire}
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
