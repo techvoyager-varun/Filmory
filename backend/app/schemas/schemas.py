@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 class MovieSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -45,13 +45,13 @@ class UserSchema(BaseModel):
     onboardingCompleted: bool = False
 
 class RegisterRequest(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=100)
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8, max_length=128)
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=1, max_length=128)
 
 class AuthResponse(BaseModel):
     accessToken: str
@@ -66,9 +66,11 @@ class ColdStartRequest(BaseModel):
     favoriteGenres: List[str] = []
     favoriteMovieIds: List[int] = []
 
+INTERACTION_TYPES = ("play", "like", "unlike", "list_add", "list_remove")
+
 class InteractionCreate(BaseModel):
     movieId: int
-    type: str # play, like, unlike, list_add, list_remove
+    type: str = Field(pattern="^(play|like|unlike|list_add|list_remove)$")
 
 class InteractionResponse(BaseModel):
     userId: str

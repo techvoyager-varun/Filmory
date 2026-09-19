@@ -48,6 +48,7 @@ class ModelService:
         return cls._instance
 
     def load_all(self):
+        """Load available recommendation artifacts once and prepare models for inference."""
         if self.is_loaded:
             return
         
@@ -79,11 +80,11 @@ class ModelService:
         # 3. Load matrices
         mg_path = os.path.join(self.ml_dir, "movie_genre_matrix.pt")
         if os.path.exists(mg_path):
-            self.movie_genre_matrix = torch.load(mg_path, map_location=self.device).float()
+            self.movie_genre_matrix = torch.load(mg_path, map_location=self.device, weights_only=True).float()
         
         ug_path = os.path.join(self.ml_dir, "user_genre_matrix.pt")
         if os.path.exists(ug_path):
-            self.user_genre_matrix = torch.load(ug_path, map_location=self.device).float()
+            self.user_genre_matrix = torch.load(ug_path, map_location=self.device, weights_only=True).float()
 
         # 4. Instantiate & load models
         num_users = self.config.get("num_users", 41547)
@@ -99,7 +100,7 @@ class ModelService:
         baseline_path = os.path.join(self.ml_dir, "ncf_baseline.pth")
         if os.path.exists(baseline_path):
             self.ncf_baseline = NCFBaseline(num_users=num_users, num_items=num_items, embedding_dim=emb_ncf)
-            self.ncf_baseline.load_state_dict(torch.load(baseline_path, map_location=self.device))
+            self.ncf_baseline.load_state_dict(torch.load(baseline_path, map_location=self.device, weights_only=True))
             self.ncf_baseline.to(self.device)
             self.ncf_baseline.eval()
             logger.info("Loaded NCF Baseline model")
@@ -110,7 +111,7 @@ class ModelService:
             self.ncf_hybrid = NCFHybrid(
                 num_users=num_users, num_items=num_items, num_genres=num_genres, embedding_dim=emb_ncf
             )
-            self.ncf_hybrid.load_state_dict(torch.load(hybrid_path, map_location=self.device))
+            self.ncf_hybrid.load_state_dict(torch.load(hybrid_path, map_location=self.device, weights_only=True))
             self.ncf_hybrid.to(self.device)
             self.ncf_hybrid.eval()
             logger.info("Loaded NCF Hybrid model")
@@ -125,7 +126,7 @@ class ModelService:
                 num_layers=layers_trans,
                 max_len=maxlen_trans,
             )
-            self.sequential_transformer.load_state_dict(torch.load(trans_path, map_location=self.device))
+            self.sequential_transformer.load_state_dict(torch.load(trans_path, map_location=self.device, weights_only=True))
             self.sequential_transformer.to(self.device)
             self.sequential_transformer.eval()
             logger.info("Loaded Sequential Transformer model")
