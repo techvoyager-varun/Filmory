@@ -45,6 +45,10 @@ _chat_timestamps: dict[int, deque] = defaultdict(deque)
 
 
 def _enforce_chat_rate_limit(user_id: int) -> None:
+    """Record a chat request or raise HTTP 429 when the user's quota is exhausted.
+
+    Rate limiting is disabled when ``ASSISTANT_RATE_LIMIT`` is nonpositive.
+    """
     limit = settings.ASSISTANT_RATE_LIMIT
     if limit <= 0:
         return
@@ -68,14 +72,16 @@ def chat(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    _enforce_chat_rate_limit(current_user.id)
     """
     Main chat endpoint. Send a natural-language movie request and receive
     personalized recommendations with evidence-grounded explanations.
 
     Pass session_id to continue a conversation (follow-up requests).
     Omit session_id to start a new conversation.
+
+    Requests count against the authenticated user's per-minute chat quota.
     """
+    _enforce_chat_rate_limit(current_user.id)
     try:
         return handle_message(
             user=current_user,

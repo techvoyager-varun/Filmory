@@ -13,6 +13,10 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 def create_access_token(subject: str | int, expires_delta: Optional[datetime.timedelta] = None) -> str:
+    """Create a signed JWT for ``subject`` with an expiry based on UTC now.
+
+    A nonzero ``expires_delta`` overrides the configured token lifetime.
+    """
     now = datetime.datetime.now(datetime.timezone.utc)
     if expires_delta:
         expire = now + expires_delta

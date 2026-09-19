@@ -49,7 +49,11 @@ def clean_movie_title(raw_title: str):
     return title.strip(), year
 
 def fetch_tmdb_metadata(tmdb_id: Optional[int] = None, title: Optional[str] = None, year: Optional[int] = None) -> Optional[Dict[str, Any]]:
-    """Fetch poster, backdrop, overview, runtime from TMDB."""
+    """Return normalized TMDB metadata for an ID or title search.
+
+    Returns ``None`` when no API key or matching movie is available, or when a
+    request or response cannot be processed.
+    """
     if not TMDB_KEY:
         return None
     try:

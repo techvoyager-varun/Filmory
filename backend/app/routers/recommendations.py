@@ -24,6 +24,10 @@ from app.ml.recommender import (
 router = APIRouter(prefix="/api", tags=["Recommendations"])
 
 def _resolve_target_user(user_id: str, current_user: Optional[User], db: Session) -> Optional[User]:
+    """Return the requester for self/guest aliases or a matching numeric ID.
+
+    Unauthenticated, malformed, and mismatched numeric IDs resolve to ``None``.
+    """
     # Never allow an authenticated user to fetch another user's personalized
     # recommendations by guessing their numeric id (IDOR protection).
     if user_id in ("me", "guest"):
