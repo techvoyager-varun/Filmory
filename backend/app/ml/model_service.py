@@ -48,6 +48,7 @@ class ModelService:
         return cls._instance
 
     def load_all(self):
+        """Load available recommendation artifacts once and prepare models for inference."""
         if self.is_loaded:
             return
         
