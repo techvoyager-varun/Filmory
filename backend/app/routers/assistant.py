@@ -9,7 +9,7 @@ import time
 from collections import defaultdict, deque
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -36,39 +36,75 @@ from app.services.assistant_orchestrator import (
 router = APIRouter(prefix="/api/assistant", tags=["Assistant"])
 
 # ---------------------------------------------------------------------------
-# Simple in-memory per-user rate limiter (sliding window, 1 minute).
-# Enforces settings.ASSISTANT_RATE_LIMIT on the /chat endpoint to prevent
-# abuse of the LLM API (cost/quota protection).
+# In-memory sliding-window rate limiters (1-minute window).
+#
+# Two layers:
+#   1. Per-user  — keyed by user id, enforces ASSISTANT_RATE_LIMIT.
+#   2. Per-IP    — keyed by client IP, enforces ASSISTANT_GLOBAL_RATE_LIMIT.
+#      This prevents account-cycling attacks (creating disposable accounts
+#      to bypass the per-user quota).
+#
+# Stale buckets are evicted every _EVICT_INTERVAL_S seconds so memory stays
+# bounded even with many one-time users.
 # ---------------------------------------------------------------------------
+_WINDOW_S = 60.0
+_EVICT_INTERVAL_S = 300.0  # prune stale buckets every 5 minutes
+
 _rate_lock = threading.Lock()
-_chat_timestamps: dict[int, deque] = defaultdict(deque)
+_user_timestamps: dict[int, deque] = defaultdict(deque)
+_ip_timestamps: dict[str, deque] = defaultdict(deque)
+_last_evict: float = time.monotonic()
 
 
-def _enforce_chat_rate_limit(user_id: int) -> None:
-    """Record a chat request or raise HTTP 429 when the user's quota is exhausted.
+def _evict_stale_buckets(now: float) -> None:
+    """Remove buckets whose newest timestamp is older than the window.
 
-    Rate limiting is disabled when ``ASSISTANT_RATE_LIMIT`` is nonpositive.
+    Called inside ``_rate_lock`` — must not re-acquire.
     """
-    limit = settings.ASSISTANT_RATE_LIMIT
+    global _last_evict
+    if now - _last_evict < _EVICT_INTERVAL_S:
+        return
+    _last_evict = now
+    for store in (_user_timestamps, _ip_timestamps):
+        stale_keys = [k for k, dq in store.items() if not dq or now - dq[-1] > _WINDOW_S]
+        for k in stale_keys:
+            del store[k]
+
+
+def _check_bucket(store: dict, key, limit: int, now: float) -> None:
+    """Sliding-window check + record for a single bucket."""
     if limit <= 0:
         return
+    timestamps = store[key]
+    while timestamps and now - timestamps[0] > _WINDOW_S:
+        timestamps.popleft()
+    if len(timestamps) >= limit:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Please wait a moment before sending another message.",
+        )
+    timestamps.append(now)
+
+
+def _enforce_chat_rate_limit(user_id: int, client_ip: str) -> None:
+    """Record a chat request or raise HTTP 429 when any quota is exhausted.
+
+    Checks both per-user and global (per-IP) limits and periodically evicts
+    stale buckets to prevent unbounded memory growth.
+    """
     now = time.monotonic()
-    window = 60.0
     with _rate_lock:
-        timestamps = _chat_timestamps[user_id]
-        while timestamps and now - timestamps[0] > window:
-            timestamps.popleft()
-        if len(timestamps) >= limit:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Please wait a moment before sending another message.",
-            )
-        timestamps.append(now)
+        _evict_stale_buckets(now)
+        # Global / per-IP limit
+        _check_bucket(_ip_timestamps, client_ip, settings.ASSISTANT_GLOBAL_RATE_LIMIT, now)
+        # Per-user limit
+        _check_bucket(_user_timestamps, user_id, settings.ASSISTANT_RATE_LIMIT, now)
 
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(
     payload: ChatRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -79,9 +115,11 @@ def chat(
     Pass session_id to continue a conversation (follow-up requests).
     Omit session_id to start a new conversation.
 
-    Requests count against the authenticated user's per-minute chat quota.
+    Requests count against the authenticated user's per-minute chat quota
+    and a global per-IP quota to mitigate account-cycling abuse.
     """
-    _enforce_chat_rate_limit(current_user.id)
+    client_ip = request.client.host if request.client else "unknown"
+    _enforce_chat_rate_limit(current_user.id, client_ip)
     try:
         return handle_message(
             user=current_user,

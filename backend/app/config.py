@@ -5,7 +5,7 @@ from urllib.parse import quote_plus, urlparse, urlunparse
 class Settings(BaseSettings):
     # Secrets must be provided via environment / .env — no real credentials in code.
     DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/filmory"
-    SECRET_KEY: str = "change-me-in-.env"
+    SECRET_KEY: str  # REQUIRED — must be provided via .env or environment variable
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     FRONTEND_ORIGIN: str = "http://localhost:5173"
@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     ASSISTANT_MAX_HISTORY: int = 20                    # max messages per session context
     ASSISTANT_TIMEOUT_S: float = 15.0                  # LLM call timeout
     ASSISTANT_RATE_LIMIT: int = 20                     # max messages per minute per user
+    ASSISTANT_GLOBAL_RATE_LIMIT: int = 60               # max messages per minute per IP (anti-cycling)
     SEMANTIC_SEARCH_TOP_K: int = 30                    # candidates from vector search
     SEMANTIC_SEARCH_ENABLED: bool = False               # enable when pgvector is installed
 
