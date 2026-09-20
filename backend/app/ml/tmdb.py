@@ -1,19 +1,19 @@
+import logging
 import os
 import urllib.request
 import urllib.parse
 import json
-import ssl
 import re
 from typing import Optional, Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from sqlalchemy.orm import Session
+from app.config import settings
 from app.models.db_models import Movie
 
-ctx = ssl.create_default_context()
-ctx.check_hostname = False
-ctx.verify_mode = ssl.CERT_NONE
+logger = logging.getLogger(__name__)
 
-TMDB_KEY = "15d2ea6d0dc1d476efbca3eba2b9bbfb"
+# Default SSL context (certificate verification enabled) — never disable it.
+TMDB_KEY = settings.TMDB_API_KEY
 
 LINKS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "links.json")
 LINKS_MAP = {}
@@ -49,13 +49,19 @@ def clean_movie_title(raw_title: str):
     return title.strip(), year
 
 def fetch_tmdb_metadata(tmdb_id: Optional[int] = None, title: Optional[str] = None, year: Optional[int] = None) -> Optional[Dict[str, Any]]:
-    """Fetch poster, backdrop, overview, runtime from TMDB."""
+    """Return normalized TMDB metadata for an ID or title search.
+
+    Returns ``None`` when no API key or matching movie is available, or when a
+    request or response cannot be processed.
+    """
+    if not TMDB_KEY:
+        return None
     try:
         data = None
         if tmdb_id:
             url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={TMDB_KEY}"
             req = urllib.request.Request(url)
-            with urllib.request.urlopen(req, context=ctx, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 data = json.loads(resp.read().decode('utf-8'))
         
         if not data and title:
@@ -65,13 +71,13 @@ def fetch_tmdb_metadata(tmdb_id: Optional[int] = None, title: Optional[str] = No
             if y:
                 search_url += f"&year={y}"
             req = urllib.request.Request(search_url)
-            with urllib.request.urlopen(req, context=ctx, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 search_res = json.loads(resp.read().decode('utf-8'))
                 results = search_res.get('results', [])
                 if not results and y:
                     # Retry without year constraint in case release year slightly differs in TMDB
                     search_url_noyear = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_KEY}&query={query_str}"
-                    with urllib.request.urlopen(urllib.request.Request(search_url_noyear), context=ctx, timeout=3) as r_resp:
+                    with urllib.request.urlopen(urllib.request.Request(search_url_noyear), timeout=3) as r_resp:
                         results = json.loads(r_resp.read().decode('utf-8')).get('results', [])
                 if results:
                     data = results[0]
@@ -79,7 +85,7 @@ def fetch_tmdb_metadata(tmdb_id: Optional[int] = None, title: Optional[str] = No
                     try:
                         m_id = data.get('id')
                         detail_url = f"https://api.themoviedb.org/3/movie/{m_id}?api_key={TMDB_KEY}"
-                        with urllib.request.urlopen(urllib.request.Request(detail_url), context=ctx, timeout=2) as d_resp:
+                        with urllib.request.urlopen(urllib.request.Request(detail_url), timeout=2) as d_resp:
                             data = json.loads(d_resp.read().decode('utf-8'))
                     except Exception:
                         pass

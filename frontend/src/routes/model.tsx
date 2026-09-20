@@ -8,6 +8,7 @@ import {
   MoveRight,
   Radar,
   TrendingUp,
+  Wand2,
 } from "lucide-react";
 import { getModelMetrics } from "@/api/recommendations";
 import type { ModelMetrics } from "@/types/movie";
