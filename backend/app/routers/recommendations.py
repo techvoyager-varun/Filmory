@@ -24,13 +24,22 @@ from app.ml.recommender import (
 router = APIRouter(prefix="/api", tags=["Recommendations"])
 
 def _resolve_target_user(user_id: str, current_user: Optional[User], db: Session) -> Optional[User]:
-    target_user = current_user
-    if user_id != "me" and user_id != "guest" and not target_user:
+    """Return the requester for self/guest aliases or a matching numeric ID.
+
+    Unauthenticated, malformed, and mismatched numeric IDs resolve to ``None``.
+    """
+    # Never allow an authenticated user to fetch another user's personalized
+    # recommendations by guessing their numeric id (IDOR protection).
+    if user_id in ("me", "guest"):
+        return current_user
+    # Only resolve a numeric user_id when it belongs to the requester.
+    if current_user is not None:
         try:
-            target_user = db.query(User).filter(User.id == int(user_id)).first()
+            if int(user_id) == current_user.id:
+                return current_user
         except ValueError:
-            target_user = None
-    return target_user
+            pass
+    return None
 
 @router.get("/recommendations/{user_id}", response_model=List[ScoredMovieSchema])
 def get_recommendations_for_user(
