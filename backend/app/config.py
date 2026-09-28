@@ -9,6 +9,13 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     FRONTEND_ORIGIN: str = "http://localhost:5173"
+    # Extra browser origins allowed by CORS, comma-separated. Merged with
+    # FRONTEND_ORIGIN so multiple deployed frontends/domains can be allowed
+    # without a code change.
+    CORS_EXTRA_ORIGINS: str = ""
+    # Regex for origins that cannot be listed statically (preview deployments).
+    # Defaults to localhost + the hosted sandbox domains.
+    CORS_ORIGIN_REGEX: str = r"(https?://(localhost|127\.0\.0\.1)(:\d+)?|https://[a-z0-9-]+\.(e2b\.app|pages\.dev|vercel\.app|netlify\.app|hf\.space))"
     PORT: int = 8000
     HOST: str = "0.0.0.0"
     # TMDB API key for on-the-fly poster/backdrop enrichment.
