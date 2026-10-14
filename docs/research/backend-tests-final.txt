@@ -1,0 +1,68 @@
+...........................................................              [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  E:\Filmory\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_api.py: 8 warnings
+tests/test_recommender_integration.py: 25 warnings
+  E:\Filmory\backend\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3627: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/test_assistant_acceptance.py: 10 warnings
+  E:\Filmory\backend\app\services\assistant_orchestrator.py:85: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.datetime.utcnow(),
+
+tests/test_assistant_acceptance.py: 10 warnings
+  E:\Filmory\backend\app\services\assistant_orchestrator.py:86: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at=datetime.datetime.utcnow(),
+
+tests/test_assistant_acceptance.py: 10 warnings
+  E:\Filmory\backend\app\services\assistant_orchestrator.py:353: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.datetime.utcnow(),
+
+tests/test_assistant_acceptance.py::test_ambiguous_title_clarification
+tests/test_assistant_acceptance.py::test_all_movies_generic_clarification
+  E:\Filmory\backend\app\services\assistant_orchestrator.py:376: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.datetime.utcnow(),
+
+tests/test_assistant_acceptance.py::test_impossible_constraints_truthful_empty
+tests/test_assistant_acceptance.py::test_llm_failure_controlled_fallback
+tests/test_assistant_acceptance.py::test_cross_user_session_isolation
+tests/test_assistant_acceptance.py::test_avengers_all_movie_catalog_lookup
+tests/test_assistant_acceptance.py::test_specific_film_resolution_avengers_1998
+tests/test_assistant_acceptance.py::test_movies_like_avengers_similar_flow
+tests/test_assistant_acceptance.py::test_unknown_title_honest_empty_response
+tests/test_assistant_acceptance.py::test_gemini_disabled_fallback_notice
+  E:\Filmory\backend\app\services\assistant_orchestrator.py:401: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    session.updated_at = datetime.datetime.utcnow()
+
+tests/test_assistant_acceptance.py::test_impossible_constraints_truthful_empty
+tests/test_assistant_acceptance.py::test_llm_failure_controlled_fallback
+tests/test_assistant_acceptance.py::test_cross_user_session_isolation
+tests/test_assistant_acceptance.py::test_avengers_all_movie_catalog_lookup
+tests/test_assistant_acceptance.py::test_specific_film_resolution_avengers_1998
+tests/test_assistant_acceptance.py::test_movies_like_avengers_similar_flow
+tests/test_assistant_acceptance.py::test_unknown_title_honest_empty_response
+tests/test_assistant_acceptance.py::test_gemini_disabled_fallback_notice
+  E:\Filmory\backend\app\services\assistant_orchestrator.py:621: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.datetime.utcnow(),
+
+tests/test_damr.py::test_stable_user_has_zero_drift_and_zero_momentum
+  E:\Filmory\backend\tests\test_damr.py:112: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_damr.py::test_drifting_user_gets_drift_and_momentum_toward_new_genre
+  E:\Filmory\backend\tests\test_damr.py:125: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_damr.py::test_momentum_boosts_candidates_in_drift_direction
+  E:\Filmory\backend\tests\test_damr.py:176: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_recommender_integration.py::test_arbitrary_catalogue_pool_preserves_positions_and_unmapped_metadata
+  E:\Filmory\backend\.venv\Lib\site-packages\torch\nn\modules\transformer.py:529: UserWarning: The PyTorch API of nested tensors is in prototype stage and will change in the near future. We recommend specifying layout=torch.jagged when constructing a nested tensor, as this layout receives active development, has better operator coverage, and works with torch.compile. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\NestedTensorImpl.cpp:181.)
+    output = torch._nested_tensor_from_mask(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+59 passed, 86 warnings in 20.89s

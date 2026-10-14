@@ -1,0 +1,22 @@
+{
+  "num_users": 41547,
+  "num_items": 22836,
+  "num_genres": 20,
+  "embedding_dim_ncf": 8,
+  "transformer_embedding_dim": 64,
+  "transformer_heads": 4,
+  "transformer_layers": 2,
+  "transformer_max_len": 20,
+  "candidate_k": 100,
+  "top_k": 10,
+  "ncf_weight": 0.55,
+  "transformer_weight": 0.25,
+  "genre_weight": 0.2,
+  "transformer_pooling": "last",
+  "transformer_dim_feedforward": 256,
+  "transformer_padding_idx": 22836,
+  "model_format_version": 2,
+  "history_indexing": "zero_based",
+  "genre_profile_normalization": "l1",
+  "preferred_retriever": "hybrid"
+}

@@ -1,0 +1,39 @@
+{
+  "fresh_initialization": false,
+  "source": {
+    "kind": "ordered stored training histories",
+    "source_sha256": "865bdea9cf7a007dec25118a55405f6cdeefdf442935ce0b5567178c0119955a",
+    "timestamps_available": false,
+    "note": "Original notebook test ratings are absent from these histories. New holdouts are taken before fresh training; chronology is ordinal only."
+  },
+  "seed": 42,
+  "device": "cpu",
+  "torch_version": "2.13.0+cpu",
+  "eligible_users": 41547,
+  "training_interactions": 5923646,
+  "training_negative_exclusion": "train histories only",
+  "selection": "sampled validation NDCG@10; test not used for selection",
+  "budget": {
+    "seed": 42,
+    "epochs": 5,
+    "sequence_epochs": 5,
+    "positives_per_epoch": 1500000,
+    "sequence_samples": 120000,
+    "batch_size": 4096,
+    "eval_users": 400,
+    "catalogue_users": 200,
+    "threads": 4,
+    "embedding_dim": 16,
+    "test_user_offset": 1200,
+    "learning_rate": 0.0002
+  },
+  "architecture_sha256": "d793b148f55735650fc3c970f292231a4efbe551c63e978e05585dee2bf06ed8",
+  "training_script_sha256": "7fd5294c059330dc176d05657764964ae04f383fabda8d1d5af6ad2a42855878",
+  "continuation_from": "E:\\Filmory\\backend\\training\\runs\\20261001_clean_extended",
+  "parent_checkpoint_sha256": {
+    "ncf_baseline.pth": "3517130ef21fb8bb37b48de12330a5757ad04f821e9c525f475c54e89a87fbfa",
+    "ncf_hybrid.pth": "e8ecd015c9cd2e73f6896fc8051d66d4fdce6e9d143ff236e1e726805ca311cd",
+    "sequential_transformer.pth": "579c5db8d4dd11e5b7ac987bf606f853c8ecd653f683defb00302cbdbfe89d93"
+  },
+  "note": "Fresh optimizer; continued fitting on identical clean training histories. Original parent checkpoint retained unless validation NDCG improves."
+}

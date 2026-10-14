@@ -1,0 +1,178 @@
+History 2: 100/1000
+History 2: 200/1000
+History 2: 300/1000
+History 2: 400/1000
+History 2: 500/1000
+History 2: 600/1000
+History 2: 700/1000
+History 2: 800/1000
+History 2: 900/1000
+History 2: 1000/1000
+History 5: 100/1000
+History 5: 200/1000
+History 5: 300/1000
+History 5: 400/1000
+History 5: 500/1000
+History 5: 600/1000
+History 5: 700/1000
+History 5: 800/1000
+History 5: 900/1000
+History 5: 1000/1000
+History 10: 100/1000
+History 10: 200/1000
+History 10: 300/1000
+History 10: 400/1000
+History 10: 500/1000
+History 10: 600/1000
+History 10: 700/1000
+History 10: 800/1000
+History 10: 900/1000
+History 10: 1000/1000
+E:\Filmory\backend\.venv\Lib\site-packages\torch\nn\modules\transformer.py:529: UserWarning: The PyTorch API of nested tensors is in prototype stage and will change in the near future. We recommend specifying layout=torch.jagged when constructing a nested tensor, as this layout receives active development, has better operator coverage, and works with torch.compile. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\NestedTensorImpl.cpp:181.)
+  output = torch._nested_tensor_from_mask(
+History 20: 100/1000
+History 20: 200/1000
+History 20: 300/1000
+History 20: 400/1000
+History 20: 500/1000
+History 20: 600/1000
+History 20: 700/1000
+History 20: 800/1000
+History 20: 900/1000
+History 20: 1000/1000
+{
+  "history_lengths": {
+    "2": {
+      "policy": {
+        "min_history": 2,
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.65,
+          0.25,
+          0.1
+        ]
+      },
+      "metrics": {
+        "legacy_cold_start": {
+          "users": 1000,
+          "hr10": 0.024,
+          "ndcg10": 0.011920287506351374,
+          "coverage10": 0.021807672096689438
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 1000,
+          "hr10": 0.04,
+          "ndcg10": 0.017751887430438696,
+          "coverage10": 0.026580837274478894,
+          "candidate_recall": 0.41
+        }
+      }
+    },
+    "5": {
+      "policy": {
+        "min_history": 5,
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.8,
+          0.2,
+          0.0
+        ]
+      },
+      "metrics": {
+        "legacy_cold_start": {
+          "users": 1000,
+          "hr10": 0.033,
+          "ndcg10": 0.015545526386424355,
+          "coverage10": 0.021282186022070416
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 1000,
+          "hr10": 0.044,
+          "ndcg10": 0.020170792795281806,
+          "coverage10": 0.024566473988439308,
+          "candidate_recall": 0.466
+        }
+      }
+    },
+    "10": {
+      "policy": {
+        "min_history": 10,
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.8,
+          0.2,
+          0.0
+        ]
+      },
+      "metrics": {
+        "legacy_cold_start": {
+          "users": 1000,
+          "hr10": 0.032,
+          "ndcg10": 0.01643653334242128,
+          "coverage10": 0.019224032229812577
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 1000,
+          "hr10": 0.037,
+          "ndcg10": 0.017785866090353025,
+          "coverage10": 0.02281485373970923,
+          "candidate_recall": 0.5
+        }
+      }
+    },
+    "20": {
+      "policy": {
+        "min_history": 20,
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.4,
+          0.5,
+          0.1
+        ]
+      },
+      "metrics": {
+        "legacy_cold_start": {
+          "users": 1000,
+          "hr10": 0.048,
+          "ndcg10": 0.023082123729529738,
+          "coverage10": 0.017559992993519007
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 1000,
+          "hr10": 0.051,
+          "ndcg10": 0.024218018996493805,
+          "coverage10": 0.01742862147486425,
+          "candidate_recall": 0.513
+        }
+      }
+    }
+  },
+  "paired_uncertainty": {
+    "protocol": "Paired user-level percentile bootstrap; average four history contexts per user before resampling",
+    "users": 1000,
+    "resamples": 10000,
+    "seed": 20261015,
+    "hr10": {
+      "mean_difference": 0.00875,
+      "95_percent_interval": [
+        0.00325,
+        0.01475
+      ]
+    },
+    "ndcg10": {
+      "mean_difference": 0.003235523586960147,
+      "95_percent_interval": [
+        0.0011406120385839586,
+        0.005417094784659913
+      ]
+    }
+  }
+}

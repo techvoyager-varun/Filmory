@@ -1,0 +1,29 @@
+{
+  "fresh_initialization": true,
+  "source": {
+    "kind": "ordered stored training histories",
+    "source_sha256": "865bdea9cf7a007dec25118a55405f6cdeefdf442935ce0b5567178c0119955a",
+    "timestamps_available": false,
+    "note": "Original notebook test ratings are absent from these histories. New holdouts are taken before fresh training; chronology is ordinal only."
+  },
+  "seed": 42,
+  "device": "cpu",
+  "torch_version": "2.13.0+cpu",
+  "eligible_users": 41547,
+  "training_interactions": 5923646,
+  "training_negative_exclusion": "train histories only",
+  "selection": "sampled validation NDCG@10; test not used for selection",
+  "budget": {
+    "seed": 42,
+    "epochs": 6,
+    "sequence_epochs": 3,
+    "positives_per_epoch": 750000,
+    "sequence_samples": 80000,
+    "batch_size": 4096,
+    "eval_users": 400,
+    "catalogue_users": 200,
+    "threads": 4
+  },
+  "architecture_sha256": "d793b148f55735650fc3c970f292231a4efbe551c63e978e05585dee2bf06ed8",
+  "training_script_sha256": "b81962dffbe7d5af6d076060ac406a53cfd7b13da7d668aeaeceebd6d5360a0b"
+}

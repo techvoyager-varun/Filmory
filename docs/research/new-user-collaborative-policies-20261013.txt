@@ -1,0 +1,132 @@
+History 2: 100/200
+History 2: 200/200
+Selected history 2 {'mode': 'sequence_only', 'candidate_k': 300, 'strategy': 'transformer', 'weights': [0.65, 0.25, 0.1]}
+History 5: 100/200
+History 5: 200/200
+Selected history 5 {'mode': 'sequence_only', 'candidate_k': 300, 'strategy': 'transformer', 'weights': [0.8, 0.2, 0.0]}
+History 10: 100/200
+History 10: 200/200
+Selected history 10 {'mode': 'sequence_only', 'candidate_k': 300, 'strategy': 'transformer', 'weights': [0.8, 0.2, 0.0]}
+E:\Filmory\backend\.venv\Lib\site-packages\torch\nn\modules\transformer.py:529: UserWarning: The PyTorch API of nested tensors is in prototype stage and will change in the near future. We recommend specifying layout=torch.jagged when constructing a nested tensor, as this layout receives active development, has better operator coverage, and works with torch.compile. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\NestedTensorImpl.cpp:181.)
+  output = torch._nested_tensor_from_mask(
+History 20: 100/200
+History 20: 200/200
+Selected history 20 {'mode': 'sequence_only', 'candidate_k': 300, 'strategy': 'transformer', 'weights': [0.4, 0.5, 0.1]}
+History 2: 100/200
+History 2: 200/200
+History 5: 100/200
+History 5: 200/200
+History 10: 100/200
+History 10: 200/200
+History 20: 100/200
+History 20: 200/200
+{
+  "2": {
+    "selected": {
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.65,
+        0.25,
+        0.1
+      ]
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.02,
+        "ndcg10": 0.01058247436224855,
+        "coverage10": 0.01488877211420564
+      },
+      "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+        "users": 200,
+        "hr10": 0.025,
+        "ndcg10": 0.010422400827097698,
+        "coverage10": 0.016903135400245226,
+        "candidate_recall": 0.41
+      }
+    }
+  },
+  "5": {
+    "selected": {
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.8,
+        0.2,
+        0.0
+      ]
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.02,
+        "ndcg10": 0.009599972899446727,
+        "coverage10": 0.014231914520931862
+      },
+      "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+        "users": 200,
+        "hr10": 0.03,
+        "ndcg10": 0.009217113676022739,
+        "coverage10": 0.014144333508495359,
+        "candidate_recall": 0.43
+      }
+    }
+  },
+  "10": {
+    "selected": {
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.8,
+        0.2,
+        0.0
+      ]
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.04,
+        "ndcg10": 0.016844029168390184,
+        "coverage10": 0.012305132247328779
+      },
+      "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+        "users": 200,
+        "hr10": 0.04,
+        "ndcg10": 0.017474630996971482,
+        "coverage10": 0.013356104396566825,
+        "candidate_recall": 0.485
+      }
+    }
+  },
+  "20": {
+    "selected": {
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.4,
+        0.5,
+        0.1
+      ]
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.045,
+        "ndcg10": 0.019921221106051244,
+        "coverage10": 0.011954808197582763
+      },
+      "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+        "users": 200,
+        "hr10": 0.04,
+        "ndcg10": 0.018644532277677192,
+        "coverage10": 0.011341741110527237,
+        "candidate_recall": 0.465
+      }
+    }
+  }
+}

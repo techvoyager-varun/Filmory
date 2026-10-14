@@ -1,0 +1,67 @@
+E:\Filmory\backend\.venv\Lib\site-packages\torch\nn\modules\transformer.py:529: UserWarning: The PyTorch API of nested tensors is in prototype stage and will change in the near future. We recommend specifying layout=torch.jagged when constructing a nested tensor, as this layout receives active development, has better operator coverage, and works with torch.compile. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\NestedTensorImpl.cpp:181.)
+  output = torch._nested_tensor_from_mask(
+mapped: 50/200 profiles
+mapped: 100/200 profiles
+mapped: 150/200 profiles
+mapped: 200/200 profiles
+mapped: 50/200 profiles
+mapped: 100/200 profiles
+mapped: 150/200 profiles
+mapped: 200/200 profiles
+sequence-only: 50/200 profiles
+sequence-only: 100/200 profiles
+sequence-only: 150/200 profiles
+sequence-only: 200/200 profiles
+sequence-only: 50/200 profiles
+sequence-only: 100/200 profiles
+sequence-only: 150/200 profiles
+sequence-only: 200/200 profiles
+{
+  "mapped": {
+    "selected": {
+      "candidate_k": 100,
+      "strategy": "transformer",
+      "weights": [
+        0.55,
+        0.25,
+        0.2
+      ]
+    },
+    "new_test": {
+      "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.55, 0.25, 0.2]}": {
+        "users": 200,
+        "hr10": 0.06,
+        "ndcg10": 0.029665004595592334,
+        "candidate_recall": 0.37,
+        "coverage10": 0.011473112629181994
+      }
+    }
+  },
+  "sequence_only": {
+    "selected": {
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.0,
+        0.75,
+        0.25
+      ]
+    },
+    "new_test": {
+      "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+        "users": 200,
+        "hr10": 0.075,
+        "ndcg10": 0.029095448213322855,
+        "candidate_recall": 0.37,
+        "coverage10": 0.012217551234892276
+      },
+      "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+        "users": 200,
+        "hr10": 0.07,
+        "ndcg10": 0.03289382799632678,
+        "candidate_recall": 0.565,
+        "coverage10": 0.01300578034682081
+      }
+    }
+  }
+}
