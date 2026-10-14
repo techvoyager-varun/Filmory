@@ -1,0 +1,98 @@
+{
+  "checked_at": "2026-10-14T03:04:22.327609+00:00",
+  "scope": "Live local functional feedback checks; not a new relevance accuracy score.",
+  "checks": [
+    {
+      "check": "Loaded local recommendation models",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Dedicated unmapped fixture",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Persisted feedback state",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "auto exclusions and uniqueness",
+      "passed": true,
+      "detail": {
+        "returned": 50
+      }
+    },
+    {
+      "check": "auto bounded finite scores",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "static exclusions and uniqueness",
+      "passed": true,
+      "detail": {
+        "returned": 50
+      }
+    },
+    {
+      "check": "static bounded finite scores",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normalized_fixed exclusions and uniqueness",
+      "passed": true,
+      "detail": {
+        "returned": 50
+      }
+    },
+    {
+      "check": "normalized_fixed bounded finite scores",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "damr exclusions and uniqueness",
+      "passed": true,
+      "detail": {
+        "returned": 50
+      }
+    },
+    {
+      "check": "damr bounded finite scores",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "mmr exclusions and uniqueness",
+      "passed": true,
+      "detail": {
+        "returned": 50
+      }
+    },
+    {
+      "check": "mmr bounded finite scores",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Browser chat persisted",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Live local assistant constraints",
+      "passed": true,
+      "detail": {
+        "returned": 10
+      }
+    },
+    {
+      "check": "Existing checkpoints unchanged",
+      "passed": true,
+      "detail": null
+    }
+  ]
+}

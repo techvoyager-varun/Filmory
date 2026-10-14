@@ -46,7 +46,6 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
         </div>
       ))}
 
-
       <div
         key={movie.movieId}
         className="absolute right-6 top-1/2 hidden w-[19rem] -translate-y-1/2 animate-fade-in overflow-hidden rounded-lg border border-gold/25 shadow-[0_30px_80px_rgba(0,0,0,0.7)] lg:block"
@@ -69,7 +68,6 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
             Featured
           </span>
 
-
           <h1 className="mt-3 text-2xl font-extrabold leading-[1.15] drop-shadow-[0_6px_30px_rgba(0,0,0,0.65)] sm:text-3xl md:mt-4 md:text-4xl lg:text-4xl xl:text-5xl max-w-xl">
             {movie.title}
           </h1>
@@ -77,11 +75,15 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
           <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-muted-foreground md:mt-4 md:gap-x-3 md:gap-y-2 md:text-sm">
             <RatingBadge rating={movie.rating} />
             <span className="font-medium text-foreground/80">{movie.year}</span>
-            <span aria-hidden className="text-gold/50">•</span>
+            <span aria-hidden className="text-gold/50">
+              •
+            </span>
             <span>{movie.genres.join(" • ")}</span>
             {movie.runtime ? (
               <>
-                <span aria-hidden className="text-gold/50">•</span>
+                <span aria-hidden className="text-gold/50">
+                  •
+                </span>
                 <span>
                   {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
                 </span>
@@ -93,9 +95,7 @@ export function HeroBanner({ movies }: { movies: ScoredMovie[] }) {
             {movie.description}
           </p>
 
-
           <div className="mt-5 flex flex-wrap items-center gap-2 md:mt-7 md:gap-3">
-
             <PlayButton movie={movie} />
             <Button
               asChild

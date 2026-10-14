@@ -4,13 +4,17 @@ import { EmptyState } from "@/components/EmptyState";
 import { RequireAuth } from "@/components/RequireAuth";
 import { Button } from "@/components/ui/button";
 import { RatingBadge } from "@/components/RatingBadge";
+import { Poster } from "@/components/Poster";
 import { useUserData } from "@/context/UserDataContext";
 
 export const Route = createFileRoute("/history")({
   head: () => ({
     meta: [
       { title: "Watch history — Filmory" },
-      { name: "description", content: "Everything you have played on Filmory, with dates and progress." },
+      {
+        name: "description",
+        content: "Your recorded viewing activity on Filmory, with dates.",
+      },
       { property: "og:title", content: "Watch history — Filmory" },
       { property: "og:description", content: "Review and replay your Filmory viewing activity." },
     ],
@@ -23,17 +27,21 @@ export const Route = createFileRoute("/history")({
 });
 
 function HistoryPage() {
-  const { history, play } = useUserData();
+  const { history, play, loading } = useUserData();
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-16 pt-24 md:px-10 md:pt-28">
       <h1 className="text-3xl font-extrabold md:text-4xl">Watch History</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Each play is recorded through the interactions API — future training signal for the model.
+        Your recorded viewing activity. Playback is simulated in this demo.
       </p>
 
       <div className="mt-8 space-y-3">
-        {history.length === 0 ? (
+        {loading ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            Loading your history...
+          </p>
+        ) : history.length === 0 ? (
           <EmptyState
             title="Nothing watched yet"
             description="Press Play on any movie and it will show up here."
@@ -54,10 +62,8 @@ function HistoryPage() {
                 params={{ movieId: String(entry.movie.movieId) }}
                 className="shrink-0"
               >
-                <img
-                  src={entry.movie.posterUrl}
-                  alt={`${entry.movie.title} poster`}
-                  loading="lazy"
+                <Poster
+                  movie={entry.movie}
                   className="h-24 w-16 rounded-md object-cover shadow-sm"
                 />
               </Link>
@@ -76,9 +82,6 @@ function HistoryPage() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   Watched {new Date(entry.watchedAt).toLocaleString()}
                 </p>
-                <div className="mt-2 h-1 w-40 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${entry.progress}%` }} />
-                </div>
               </div>
 
               <RatingBadge rating={entry.movie.rating} className="hidden sm:inline-flex" />

@@ -4,12 +4,10 @@ import type { ScoredMovie, TasteState, ModelMetrics } from "@/types/movie";
 /** GET /api/recommendations/:userId */
 export async function getRecommendations(
   userId: string,
-  variant: "damr" | "mmr" | "static" = "damr",
+  variant: "auto" | "normalized_fixed" | "damr" | "mmr" | "static" = "auto",
 ): Promise<ScoredMovie[]> {
   const target = userId && userId !== "guest" ? userId : "me";
-  return request<ScoredMovie[]>(
-    `/api/recommendations/${target}?candidate_k=100&top_k=12&variant=${variant}`,
-  );
+  return request<ScoredMovie[]>(`/api/recommendations/${target}?top_k=12&variant=${variant}`);
 }
 
 /** GET /api/metrics — offline evaluation (HR@K / NDCG@K / MRR / AUC) */

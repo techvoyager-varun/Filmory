@@ -36,9 +36,14 @@ export async function submitFeedback(payload: FeedbackRequest): Promise<{ status
   });
 }
 
-export async function clearSessionFilter(sessionId: string, filterKey: string): Promise<MovieIntent> {
-  return request<MovieIntent>(`/api/assistant/sessions/${sessionId}/filters/${encodeURIComponent(filterKey)}`, {
-    method: "DELETE",
-  });
+export async function clearSessionFilter(
+  sessionId: string,
+  filterKey: string,
+): Promise<MovieIntent> {
+  return request<MovieIntent>(
+    `/api/assistant/sessions/${sessionId}/filters/${encodeURIComponent(filterKey)}`,
+    {
+      method: "DELETE",
+    },
+  );
 }
-

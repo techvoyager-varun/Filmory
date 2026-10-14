@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { ApiError, request } from "./client";
 import type { Movie } from "@/types/movie";
 
 export interface MoviePage {
@@ -47,8 +47,9 @@ export async function getMovies(): Promise<Movie[]> {
 export async function getMovie(movieId: number): Promise<Movie | null> {
   try {
     return await request<Movie>(`/api/movies/${movieId}`);
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
   }
 }
 

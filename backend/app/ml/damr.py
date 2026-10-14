@@ -2,7 +2,7 @@
 Stage 4 — DAMR: Drift-Aware Momentum Re-Ranker
 ==============================================
 
-The novel contribution of Filmory. DAMR sits after the three scoring stages
+Filmory's proposed custom re-ranking method. DAMR sits after the three scoring stages
 (NCF Hybrid, Sequential Transformer, Genre affinity) and answers two questions
 the fixed ensemble `0.55*NCF + 0.25*TR + 0.20*Genre` cannot:
 
@@ -427,6 +427,8 @@ def damr_rerank(
     use_agreement: bool = True,          # Step 4 — expert-agreement confidence
     use_quality: bool = True,            # Step 5a — Bayesian quality prior
     use_diversity: bool = True,          # Step 5b — MMR diversity selection
+    candidate_genres: Optional[torch.Tensor] = None,
+    candidate_similarity: Optional[torch.Tensor] = None,
 ) -> List[Dict[str, Any]]:
     """
     Re-rank the candidate pool and return the final top-k as a list of dicts:
@@ -465,8 +467,9 @@ def damr_rerank(
     s_mom = torch.zeros(K, device=device)
     if use_momentum and float(momentum.norm()) > 1e-6 and profile.state.drift > 0:
         m_unit = F.normalize(momentum, dim=0)
-        if model_service.movie_genre_matrix is not None:
-            gvecs = F.normalize(model_service.movie_genre_matrix[cand_idxs.to(device)].float(), dim=1)
+        if candidate_genres is not None or model_service.movie_genre_matrix is not None:
+            raw_genres = candidate_genres if candidate_genres is not None else model_service.movie_genre_matrix[cand_idxs.to(device)]
+            gvecs = F.normalize(raw_genres.to(device).float(), dim=1)
             s_mom = (gvecs @ m_unit).clamp(min=0.0)
         rel = rel + settings.DAMR_ETA * profile.state.drift * s_mom
 
@@ -491,7 +494,7 @@ def damr_rerank(
 
     # ---- Step 5b: MMR diversity-aware selection ---------------------------
     if use_diversity and K > 1:
-        sim = item_pair_similarity(cand_idxs.tolist(), device)
+        sim = candidate_similarity.to(device) if candidate_similarity is not None else item_pair_similarity(cand_idxs.tolist(), device)
         lam = settings.MMR_LAMBDA
         chosen: List[int] = []
         remaining = set(range(K))
@@ -562,4 +565,6 @@ VARIANT_SWITCHES: Dict[str, Dict[str, bool]] = {
 
 
 def switches_for_variant(variant: str) -> Dict[str, bool]:
+    if variant == "normalized_fixed":
+        return dict(use_adaptive=False, use_momentum=False, use_agreement=False, use_quality=False, use_diversity=False)
     return VARIANT_SWITCHES.get(variant, VARIANT_SWITCHES["damr"])

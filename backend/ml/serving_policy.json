@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "checkpoint_hashes": {
+    "ncf_baseline.pth": "3517130ef21fb8bb37b48de12330a5757ad04f821e9c525f475c54e89a87fbfa",
+    "ncf_hybrid.pth": "e8ecd015c9cd2e73f6896fc8051d66d4fdce6e9d143ff236e1e726805ca311cd",
+    "sequential_transformer.pth": "579c5db8d4dd11e5b7ac987bf606f853c8ecd653f683defb00302cbdbfe89d93"
+  },
+  "selection_metric": "validation NDCG@10",
+  "evaluation": "../evaluation/new_user_collaborative_policies_20261013/metrics.json",
+  "mapped_policy": "unchanged: validated 100-candidate normalized fixed ensemble",
+  "history_bins": [
+    {
+      "min_history": 2,
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.65,
+        0.25,
+        0.1
+      ]
+    },
+    {
+      "min_history": 5,
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.8,
+        0.2,
+        0.0
+      ]
+    },
+    {
+      "min_history": 10,
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.8,
+        0.2,
+        0.0
+      ]
+    },
+    {
+      "min_history": 20,
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "transformer",
+      "weights": [
+        0.4,
+        0.5,
+        0.1
+      ]
+    }
+  ]
+}

@@ -21,20 +21,12 @@ export async function recordInteraction(data: {
 
 /** GET /api/users/me/history */
 export async function getHistory(_userId?: string): Promise<HistoryEntry[]> {
-  try {
-    return await request<HistoryEntry[]>("/api/users/me/history");
-  } catch {
-    return [];
-  }
+  return request<HistoryEntry[]>("/api/users/me/history");
 }
 
 /** GET /api/users/me/my-list */
 export async function getMyList(_userId?: string): Promise<Movie[]> {
-  try {
-    return await request<Movie[]>("/api/users/me/my-list");
-  } catch {
-    return [];
-  }
+  return request<Movie[]>("/api/users/me/my-list");
 }
 
 /** POST /api/users/me/my-list/:movieId */
@@ -53,11 +45,11 @@ export async function removeFromMyList(_userId: string, movieId: number): Promis
 
 /** GET /api/users/me/likes */
 export async function getLikes(): Promise<number[]> {
-  try {
-    return await request<number[]>("/api/users/me/likes");
-  } catch {
-    return [];
-  }
+  return request<number[]>("/api/users/me/likes");
+}
+
+export async function getHiddenMovies(): Promise<number[]> {
+  return request<number[]>("/api/users/me/hidden-movies");
 }
 
 /** POST /api/users/me/likes/:movieId */

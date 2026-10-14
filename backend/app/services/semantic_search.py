@@ -219,11 +219,19 @@ def search_movies_by_intent(
 
     # Title / Synopsis keywords for discovery (skip generic stop words!)
     if intent.semantic_query:
-        cleaned_query = clean_query_filler(intent.semantic_query)
+        cleaned_query = clean_query_filler(intent.semantic_query).lower()
+        # Structured filters already enforce these concepts. Requiring their
+        # words in a title/synopsis incorrectly hides otherwise matching films.
+        genre_words = r"\b(?:science fiction|sci[ -]?fi|film[ -]?noir|action|adventure|animation|animated|anime|cartoon|comedy|comedies|funny|humou?r|crime|documentar(?:y|ies)|docuseries|drama|fantasy|horror|scary|creepy|mystery|romance|romantic|thriller|war|westerns?|children|kids|family|musicals?|imax)\b"
+        cleaned_query = re.sub(genre_words, " ", cleaned_query)
+        cleaned_query = re.sub(r"\b(?:under|less than|below|max|within|up to|shorter than)\s+\d+(?:\.\d+)?\s*(?:hours?|hrs?|minutes?|mins?)\b", " ", cleaned_query)
+        cleaned_query = re.sub(r"\b(?:rated|rating)\s+(?:(?:at least|above|over|minimum|min)\s+)?\d+(?:\.\d+)?(?:\s*(?:out of\s+10|/\s*10))?", " ", cleaned_query)
+        cleaned_query = re.sub(r"\b(?:after|post|since|newer than|before|pre|older than|up to)\s+(?:19|20)\d{2}\b|\b(?:19|20)?\d0s\b", " ", cleaned_query)
+        constraint_words = {"and", "or", "but", "not", "excluding", "exclude", "except", "made", "during", "rated", "rating"}
         words = [
             w.lower()
             for w in cleaned_query.split()
-            if len(w) >= 3 and w.lower() not in GENERIC_STOP_WORDS
+            if len(w) >= 3 and w.lower() not in GENERIC_STOP_WORDS | constraint_words
         ]
         if words:
             kw_conditions = []
@@ -240,8 +248,7 @@ def search_movies_by_intent(
     if filters:
         query = query.filter(and_(*filters))
 
-    query = query.filter(Movie.description != "")
-    query = query.order_by(Movie.rating_count.desc())
+    query = query.order_by(Movie.rating_count.desc().nullslast(), Movie.movie_id)
 
     movies = query.limit(limit).all()
 

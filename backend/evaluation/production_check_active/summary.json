@@ -1,0 +1,36 @@
+{
+  "development": {
+    "queries": 21,
+    "errors": 0,
+    "routing_correct": 21,
+    "returned_movies": 118,
+    "constraint_violations": 0,
+    "expected_clarification_correct": 2,
+    "expected_clarification_cases": 2,
+    "expected_empty_correct": 4,
+    "expected_empty_cases": 4,
+    "invalid_evidence_reference_items": 0,
+    "p50_ms": 72.41719999001361,
+    "p95_ms": 216.94270000443794
+  },
+  "hidden": {
+    "queries": 15,
+    "errors": 0,
+    "routing_correct": 15,
+    "returned_movies": 80,
+    "constraint_violations": 0,
+    "expected_clarification_correct": 2,
+    "expected_clarification_cases": 2,
+    "expected_empty_correct": 4,
+    "expected_empty_cases": 4,
+    "invalid_evidence_reference_items": 0,
+    "p50_ms": 96.66400001151487,
+    "p95_ms": 155.68399998592207
+  },
+  "limitations": [
+    "Offline heuristic extraction and template fallback; live provider not measured",
+    "Development and hidden cases have been inspected; neither is a new independently blinded set",
+    "No oracle filters supplied to production handler; evidence references do not establish semantic claim support",
+    "Catalogue copied from local PostgreSQL into isolated SQLite; timings include local inference, not browser/network"
+  ]
+}

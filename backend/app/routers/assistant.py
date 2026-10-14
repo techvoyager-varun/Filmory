@@ -71,8 +71,8 @@ def _evict_stale_buckets(now: float) -> None:
             del store[k]
 
 
-def _check_bucket(store: dict, key, limit: int, now: float) -> None:
-    """Sliding-window check + record for a single bucket."""
+def _check_bucket(store: dict, key, limit: int, now: float) -> deque | None:
+    """Check a bucket without consuming quota until all checks pass."""
     if limit <= 0:
         return
     timestamps = store[key]
@@ -83,7 +83,7 @@ def _check_bucket(store: dict, key, limit: int, now: float) -> None:
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Rate limit exceeded. Please wait a moment before sending another message.",
         )
-    timestamps.append(now)
+    return timestamps
 
 
 def _enforce_chat_rate_limit(user_id: int, client_ip: str) -> None:
@@ -96,9 +96,13 @@ def _enforce_chat_rate_limit(user_id: int, client_ip: str) -> None:
     with _rate_lock:
         _evict_stale_buckets(now)
         # Global / per-IP limit
-        _check_bucket(_ip_timestamps, client_ip, settings.ASSISTANT_GLOBAL_RATE_LIMIT, now)
+        ip_bucket = _check_bucket(_ip_timestamps, client_ip, settings.ASSISTANT_GLOBAL_RATE_LIMIT, now)
         # Per-user limit
-        _check_bucket(_user_timestamps, user_id, settings.ASSISTANT_RATE_LIMIT, now)
+        user_bucket = _check_bucket(_user_timestamps, user_id, settings.ASSISTANT_RATE_LIMIT, now)
+        # Rejected requests must not consume a different user's shared IP quota.
+        for bucket in (ip_bucket, user_bucket):
+            if bucket is not None:
+                bucket.append(now)
 
 
 @router.post("/chat", response_model=ChatResponse)

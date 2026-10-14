@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { Activity, RefreshCw } from "lucide-react";
 import { getTasteState } from "@/api/recommendations";
+import { useAuth } from "@/context/AuthContext";
 import type { UserStateInfo } from "@/types/movie";
 
 /**
@@ -19,9 +20,11 @@ import type { UserStateInfo } from "@/types/movie";
  * produces the drift estimate and the momentum direction).
  */
 export function TasteDriftCard() {
+  const { user } = useAuth();
   const taste = useQuery({
-    queryKey: ["taste-state"],
+    queryKey: ["taste-state", user?.userId],
     queryFn: getTasteState,
+    enabled: !!user,
     staleTime: 30 * 1000,
     retry: false,
   });
@@ -53,7 +56,7 @@ export function TasteDriftCard() {
               Taste Drift — live DAMR state
             </h2>
             <p className="text-xs text-muted-foreground">
-              Stage 4 estimates these four numbers on every recommendation request.
+              A diagnostic view of how your movie preferences change over time.
             </p>
           </div>
         </div>
@@ -98,7 +101,7 @@ export function TasteDriftCard() {
 
             <div className="mt-4 rounded-lg border border-border bg-surface-raised/40 p-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Expert weights this request
+                Adaptive weighting diagnostic
               </p>
               <WeightBar label="NCF Hybrid" value={state.weights.ncf} className="bg-primary" />
               <WeightBar
@@ -108,8 +111,8 @@ export function TasteDriftCard() {
               />
               <WeightBar label="Genre" value={state.weights.genre} className="bg-emerald-500" />
               <p className="mt-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
-                {state.nInteractions} interactions analysed · fixed legacy weights were 55% / 25% /
-                20% — DAMR adapts them to your current state.
+                {state.nInteractions} interactions analysed. These weights describe the optional
+                DAMR ranking method; the default recommendations use the validated fixed ensemble.
               </p>
             </div>
           </div>

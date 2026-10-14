@@ -1,10 +1,39 @@
-import { Check, Heart, Play, Plus } from "lucide-react";
+import { Check, Heart, Play, Plus, EyeOff, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserData } from "@/context/UserDataContext";
 import { cn } from "@/lib/utils";
 import type { Movie } from "@/types/movie";
 
 type Size = "sm" | "lg" | "icon";
+
+export function NotInterestedButton({ movie, size = "lg" }: { movie: Movie; size?: Size }) {
+  const { isHidden, toggleHidden } = useUserData();
+  const hidden = isHidden(movie.movieId);
+  const Icon = hidden ? Undo2 : EyeOff;
+  return (
+    <Button
+      variant="secondary"
+      size={size === "icon" ? "icon" : size === "lg" ? "lg" : "default"}
+      aria-pressed={hidden}
+      aria-label={
+        hidden ? `Show ${movie.title} in recommendations again` : `Not interested in ${movie.title}`
+      }
+      title={hidden ? "Show in recommendations again" : "Not interested"}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        void toggleHidden(movie);
+      }}
+      className={cn(
+        "rounded-md border border-border bg-surface-raised/80 hover:bg-surface-raised",
+        size === "icon" ? "size-9" : "h-10 px-4 text-sm md:h-11",
+      )}
+    >
+      <Icon className="size-4" aria-hidden />
+      {size !== "icon" ? (hidden ? "Show again" : "Not interested") : null}
+    </Button>
+  );
+}
 
 export function PlayButton({ movie, size = "lg" }: { movie: Movie; size?: Size }) {
   const { play } = useUserData();
@@ -86,7 +115,11 @@ export function MyListButton({ movie, size = "lg" }: { movie: Movie; size?: Size
         size === "icon" && "size-9",
       )}
     >
-      {inList ? <Check className="size-4 text-gold" aria-hidden /> : <Plus className="size-4" aria-hidden />}
+      {inList ? (
+        <Check className="size-4 text-gold" aria-hidden />
+      ) : (
+        <Plus className="size-4" aria-hidden />
+      )}
       {size !== "icon" ? (inList ? "In My List" : "My List") : null}
     </Button>
   );

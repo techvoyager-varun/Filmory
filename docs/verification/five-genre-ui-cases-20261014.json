@@ -1,0 +1,799 @@
+[
+  {
+    "kind": "home",
+    "genres": [
+      "Sci-Fi"
+    ],
+    "cards": [
+      {
+        "href": "/movies/1210",
+        "metadata": "1983 • Action • Adventure",
+        "title": "Star Wars: Episode VI - Return of the Jedi (1983)"
+      },
+      {
+        "href": "/movies/1270",
+        "metadata": "1985 • Adventure • Comedy",
+        "title": "Back to the Future (1985)"
+      },
+      {
+        "href": "/movies/260",
+        "metadata": "1977 • Action • Adventure",
+        "title": "Star Wars: Episode IV - A New Hope (1977)"
+      },
+      {
+        "href": "/movies/589",
+        "metadata": "1991 • Action • Sci-Fi",
+        "title": "Terminator 2: Judgment Day (1991)"
+      },
+      {
+        "href": "/movies/1214",
+        "metadata": "1979 • Horror • Sci-Fi",
+        "title": "Alien (1979)"
+      },
+      {
+        "href": "/movies/1196",
+        "metadata": "1980 • Action • Adventure",
+        "title": "Star Wars: Episode V - The Empire Strikes Back (1980)"
+      },
+      {
+        "href": "/movies/1240",
+        "metadata": "1984 • Action • Sci-Fi",
+        "title": "Terminator, The (1984)"
+      },
+      {
+        "href": "/movies/32",
+        "metadata": "1995 • Mystery • Sci-Fi",
+        "title": "Twelve Monkeys (a.k.a. 12 Monkeys) (1995)"
+      },
+      {
+        "href": "/movies/1097",
+        "metadata": "1982 • Children • Drama",
+        "title": "E.T. the Extra-Terrestrial (1982)"
+      },
+      {
+        "href": "/movies/480",
+        "metadata": "1993 • Action • Adventure",
+        "title": "Jurassic Park (1993)"
+      },
+      {
+        "href": "/movies/924",
+        "metadata": "1968 • Adventure • Drama",
+        "title": "2001: A Space Odyssey (1968)"
+      },
+      {
+        "href": "/movies/1584",
+        "metadata": "1997 • Drama • Sci-Fi",
+        "title": "Contact (1997)"
+      }
+    ]
+  },
+  {
+    "kind": "home",
+    "genres": [
+      "Comedy"
+    ],
+    "cards": [
+      {
+        "href": "/movies/1265",
+        "metadata": "1993 • Comedy • Fantasy",
+        "title": "Groundhog Day (1993)"
+      },
+      {
+        "href": "/movies/39",
+        "metadata": "1995 • Comedy • Romance",
+        "title": "Clueless (1995)"
+      },
+      {
+        "href": "/movies/1580",
+        "metadata": "1997 • Action • Comedy",
+        "title": "Men in Black (a.k.a. MIB) (1997)"
+      },
+      {
+        "href": "/movies/344",
+        "metadata": "1994 • Comedy",
+        "title": "Ace Ventura: Pet Detective (1994)"
+      },
+      {
+        "href": "/movies/356",
+        "metadata": "1994 • Comedy • Drama",
+        "title": "Forrest Gump (1994)"
+      },
+      {
+        "href": "/movies/1270",
+        "metadata": "1985 • Adventure • Comedy",
+        "title": "Back to the Future (1985)"
+      },
+      {
+        "href": "/movies/231",
+        "metadata": "1994 • Adventure • Comedy",
+        "title": "Dumb & Dumber (Dumb and Dumber) (1994)"
+      },
+      {
+        "href": "/movies/500",
+        "metadata": "1993 • Comedy • Drama",
+        "title": "Mrs. Doubtfire (1993)"
+      },
+      {
+        "href": "/movies/586",
+        "metadata": "1990 • Children • Comedy",
+        "title": "Home Alone (1990)"
+      },
+      {
+        "href": "/movies/1923",
+        "metadata": "1998 • Comedy • Romance",
+        "title": "There's Something About Mary (1998)"
+      },
+      {
+        "href": "/movies/2716",
+        "metadata": "1984 • Action • Comedy",
+        "title": "Ghostbusters (a.k.a. Ghost Busters) (1984)"
+      },
+      {
+        "href": "/movies/367",
+        "metadata": "1994 • Action • Comedy",
+        "title": "Mask, The (1994)"
+      }
+    ]
+  },
+  {
+    "kind": "home",
+    "genres": [
+      "Thriller"
+    ],
+    "cards": [
+      {
+        "href": "/movies/593",
+        "metadata": "1991 • Crime • Horror",
+        "title": "Silence of the Lambs, The (1991)"
+      },
+      {
+        "href": "/movies/457",
+        "metadata": "1993 • Thriller",
+        "title": "Fugitive, The (1993)"
+      },
+      {
+        "href": "/movies/50",
+        "metadata": "1995 • Crime • Mystery",
+        "title": "Usual Suspects, The (1995)"
+      },
+      {
+        "href": "/movies/47",
+        "metadata": "1995 • Mystery • Thriller",
+        "title": "Seven (a.k.a. Se7en) (1995)"
+      },
+      {
+        "href": "/movies/608",
+        "metadata": "1996 • Comedy • Crime",
+        "title": "Fargo (1996)"
+      },
+      {
+        "href": "/movies/1617",
+        "metadata": "1997 • Crime • Film-Noir",
+        "title": "L.A. Confidential (1997)"
+      },
+      {
+        "href": "/movies/1610",
+        "metadata": "1990 • Action • Adventure",
+        "title": "Hunt for Red October, The (1990)"
+      },
+      {
+        "href": "/movies/832",
+        "metadata": "1996 • Crime • Thriller",
+        "title": "Ransom (1996)"
+      },
+      {
+        "href": "/movies/349",
+        "metadata": "1994 • Action • Crime",
+        "title": "Clear and Present Danger (1994)"
+      },
+      {
+        "href": "/movies/2571",
+        "metadata": "1999 • Action • Sci-Fi",
+        "title": "Matrix, The (1999)"
+      },
+      {
+        "href": "/movies/733",
+        "metadata": "1996 • Action • Adventure",
+        "title": "Rock, The (1996)"
+      },
+      {
+        "href": "/movies/1343",
+        "metadata": "1991 • Thriller",
+        "title": "Cape Fear (1991)"
+      }
+    ]
+  },
+  {
+    "kind": "home",
+    "genres": [
+      "Animation"
+    ],
+    "cards": [
+      {
+        "href": "/movies/1",
+        "metadata": "1995 • Adventure • Animation",
+        "title": "Toy Story (1995)"
+      },
+      {
+        "href": "/movies/364",
+        "metadata": "1994 • Adventure • Animation",
+        "title": "Lion King, The (1994)"
+      },
+      {
+        "href": "/movies/588",
+        "metadata": "1992 • Adventure • Animation",
+        "title": "Aladdin (1992)"
+      },
+      {
+        "href": "/movies/595",
+        "metadata": "1991 • Animation • Children",
+        "title": "Beauty and the Beast (1991)"
+      },
+      {
+        "href": "/movies/3114",
+        "metadata": "1999 • Adventure • Animation",
+        "title": "Toy Story 2 (1999)"
+      },
+      {
+        "href": "/movies/594",
+        "metadata": "1937 • Animation • Children",
+        "title": "Snow White and the Seven Dwarfs (1937)"
+      },
+      {
+        "href": "/movies/2081",
+        "metadata": "1989 • Animation • Children",
+        "title": "Little Mermaid, The (1989)"
+      },
+      {
+        "href": "/movies/1907",
+        "metadata": "1998 • Adventure • Animation",
+        "title": "Mulan (1998)"
+      },
+      {
+        "href": "/movies/1022",
+        "metadata": "1950 • Animation • Children",
+        "title": "Cinderella (1950)"
+      },
+      {
+        "href": "/movies/2078",
+        "metadata": "1967 • Animation • Children",
+        "title": "Jungle Book, The (1967)"
+      },
+      {
+        "href": "/movies/2355",
+        "metadata": "1998 • Adventure • Animation",
+        "title": "Bug's Life, A (1998)"
+      },
+      {
+        "href": "/movies/2018",
+        "metadata": "1942 • Animation • Children",
+        "title": "Bambi (1942)"
+      }
+    ]
+  },
+  {
+    "kind": "home",
+    "genres": [
+      "Documentary"
+    ],
+    "cards": [
+      {
+        "href": "/movies/246",
+        "metadata": "1994 • Documentary",
+        "title": "Hoop Dreams (1994)"
+      },
+      {
+        "href": "/movies/1147",
+        "metadata": "1996 • Documentary",
+        "title": "When We Were Kings (1996)"
+      },
+      {
+        "href": "/movies/162",
+        "metadata": "1994 • Documentary",
+        "title": "Crumb (1994)"
+      },
+      {
+        "href": "/movies/2064",
+        "metadata": "1989 • Documentary",
+        "title": "Roger & Me (1989)"
+      },
+      {
+        "href": "/movies/1189",
+        "metadata": "1988 • Documentary",
+        "title": "Thin Blue Line, The (1988)"
+      },
+      {
+        "href": "/movies/5669",
+        "metadata": "2002 • Documentary",
+        "title": "Bowling for Columbine (2002)"
+      },
+      {
+        "href": "/movies/2677",
+        "metadata": "1999 • Documentary • Musical",
+        "title": "Buena Vista Social Club (1999)"
+      },
+      {
+        "href": "/movies/1649",
+        "metadata": "1997 • Documentary",
+        "title": "Fast, Cheap & Out of Control (1997)"
+      },
+      {
+        "href": "/movies/1361",
+        "metadata": "1996 • Documentary",
+        "title": "Paradise Lost: The Child Murders at Robin Hood Hills (1996)"
+      },
+      {
+        "href": "/movies/3007",
+        "metadata": "1999 • Documentary",
+        "title": "American Movie (1999)"
+      },
+      {
+        "href": "/movies/581",
+        "metadata": "1995 • Documentary",
+        "title": "Celluloid Closet, The (1995)"
+      },
+      {
+        "href": "/movies/6331",
+        "metadata": "2002 • Documentary",
+        "title": "Spellbound (2002)"
+      }
+    ]
+  },
+  {
+    "kind": "home",
+    "genres": [
+      "Sci-Fi",
+      "Comedy",
+      "Thriller",
+      "Animation",
+      "Documentary"
+    ],
+    "cards": [
+      {
+        "href": "/movies/32",
+        "metadata": "1995 • Mystery • Sci-Fi",
+        "title": "Twelve Monkeys (a.k.a. 12 Monkeys) (1995)"
+      },
+      {
+        "href": "/movies/1",
+        "metadata": "1995 • Adventure • Animation",
+        "title": "Toy Story (1995)"
+      },
+      {
+        "href": "/movies/780",
+        "metadata": "1996 • Action • Adventure",
+        "title": "Independence Day (a.k.a. ID4) (1996)"
+      },
+      {
+        "href": "/movies/2571",
+        "metadata": "1999 • Action • Sci-Fi",
+        "title": "Matrix, The (1999)"
+      },
+      {
+        "href": "/movies/1270",
+        "metadata": "1985 • Adventure • Comedy",
+        "title": "Back to the Future (1985)"
+      },
+      {
+        "href": "/movies/1223",
+        "metadata": "1989 • Adventure • Animation",
+        "title": "Grand Day Out with Wallace and Gromit, A (1989)"
+      },
+      {
+        "href": "/movies/745",
+        "metadata": "1995 • Animation • Children",
+        "title": "Wallace & Gromit: A Close Shave (1995)"
+      },
+      {
+        "href": "/movies/480",
+        "metadata": "1993 • Action • Adventure",
+        "title": "Jurassic Park (1993)"
+      },
+      {
+        "href": "/movies/260",
+        "metadata": "1977 • Action • Adventure",
+        "title": "Star Wars: Episode IV - A New Hope (1977)"
+      },
+      {
+        "href": "/movies/673",
+        "metadata": "1996 • Adventure • Animation",
+        "title": "Space Jam (1996)"
+      },
+      {
+        "href": "/movies/788",
+        "metadata": "1996 • Comedy • Fantasy",
+        "title": "Nutty Professor, The (1996)"
+      },
+      {
+        "href": "/movies/1148",
+        "metadata": "1993 • Animation • Children",
+        "title": "Wallace & Gromit: The Wrong Trousers (1993)"
+      }
+    ]
+  },
+  {
+    "kind": "after_play",
+    "genres": [
+      "Sci-Fi",
+      "Comedy",
+      "Thriller",
+      "Animation",
+      "Documentary"
+    ],
+    "played_ids": [
+      32
+    ],
+    "cards": [
+      {
+        "href": "/movies/2571",
+        "metadata": "1999 • Action • Sci-Fi",
+        "title": "Matrix, The (1999)"
+      },
+      {
+        "href": "/movies/480",
+        "metadata": "1993 • Action • Adventure",
+        "title": "Jurassic Park (1993)"
+      },
+      {
+        "href": "/movies/1909",
+        "metadata": "1998 • Action • Crime",
+        "title": "X-Files: Fight the Future, The (1998)"
+      },
+      {
+        "href": "/movies/1527",
+        "metadata": "1997 • Action • Adventure",
+        "title": "Fifth Element, The (1997)"
+      },
+      {
+        "href": "/movies/780",
+        "metadata": "1996 • Action • Adventure",
+        "title": "Independence Day (a.k.a. ID4) (1996)"
+      },
+      {
+        "href": "/movies/541",
+        "metadata": "1982 • Action • Sci-Fi",
+        "title": "Blade Runner (1982)"
+      },
+      {
+        "href": "/movies/1240",
+        "metadata": "1984 • Action • Sci-Fi",
+        "title": "Terminator, The (1984)"
+      },
+      {
+        "href": "/movies/1653",
+        "metadata": "1997 • Drama • Sci-Fi",
+        "title": "Gattaca (1997)"
+      },
+      {
+        "href": "/movies/1270",
+        "metadata": "1985 • Adventure • Comedy",
+        "title": "Back to the Future (1985)"
+      },
+      {
+        "href": "/movies/1748",
+        "metadata": "1998 • Adventure • Film-Noir",
+        "title": "Dark City (1998)"
+      },
+      {
+        "href": "/movies/1580",
+        "metadata": "1997 • Action • Comedy",
+        "title": "Men in Black (a.k.a. MIB) (1997)"
+      },
+      {
+        "href": "/movies/1356",
+        "metadata": "1996 • Action • Adventure",
+        "title": "Star Trek: First Contact (1996)"
+      }
+    ]
+  },
+  {
+    "kind": "after_play",
+    "genres": [
+      "Sci-Fi",
+      "Comedy",
+      "Thriller",
+      "Animation",
+      "Documentary"
+    ],
+    "played_ids": [
+      32,
+      1265
+    ],
+    "cards": [
+      {
+        "href": "/movies/1197",
+        "metadata": "1987 • Action • Adventure",
+        "title": "Princess Bride, The (1987)"
+      },
+      {
+        "href": "/movies/2174",
+        "metadata": "1988 • Comedy • Fantasy",
+        "title": "Beetlejuice (1988)"
+      },
+      {
+        "href": "/movies/1",
+        "metadata": "1995 • Adventure • Animation",
+        "title": "Toy Story (1995)"
+      },
+      {
+        "href": "/movies/1136",
+        "metadata": "1975 • Adventure • Comedy",
+        "title": "Monty Python and the Holy Grail (1975)"
+      },
+      {
+        "href": "/movies/1407",
+        "metadata": "1996 • Comedy • Horror",
+        "title": "Scream (1996)"
+      },
+      {
+        "href": "/movies/1270",
+        "metadata": "1985 • Adventure • Comedy",
+        "title": "Back to the Future (1985)"
+      },
+      {
+        "href": "/movies/2997",
+        "metadata": "1999 • Comedy • Drama",
+        "title": "Being John Malkovich (1999)"
+      },
+      {
+        "href": "/movies/1073",
+        "metadata": "1971 • Children • Comedy",
+        "title": "Willy Wonka & the Chocolate Factory (1971)"
+      },
+      {
+        "href": "/movies/2716",
+        "metadata": "1984 • Action • Comedy",
+        "title": "Ghostbusters (a.k.a. Ghost Busters) (1984)"
+      },
+      {
+        "href": "/movies/1278",
+        "metadata": "1974 • Comedy • Fantasy",
+        "title": "Young Frankenstein (1974)"
+      },
+      {
+        "href": "/movies/4306",
+        "metadata": "2001 • Adventure • Animation",
+        "title": "Shrek (2001)"
+      },
+      {
+        "href": "/movies/587",
+        "metadata": "1990 • Comedy • Drama",
+        "title": "Ghost (1990)"
+      }
+    ]
+  },
+  {
+    "kind": "after_play",
+    "genres": [
+      "Sci-Fi",
+      "Comedy",
+      "Thriller",
+      "Animation",
+      "Documentary"
+    ],
+    "played_ids": [
+      32,
+      1265,
+      47
+    ],
+    "cards": [
+      {
+        "href": "/movies/1197",
+        "metadata": "1987 • Action • Adventure",
+        "title": "Princess Bride, The (1987)"
+      },
+      {
+        "href": "/movies/1",
+        "metadata": "1995 • Adventure • Animation",
+        "title": "Toy Story (1995)"
+      },
+      {
+        "href": "/movies/1136",
+        "metadata": "1975 • Adventure • Comedy",
+        "title": "Monty Python and the Holy Grail (1975)"
+      },
+      {
+        "href": "/movies/2174",
+        "metadata": "1988 • Comedy • Fantasy",
+        "title": "Beetlejuice (1988)"
+      },
+      {
+        "href": "/movies/1278",
+        "metadata": "1974 • Comedy • Fantasy",
+        "title": "Young Frankenstein (1974)"
+      },
+      {
+        "href": "/movies/2100",
+        "metadata": "1984 • Comedy • Fantasy",
+        "title": "Splash (1984)"
+      },
+      {
+        "href": "/movies/2997",
+        "metadata": "1999 • Comedy • Drama",
+        "title": "Being John Malkovich (1999)"
+      },
+      {
+        "href": "/movies/356",
+        "metadata": "1994 • Comedy • Drama",
+        "title": "Forrest Gump (1994)"
+      },
+      {
+        "href": "/movies/1270",
+        "metadata": "1985 • Adventure • Comedy",
+        "title": "Back to the Future (1985)"
+      },
+      {
+        "href": "/movies/1407",
+        "metadata": "1996 • Comedy • Horror",
+        "title": "Scream (1996)"
+      },
+      {
+        "href": "/movies/1073",
+        "metadata": "1971 • Children • Comedy",
+        "title": "Willy Wonka & the Chocolate Factory (1971)"
+      },
+      {
+        "href": "/movies/3114",
+        "metadata": "1999 • Adventure • Animation",
+        "title": "Toy Story 2 (1999)"
+      }
+    ]
+  },
+  {
+    "kind": "after_play",
+    "genres": [
+      "Sci-Fi",
+      "Comedy",
+      "Thriller",
+      "Animation",
+      "Documentary"
+    ],
+    "played_ids": [
+      32,
+      1265,
+      47,
+      1
+    ],
+    "cards": [
+      {
+        "href": "/movies/588",
+        "metadata": "1992 • Adventure • Animation",
+        "title": "Aladdin (1992)"
+      },
+      {
+        "href": "/movies/364",
+        "metadata": "1994 • Adventure • Animation",
+        "title": "Lion King, The (1994)"
+      },
+      {
+        "href": "/movies/3114",
+        "metadata": "1999 • Adventure • Animation",
+        "title": "Toy Story 2 (1999)"
+      },
+      {
+        "href": "/movies/595",
+        "metadata": "1991 • Animation • Children",
+        "title": "Beauty and the Beast (1991)"
+      },
+      {
+        "href": "/movies/2355",
+        "metadata": "1998 • Adventure • Animation",
+        "title": "Bug's Life, A (1998)"
+      },
+      {
+        "href": "/movies/4306",
+        "metadata": "2001 • Adventure • Animation",
+        "title": "Shrek (2001)"
+      },
+      {
+        "href": "/movies/594",
+        "metadata": "1937 • Animation • Children",
+        "title": "Snow White and the Seven Dwarfs (1937)"
+      },
+      {
+        "href": "/movies/661",
+        "metadata": "1996 • Adventure • Animation",
+        "title": "James and the Giant Peach (1996)"
+      },
+      {
+        "href": "/movies/596",
+        "metadata": "1940 • Animation • Children",
+        "title": "Pinocchio (1940)"
+      },
+      {
+        "href": "/movies/48",
+        "metadata": "1995 • Animation • Children",
+        "title": "Pocahontas (1995)"
+      },
+      {
+        "href": "/movies/783",
+        "metadata": "1996 • Animation • Children",
+        "title": "Hunchback of Notre Dame, The (1996)"
+      },
+      {
+        "href": "/movies/2",
+        "metadata": "1995 • Adventure • Children",
+        "title": "Jumanji (1995)"
+      }
+    ]
+  },
+  {
+    "kind": "after_play",
+    "genres": [
+      "Sci-Fi",
+      "Comedy",
+      "Thriller",
+      "Animation",
+      "Documentary"
+    ],
+    "played_ids": [
+      32,
+      1265,
+      47,
+      1,
+      5669
+    ],
+    "cards": [
+      {
+        "href": "/movies/1073",
+        "metadata": "1971 • Children • Comedy",
+        "title": "Willy Wonka & the Chocolate Factory (1971)"
+      },
+      {
+        "href": "/movies/4306",
+        "metadata": "2001 • Adventure • Animation",
+        "title": "Shrek (2001)"
+      },
+      {
+        "href": "/movies/1197",
+        "metadata": "1987 • Action • Adventure",
+        "title": "Princess Bride, The (1987)"
+      },
+      {
+        "href": "/movies/3114",
+        "metadata": "1999 • Adventure • Animation",
+        "title": "Toy Story 2 (1999)"
+      },
+      {
+        "href": "/movies/4886",
+        "metadata": "2001 • Adventure • Animation",
+        "title": "Monsters, Inc. (2001)"
+      },
+      {
+        "href": "/movies/1136",
+        "metadata": "1975 • Adventure • Comedy",
+        "title": "Monty Python and the Holy Grail (1975)"
+      },
+      {
+        "href": "/movies/3052",
+        "metadata": "1999 • Adventure • Comedy",
+        "title": "Dogma (1999)"
+      },
+      {
+        "href": "/movies/6539",
+        "metadata": "2003 • Action • Adventure",
+        "title": "Pirates of the Caribbean: The Curse of the Black Pearl (2003)"
+      },
+      {
+        "href": "/movies/648",
+        "metadata": "1996 • Action • Adventure",
+        "title": "Mission: Impossible (1996)"
+      },
+      {
+        "href": "/movies/1407",
+        "metadata": "1996 • Comedy • Horror",
+        "title": "Scream (1996)"
+      },
+      {
+        "href": "/movies/2987",
+        "metadata": "1988 • Adventure • Animation",
+        "title": "Who Framed Roger Rabbit? (1988)"
+      },
+      {
+        "href": "/movies/4993",
+        "metadata": "2001 • Adventure • Fantasy",
+        "title": "Lord of the Rings: The Fellowship of the Ring, The (2001)"
+      }
+    ]
+  }
+]

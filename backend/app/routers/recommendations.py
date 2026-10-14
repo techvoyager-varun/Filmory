@@ -44,9 +44,9 @@ def _resolve_target_user(user_id: str, current_user: Optional[User], db: Session
 @router.get("/recommendations/{user_id}", response_model=List[ScoredMovieSchema])
 def get_recommendations_for_user(
     user_id: str,
-    candidate_k: int = Query(100, ge=10, le=500),
+    candidate_k: Optional[int] = Query(None, ge=10, le=1000, description="Omit to use the validated default for this user path"),
     top_k: int = Query(10, ge=1, le=50),
-    variant: str = Query("damr", pattern="^(damr|mmr|static)$", description="Stage-4 re-ranker variant"),
+    variant: str = Query("auto", pattern="^(auto|normalized_fixed|damr|mmr|static)$", description="auto uses the validation-selected ranking policy"),
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
@@ -67,12 +67,28 @@ def get_model_metrics():
     Offline evaluation results (HR@10, NDCG@10, MRR, AUC, ILD, coverage ...)
     produced by `backend/scripts/evaluate.py` under the leave-one-out protocol.
     """
+    model_service.load_all()
     path = model_service.ml_dir + "/metrics.json"
     if not path:
         raise HTTPException(status_code=404, detail="Metrics file not configured")
     try:
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        if "sampled_test" in data:
+            from datetime import datetime, timezone
+            from pathlib import Path
+            names = {"baseline": "NCF Baseline", "hybrid": "NCF Hybrid", "transformer": "Transformer"}
+            return {
+                "protocol": data["protocol"], "k": 10, "seed": 42, "num_negatives": 99,
+                "num_users_evaluated": next(iter(data["sampled_test"].values()))["users"],
+                "generated_at": datetime.fromtimestamp(Path(path).stat().st_mtime, timezone.utc).isoformat(),
+                "dataset": {"num_users_total": model_service.config["num_users"], "num_items": model_service.config["num_items"], "num_genres": model_service.config["num_genres"]},
+                "results": {names[name]: {"HR@10": r["hr10"], "NDCG@10": r["ndcg10"], "MRR": r["mrr"]} for name, r in data["sampled_test"].items()},
+                "full_catalogue": data["full_catalogue_test"], "limitations": data["limitations"],
+                "validation_selected_retriever": data["preferred_retriever_from_validation"],
+            }
+        data["limitations"] = ["Historical diagnostic metrics: checkpoints and evaluation inference conventions were not independently verified. Use fresh training results for current models."]
+        return data
     except FileNotFoundError:
         raise HTTPException(
             status_code=404,

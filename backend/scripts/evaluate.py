@@ -138,7 +138,7 @@ def score_ncf_hybrid(u_idx: int, item_idxs: torch.Tensor, u_gvec: torch.Tensor) 
 @torch.no_grad()
 def score_transformer(history_movie_ids: Sequence[int], item_idxs: torch.Tensor) -> torch.Tensor:
     dev = model_service.device
-    seq = [model_service.movie2idx[m] + 1 for m in history_movie_ids if m in model_service.movie2idx]
+    seq = [model_service.movie2idx[m] for m in history_movie_ids if m in model_service.movie2idx]
     return model_service.sequential_transformer.score_candidates_with_sequence(
         sequence_item_indices=seq,
         candidate_item_indices=item_idxs.to(dev),
@@ -219,6 +219,8 @@ def main() -> None:
 
     print("Loading models & artifacts ...")
     model_service.load_all()
+    if model_service.config.get("model_format_version") == 2:
+        raise RuntimeError("This historical harness splits AFTER training. Use the clean bundle metrics.json and check_ranking_policy.py; do not overwrite them with contaminated diagnostics.")
     dev = model_service.device
 
     movie2idx: Dict[int, int] = model_service.movie2idx

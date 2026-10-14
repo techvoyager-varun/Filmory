@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 from typing import List, Dict, Any, Optional, Set, Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, cast, String
+from sqlalchemy import desc, cast, String, or_
 
 from app.config import settings
 from app.ml.model_service import model_service
@@ -13,6 +13,7 @@ from app.ml.damr import (
     adaptive_weights,
     damr_rerank,
     estimate_user_state,
+    estimate_user_state_from_positions,
     switches_for_variant,
     intra_list_diversity,
 )
@@ -28,6 +29,8 @@ from app.models.db_models import (
 )
 from app.schemas.schemas import ScoredMovieSchema, MovieSchema
 from app.ml.tmdb import ensure_movie_posters
+from app.ml.ranking_policy import select_candidate_positions, rank_candidate_positions, choose_history_policy, score_neighbor_items
+from app.services.recommendation_feedback import hidden_movie_ids, positive_history
 
 def movie_model_to_schema(movie: Movie) -> MovieSchema:
     return MovieSchema(
@@ -71,7 +74,8 @@ def build_user_genre_vector(user: User, db: Session) -> torch.Tensor:
 
     # Normalize if not all zeros
     if genre_vec.sum() > 0:
-        genre_vec = genre_vec / (torch.norm(genre_vec, p=2) + 1e-6)
+        norm = 1 if model_service.config.get("genre_profile_normalization") == "l1" else 2
+        genre_vec = F.normalize(genre_vec, p=norm, dim=0)
     
     return genre_vec
 
@@ -79,9 +83,10 @@ def build_user_genre_vector(user: User, db: Session) -> torch.Tensor:
 def get_user_interacted_movie_ids(user: User, db: Session) -> Set[int]:
     """Collect all movieIds the user has watched, liked, or saved"""
     interacted: Set[int] = set()
+    interacted.update(hidden_movie_ids(user.id, db))
     
     # 1. From database interactions
-    plays = db.query(Interaction.movie_id).filter(Interaction.user_id == user.id).all()
+    plays = db.query(Interaction.movie_id).filter(Interaction.user_id == user.id, Interaction.type == "play").all()
     interacted.update(p[0] for p in plays)
 
     # 2. From watch history
@@ -96,35 +101,36 @@ def get_user_interacted_movie_ids(user: User, db: Session) -> Set[int]:
     interacted.update(m[0] for m in my_list)
 
     # 4. From training set history if user has model_user_id
-    if user.model_user_id is not None and user.model_user_id in model_service.user_interacted:
-        interacted.update(model_service.user_interacted[user.model_user_id])
+    if user.model_user_id is not None:
+        user_idx = model_service.user2idx.get(user.model_user_id)
+        for item_idx in model_service.user_interacted.get(user_idx, []):
+            movie_id = model_service.idx2movie.get(int(item_idx))
+            if movie_id is not None:
+                interacted.add(int(movie_id))
 
     return interacted
 
 
 def get_user_recent_sequence(user: User, db: Session, max_len: int = 20) -> List[int]:
-    """Retrieves user's recent sequence of movie item indices (1-indexed for transformer)"""
-    recent_interactions = (
-        db.query(Interaction.movie_id)
-        .filter(Interaction.user_id == user.id)
-        .order_by(Interaction.timestamp.desc())
-        .limit(max_len)
-        .all()
-    )
+    """Return zero-based model item indices, oldest to newest."""
+    recent_interactions = reversed(positive_history(user.id, db))
     
     item_indices = []
-    for (m_id,) in reversed(recent_interactions):
+    for m_id, _ in recent_interactions:
         idx = model_service.movie2idx.get(m_id)
         if idx is not None:
-            item_indices.append(idx + 1) # 1-indexed (0 is padding)
+            item_indices.append(int(idx))
+            if len(item_indices) == max_len:
+                break
+    item_indices.reverse()
 
     # Fallback to training sequence if available and db sequence is empty
     if not item_indices and user.model_user_id is not None:
-        raw_seq = model_service.user_sequences.get(user.model_user_id, [])
-        for m_id in raw_seq[-max_len:]:
-            idx = model_service.movie2idx.get(m_id)
-            if idx is not None:
-                item_indices.append(idx + 1)
+        user_idx = model_service.user2idx.get(user.model_user_id)
+        hidden = hidden_movie_ids(user.id, db)
+        raw_seq = [idx for idx in model_service.user_sequences.get(user_idx, [])
+                   if model_service.idx2movie.get(int(idx)) not in hidden]
+        item_indices.extend(int(idx) for idx in raw_seq[-max_len:])
 
     return item_indices
 
@@ -136,17 +142,11 @@ def build_taste_profile(user: User, db: Session) -> TasteProfile:
 
     History source, in order of preference:
       1. `interactions` rows of type play/like (real, timestamped).
-      2. Fallback for mapped training users: their MovieLens training sequence,
-         spread synthetically over the last 90 days (most recent item = now).
+      2. Mapped training users: positional decay, without invented timestamps.
     """
     history: List[Tuple[int, _dt.datetime]] = []
 
-    rows = (
-        db.query(Interaction.movie_id, Interaction.timestamp)
-        .filter(Interaction.user_id == user.id, Interaction.type.in_(["play", "like"]))
-        .order_by(Interaction.timestamp.asc())
-        .all()
-    )
+    rows = positive_history(user.id, db)
     history = [
         (model_service.movie2idx[m_id], ts)
         for m_id, ts in rows
@@ -154,15 +154,12 @@ def build_taste_profile(user: User, db: Session) -> TasteProfile:
     ]
 
     if not history and user.model_user_id is not None:
-        seq = model_service.user_sequences.get(user.model_user_id, []) or []
-        mapped = [model_service.movie2idx[m] for m in seq if m in model_service.movie2idx]
-        if mapped:
-            now = _dt.datetime.utcnow()
-            step = _dt.timedelta(days=90.0 / max(1, len(mapped)))
-            history = [
-                (idx, now - step * (len(mapped) - k))
-                for k, idx in enumerate(mapped)
-            ]
+        user_idx = model_service.user2idx.get(user.model_user_id)
+        hidden = hidden_movie_ids(user.id, db)
+        seq = [idx for idx in (model_service.user_sequences.get(user_idx, []) or [])
+               if model_service.idx2movie.get(int(idx)) not in hidden]
+        if seq:
+            return estimate_user_state_from_positions([int(i) for i in seq])
 
     base_profile = None
     if user.model_user_id is not None and model_service.user_genre_matrix is not None:
@@ -191,12 +188,54 @@ def get_taste_state(user: User, db: Session) -> Dict[str, Any]:
 
 
 @torch.no_grad()
+def _get_sequence_recommendations(
+    user: User, db: Session, sequence: List[int], top_k: int, candidate_k: Optional[int], policy: Dict[str, Any],
+) -> List[ScoredMovieSchema]:
+    """Recommend for a live account using item history, without a learned user ID."""
+    sequence = sequence[-policy["min_history"]:]
+    budget = max(top_k, candidate_k or policy.get("candidate_k", 300))
+    weights = policy.get("weights", [0.0, 0.75, 0.25])
+    strategy = policy.get("strategy", "transformer")
+    excluded = get_user_interacted_movie_ids(user, db)
+    # Restrict the scored universe before retrieval. Missing database titles and
+    # already watched/saved/liked titles cannot occupy the candidate budget.
+    catalogue_ids = db.query(Movie.movie_id).order_by(Movie.movie_id).all()
+    eligible_ids = [int(row[0]) for row in catalogue_ids
+                    if row[0] in model_service.movie2idx and row[0] not in excluded]
+    if not eligible_ids:
+        return []
+    item_indices = torch.tensor([model_service.movie2idx[mid] for mid in eligible_ids],
+                                dtype=torch.long, device=model_service.device)
+    transformer = model_service.sequential_transformer.score_candidates_with_sequence(
+        sequence, item_indices, model_service.device)
+    genre_profile = model_service.movie_genre_matrix[sequence].sum(0).to(model_service.device)
+    genre_profile = genre_profile / genre_profile.sum().clamp_min(1e-8)
+    genre = (model_service.movie_genre_matrix[item_indices] @ genre_profile
+             if model_service.movie_genre_matrix is not None else torch.zeros_like(transformer))
+    collaborative = score_neighbor_items(sequence, genre_profile, model_service)[item_indices]
+    pool = select_candidate_positions(transformer, collaborative, genre, budget, strategy)
+    ranking, scores = rank_candidate_positions(pool, transformer, collaborative, genre, weights, top_k)
+    movie_ids = [eligible_ids[position] for position in ranking.tolist()]
+    movies = db.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
+    ensure_movie_posters(movies, db)
+    by_id = {movie.movie_id:movie for movie in movies}
+    return [ScoredMovieSchema(
+        **movie_model_to_schema(by_id[mid]).model_dump(), score=round(float(score),4),
+        transformerScore=round(float(transformer[position]),4),
+        neighborScore=round(float(collaborative[position]),4),
+        genreScore=round(float(genre[position]),4),
+        expertWeights={"ncf":0.0,"neighbor":weights[0],"transformer":weights[1],"genre":weights[2]},
+        variant="sequence_only", rank=rank+1,
+    ) for rank,(mid,position,score) in enumerate(zip(movie_ids,ranking.tolist(),scores)) if mid in by_id]
+
+
+@torch.no_grad()
 def get_personalized_recommendations(
     user: Optional[User],
     db: Session,
-    candidate_k: int = 100,
+    candidate_k: Optional[int] = None,
     top_k: int = 10,
-    variant: str = "damr",
+    variant: str = "auto",
 ) -> Tuple[str, List[ScoredMovieSchema]]:
     """
     Full 4-Stage Personalized Recommendation Flow:
@@ -217,31 +256,52 @@ def get_personalized_recommendations(
         recs = get_popular_movies(db, limit=top_k)
         return "popular", recs
 
-    # Check interaction count threshold: new user uses cold start
-    interaction_count = db.query(Interaction).filter(Interaction.user_id == user.id).count()
-    if (user.model_user_id is None) and (interaction_count < settings.MIN_INTERACTIONS_FOR_PERSONALIZATION):
+    # A learned NCF user ID is not required by the sequence model.
+    if user.model_user_id not in model_service.user2idx:
+        sequence = get_user_recent_sequence(user, db, max_len=model_service.config.get("transformer_max_len", 20))
+        policy = choose_history_policy(model_service.serving_policy, len(sequence))
+        if (model_service.sequential_transformer is not None
+            and model_service.movie_genre_matrix is not None
+            and len(set(sequence)) >= settings.MIN_INTERACTIONS_FOR_PERSONALIZATION
+            and policy["mode"] == "sequence_only"):
+            return "sequence_personalized", _get_sequence_recommendations(user, db, sequence, top_k, candidate_k, policy)
         pref = db.query(UserPreference).filter(UserPreference.user_id == user.id).first()
-        fav_genres = pref.favorite_genres if pref else []
-        fav_movies = pref.favorite_movie_ids if pref else []
-        return "cold_start", get_cold_start_recommendations(fav_genres, fav_movies, db, top_k=top_k)
+        fav_genres = list(pref.favorite_genres or []) if pref else []
+        dynamic = build_user_genre_vector(user, db)
+        if dynamic.sum() > 0:
+            recent_genres = [model_service.idx2genre[int(i)] for i in torch.topk(dynamic, k=min(3, len(dynamic))).indices if float(dynamic[i]) > 0]
+            # Explicit preferences are never dropped by the top-three dynamic
+            # signal cap. Add recent interests while retaining every chosen genre.
+            fav_genres = list(dict.fromkeys(fav_genres + recent_genres))
+        fav_movies = list(pref.favorite_movie_ids or []) if pref else []
+        hidden = hidden_movie_ids(user.id, db)
+        # Rejections are exclusions, never positive cold-start seed movies.
+        positive_ids = {movie_id for movie_id, _ in positive_history(user.id, db)}
+        positive_ids.update(row[0] for row in db.query(MyList.movie_id).filter(MyList.user_id == user.id))
+        fav_movies = sorted((set(fav_movies) | positive_ids) - hidden)
+        return "cold_start", get_cold_start_recommendations(
+            fav_genres, fav_movies, db, top_k=top_k,
+            exclude_ids=get_user_interacted_movie_ids(user, db),
+        )
 
     # Get model user index
-    model_user_id = user.model_user_id if user.model_user_id is not None else 1
-    user_idx = model_service.user2idx.get(model_user_id, 0)
+    user_idx = model_service.user2idx[user.model_user_id]
+    candidate_k = max(top_k, candidate_k or model_service.config.get("candidate_k", settings.CANDIDATE_K))
 
     # Interacted movies to exclude
     interacted_movie_ids = get_user_interacted_movie_ids(user, db)
 
     # Build candidate pool of movie model indices
     num_items = model_service.config.get("num_items", 22836)
+    catalogue_ids = {int(row[0]) for row in db.query(Movie.movie_id).all()}
     all_item_indices = []
     for idx in range(num_items):
         m_id = model_service.idx2movie.get(idx)
-        if m_id is not None and m_id not in interacted_movie_ids:
+        if m_id in catalogue_ids and m_id not in interacted_movie_ids:
             all_item_indices.append(idx)
 
     if not all_item_indices:
-        return "popular", get_popular_movies(db, limit=top_k)
+        return "personalized", []
 
     candidate_item_tensor = torch.tensor(all_item_indices, dtype=torch.long, device=model_service.device)
 
@@ -259,18 +319,28 @@ def get_personalized_recommendations(
             movie_genre_matrix=model_service.movie_genre_matrix,
             device=model_service.device,
         )
+        if model_service.config.get("preferred_retriever") == "baseline" and model_service.ncf_baseline is not None:
+            user_tensor = torch.full_like(candidate_item_tensor, user_idx)
+            retrieval_scores = model_service.ncf_baseline(user_tensor, candidate_item_tensor)
+        elif model_service.config.get("preferred_retriever") == "transformer" and model_service.sequential_transformer is not None:
+            retrieval_scores = model_service.sequential_transformer.score_candidates_with_sequence(
+                get_user_recent_sequence(user, db), candidate_item_tensor, model_service.device
+            )
+        else:
+            retrieval_scores = ncf_scores
     elif model_service.ncf_baseline is not None:
         user_tensor = torch.full((len(candidate_item_tensor),), user_idx, dtype=torch.long, device=model_service.device)
         ncf_scores = model_service.ncf_baseline(user_tensor, candidate_item_tensor)
+        retrieval_scores = ncf_scores
     else:
-        ncf_scores = torch.rand(len(candidate_item_tensor), device=model_service.device)
+        return "popular", get_popular_movies(db, limit=top_k, exclude_ids=interacted_movie_ids)
 
     # Select Top Candidate_K (default 100)
     actual_candidate_k = min(candidate_k, len(candidate_item_tensor))
-    top_cand_values, top_cand_indices_in_pool = torch.topk(ncf_scores, k=actual_candidate_k)
+    _, top_cand_indices_in_pool = torch.topk(retrieval_scores, k=actual_candidate_k)
     
     top_100_item_indices = candidate_item_tensor[top_cand_indices_in_pool]
-    top_100_ncf_scores = top_cand_values
+    top_100_ncf_scores = ncf_scores[top_cand_indices_in_pool]
 
     # ==========================================
     # STAGE 2: Sequential Transformer Scoring
@@ -315,7 +385,9 @@ def get_personalized_recommendations(
     # ==========================================
     # variant = "damr" (proposed) | "mmr" (static + quality + diversity) |
     #           "static" (pure 0.55/0.25/0.20 ensemble, legacy behaviour)
-    variant = (variant or settings.RERANK_VARIANT).lower()
+    variant = (variant or "auto").lower()
+    if variant == "auto":
+        variant = model_service.config.get("serving_variant", settings.RERANK_VARIANT)
     actual_top_k = min(top_k, actual_candidate_k)
 
     if variant == "static":
@@ -364,7 +436,7 @@ def get_personalized_recommendations(
     # int(): idx2movie values are numpy.int64, which some DB drivers cannot bind
     pool_movie_ids = [int(model_service.idx2movie[int(i)]) for i in pool_item_indices.tolist() if int(i) in model_service.idx2movie]
     if not pool_movie_ids:
-        return "popular", get_popular_movies(db, limit=top_k)
+        return "popular", get_popular_movies(db, limit=top_k, exclude_ids=interacted_movie_ids)
 
     db_movies = db.query(Movie).filter(Movie.movie_id.in_(pool_movie_ids)).all()
     movie_by_id = {m.movie_id: m for m in db_movies}
@@ -492,7 +564,8 @@ def get_similar_movies(movie_id: int, db: Session, top_k: int = 14) -> List[Scor
     sim_scores[target_idx] = -1.0
 
     # Top K similar
-    top_values, top_indices = torch.topk(sim_scores, k=top_k)
+    sim_scores[target_idx] = float("-inf")
+    top_values, top_indices = torch.topk(sim_scores, k=min(top_k, max(0, len(sim_scores) - 1)))
     top_indices_list = top_indices.cpu().tolist()
     
     similar_movie_ids = [int(model_service.idx2movie[idx]) for idx in top_indices_list if idx in model_service.idx2movie]
@@ -530,6 +603,7 @@ def get_cold_start_recommendations(
     favorite_movie_ids: List[int],
     db: Session,
     top_k: int = 10,
+    exclude_ids: Optional[Set[int]] = None,
 ) -> List[ScoredMovieSchema]:
     """
     Cold-Start Recommendation:
@@ -537,6 +611,7 @@ def get_cold_start_recommendations(
     with similar MovieLens users and weighting candidate movies by genre overlap.
     """
     model_service.load_all()
+    excluded_ids = set(favorite_movie_ids) | (exclude_ids or set())
 
     num_genres = model_service.config.get("num_genres", 20)
     target_vec = torch.zeros(num_genres, dtype=torch.float32, device=model_service.device)
@@ -567,13 +642,16 @@ def get_cold_start_recommendations(
 
         # Collect candidate movies from these similar users and weight by GENRE ALIGNMENT
         movie_scores: Dict[int, float] = {}
-        fav_set = set(favorite_movie_ids)
+        fav_set = excluded_ids
 
         for u_idx in top_user_indices_list:
-            u_id = model_service.idx2user.get(u_idx)
-            if u_id and u_id in model_service.user_interacted:
+            if u_idx in model_service.user_interacted:
                 u_sim = float(user_sims[u_idx].item())
-                for m_id in model_service.user_interacted[u_id]:
+                for item_idx in model_service.user_interacted[u_idx]:
+                    m_id = model_service.idx2movie.get(int(item_idx))
+                    if m_id is None:
+                        continue
+                    m_id = int(m_id)
                     if m_id not in fav_set:
                         m_idx = model_service.movie2idx.get(m_id)
                         if m_idx is not None and model_service.movie_genre_matrix is not None:
@@ -583,7 +661,11 @@ def get_cold_start_recommendations(
                                 movie_scores[m_id] = movie_scores.get(m_id, 0.0) + (u_sim * (1.0 + 4.0 * genre_match))
 
         if movie_scores:
-            sorted_movies = sorted(movie_scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
+            existing_ids = {int(row[0]) for row in db.query(Movie.movie_id).all()}
+            sorted_movies = sorted(
+                ((mid, score) for mid, score in movie_scores.items() if mid in existing_ids),
+                key=lambda x: (-x[1], x[0]),
+            )[:top_k]
             movie_ids = [m_id for m_id, _ in sorted_movies]
             
             db_movies = db.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
@@ -612,20 +694,30 @@ def get_cold_start_recommendations(
             if results:
                 return results
 
-    # Fallback to genre-filtered movies
+    # Keep previously supplied movies excluded even when neighbour retrieval fails.
+    fallback = db.query(Movie).filter(~Movie.movie_id.in_(excluded_ids))
     if favorite_genres:
-        first_genre = favorite_genres[0]
-        return get_movies_by_genre(first_genre, db, limit=top_k)
+        fallback = fallback.filter(or_(*[
+            cast(Movie.genres, String).contains('"' + genre + '"', autoescape=True)
+            for genre in favorite_genres
+        ]))
+    movies = fallback.order_by(
+        desc(Movie.rating_count).nullslast(), desc(Movie.rating).nullslast(), Movie.movie_id
+    ).limit(top_k).all()
+    ensure_movie_posters(movies, db)
+    return [ScoredMovieSchema(
+        **movie_model_to_schema(movie).model_dump(),
+        score=round(min(1.0, max(0.0, float(movie.rating or 0.0) / 10.0)), 2),
+    ) for movie in movies]
 
-    return get_popular_movies(db, limit=top_k)
 
-
-def get_popular_movies(db: Session, limit: int = 20) -> List[ScoredMovieSchema]:
+def get_popular_movies(db: Session, limit: int = 20, exclude_ids: Optional[Set[int]] = None) -> List[ScoredMovieSchema]:
     """Top rated movies with significant rating count (> 1000)"""
     movies = (
         db.query(Movie)
         .filter(Movie.rating_count >= 1000)
-        .order_by(desc(Movie.rating), desc(Movie.rating_count))
+        .filter(~Movie.movie_id.in_(exclude_ids or set()))
+        .order_by(desc(Movie.rating).nullslast(), desc(Movie.rating_count).nullslast(), Movie.movie_id)
         .limit(limit)
         .all()
     )
@@ -641,7 +733,7 @@ def get_popular_movies(db: Session, limit: int = 20) -> List[ScoredMovieSchema]:
             posterUrl=m.poster_url or "",
             backdropUrl=m.backdrop_url or "",
             description=m.description or "",
-            score=round(min(0.99, float(m.rating or 3.5) / 5.0), 2),
+            score=round(min(1.0, max(0.0, float(m.rating or 0.0) / 10.0)), 2),
         )
         for m in movies
     ]
@@ -651,7 +743,7 @@ def get_trending_movies(db: Session, limit: int = 20) -> List[ScoredMovieSchema]
     """Trending movies based on interactions / popularity"""
     trending_db = (
         db.query(Movie)
-        .order_by(desc(Movie.rating_count))
+        .order_by(desc(Movie.rating_count).nullslast(), Movie.movie_id)
         .limit(limit)
         .all()
     )
@@ -667,7 +759,7 @@ def get_trending_movies(db: Session, limit: int = 20) -> List[ScoredMovieSchema]
             posterUrl=m.poster_url or "",
             backdropUrl=m.backdrop_url or "",
             description=m.description or "",
-            score=round(min(0.99, 0.75 + (i * -0.01)), 2),
+            score=round(min(1.0, max(0.0, float(m.rating or 0.0) / 10.0)), 2),
         )
         for i, m in enumerate(trending_db)
     ]
@@ -677,8 +769,8 @@ def get_movies_by_genre(genre: str, db: Session, limit: int = 20) -> List[Scored
     """Retrieves top movies for a given genre rail"""
     movies = (
         db.query(Movie)
-        .filter(cast(Movie.genres, String).ilike(f"%{genre}%"))
-        .order_by(desc(Movie.rating_count))
+        .filter(cast(Movie.genres, String).contains('"' + genre + '"', autoescape=True))
+        .order_by(desc(Movie.rating_count).nullslast(), Movie.movie_id)
         .limit(limit)
         .all()
     )
@@ -695,7 +787,7 @@ def get_movies_by_genre(genre: str, db: Session, limit: int = 20) -> List[Scored
             posterUrl=m.poster_url or "",
             backdropUrl=m.backdrop_url or "",
             description=m.description or "",
-            score=round(min(0.99, float(m.rating or 3.5) / 5.0), 2),
+            score=round(min(1.0, max(0.0, float(m.rating or 0.0) / 10.0)), 2),
         )
         for m in movies
     ]
@@ -721,6 +813,9 @@ def rerank_candidate_pool_with_damr(
       (scored_movies, audit_metrics)
     """
     model_service.load_all()
+    if user is not None:
+        hidden = hidden_movie_ids(user.id, db)
+        candidate_movies = [movie for movie in candidate_movies if movie.movie_id not in hidden]
     if not candidate_movies:
         return [], {
             "total_candidates": 0,
@@ -750,15 +845,13 @@ def rerank_candidate_pool_with_damr(
     unmapped_count = total_cands - mapped_count
 
     # 2. Stage 1: NCF Hybrid Scoring
-    user_idx = 0
-    if user and user.model_user_id is not None:
-        user_idx = model_service.user2idx.get(user.model_user_id, 0)
+    user_idx = model_service.user2idx.get(user.model_user_id) if user else None
 
     user_genre_vector = build_user_genre_vector(user, db) if user else torch.zeros(
         model_service.config.get("num_genres", 20), device=model_service.device
     )
 
-    if model_service.ncf_hybrid is not None and model_service.movie_genre_matrix is not None:
+    if user_idx is not None and model_service.ncf_hybrid is not None and model_service.movie_genre_matrix is not None:
         ncf_scores = model_service.ncf_hybrid.score_candidate_items(
             user_idx_int=user_idx,
             candidate_item_indices=cand_item_tensor,
@@ -766,11 +859,11 @@ def rerank_candidate_pool_with_damr(
             movie_genre_matrix=model_service.movie_genre_matrix,
             device=model_service.device,
         )
-    elif model_service.ncf_baseline is not None:
+    elif user_idx is not None and model_service.ncf_baseline is not None:
         user_tensor = torch.full((total_cands,), user_idx, dtype=torch.long, device=model_service.device)
         ncf_scores = model_service.ncf_baseline(user_tensor, cand_item_tensor)
     else:
-        ncf_scores = torch.full((total_cands,), 0.5, device=model_service.device)
+        ncf_scores = torch.tensor([float(m.rating or 0.0) / 10.0 for m in candidate_movies], device=model_service.device)
 
     # Unmapped items use normalized rating prior as NCF proxy
     for i, m in enumerate(candidate_movies):
@@ -789,8 +882,18 @@ def rerank_candidate_pool_with_damr(
         transformer_scores = torch.full((total_cands,), 0.3, device=model_service.device)
 
     # 4. Stage 3: Fresh Genre Re-ranking Signal
+    cand_genre_matrix = torch.zeros(total_cands, model_service.config.get("num_genres", 20), device=model_service.device)
+    for pos, movie in enumerate(candidate_movies):
+        midx = model_service.movie2idx.get(movie.movie_id)
+        if midx is not None and model_service.movie_genre_matrix is not None:
+            cand_genre_matrix[pos] = model_service.movie_genre_matrix[midx].to(model_service.device)
+        else:
+            for genre in movie.genres or []:
+                gidx = model_service.genre2idx.get(genre)
+                if gidx is not None:
+                    cand_genre_matrix[pos, gidx] = 1.0
+            transformer_scores[pos] = 0.5
     if model_service.movie_genre_matrix is not None:
-        cand_genre_matrix = model_service.movie_genre_matrix[cand_item_tensor].to(model_service.device)
         genre_scores = torch.mv(cand_genre_matrix, user_genre_vector)
         if genre_scores.max() > 0:
             genre_scores = genre_scores / genre_scores.max()
@@ -798,13 +901,7 @@ def rerank_candidate_pool_with_damr(
         genre_scores = torch.full((total_cands,), 0.5, device=model_service.device)
 
     # 5. Build user profile and inputs for DAMR
-    profile = build_taste_profile(user, db) if user else TasteProfile(
-        short_term_weights={},
-        long_term_weights={},
-        interaction_timestamps=[],
-        active_genre_count=0,
-        total_interactions=0,
-    )
+    profile = build_taste_profile(user, db) if user else estimate_user_state_from_positions([])
 
     pool_ratings = [
         float(m.rating) / 2.0 if m.rating is not None else None
@@ -816,10 +913,20 @@ def rerank_candidate_pool_with_damr(
     ]
 
     actual_top_k = min(top_k, total_cands)
-    unique_cand_idxs = torch.arange(total_cands, dtype=torch.long, device=model_service.device)
+    # Catalogue positions are NOT model indices. Supply actual pool features
+    # to DAMR so unmapped titles never inherit model item zero's genres/embedding.
+    gen_norm = F.normalize(cand_genre_matrix, dim=1)
+    candidate_similarity = 0.5 * (gen_norm @ gen_norm.T)
+    if model_service.ncf_hybrid is not None:
+        emb = model_service.ncf_hybrid.item_embedding(cand_item_tensor).clone()
+        for pos, movie in enumerate(candidate_movies):
+            if movie.movie_id not in model_service.movie2idx:
+                emb[pos] = 0.0
+        emb = F.normalize(emb, dim=1)
+        candidate_similarity += 0.5 * (emb @ emb.T)
 
     ranked = damr_rerank(
-        cand_idxs=unique_cand_idxs,
+        cand_idxs=cand_item_tensor,
         s_ncf=ncf_scores,
         s_tr=transformer_scores,
         s_gen=genre_scores,
@@ -827,6 +934,8 @@ def rerank_candidate_pool_with_damr(
         ratings=pool_ratings,
         counts=pool_counts,
         top_k=actual_top_k,
+        candidate_genres=cand_genre_matrix,
+        candidate_similarity=candidate_similarity.clamp(-1, 1),
         **switches_for_variant(variant),
     )
 
@@ -834,7 +943,7 @@ def rerank_candidate_pool_with_damr(
 
     results: List[ScoredMovieSchema] = []
     for entry in ranked:
-        cand_idx = entry["modelIdx"]
+        cand_idx = entry["pos"]
         if 0 <= cand_idx < len(candidate_movies):
             m = candidate_movies[cand_idx]
             results.append(
@@ -860,7 +969,7 @@ def rerank_candidate_pool_with_damr(
                     userState=entry["userState"],
                     variant=variant,
                     rank=len(results) + 1,
-                    listDiversity=round(intra_list_diversity([e["modelIdx"] for e in ranked]), 4) if len(results) == 0 else None,
+                    listDiversity=_pool_diversity(candidate_similarity, [e["pos"] for e in ranked]) if len(results) == 0 else None,
                 )
             )
 
@@ -875,4 +984,13 @@ def rerank_candidate_pool_with_damr(
     }
 
     return results, audit_metrics
+
+
+def _pool_diversity(similarity: torch.Tensor, positions: List[int]) -> float:
+    if len(positions) < 2:
+        return 0.0
+    indices = torch.tensor(positions, device=similarity.device)
+    distances = 1.0 - similarity.index_select(0, indices).index_select(1, indices)
+    distances.fill_diagonal_(0.0)
+    return round(float(distances.sum() / (len(positions)*(len(positions)-1))), 4)
 

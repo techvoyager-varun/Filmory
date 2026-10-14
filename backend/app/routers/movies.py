@@ -32,25 +32,26 @@ def get_movies(
     q = db.query(Movie)
 
     if genre and genre != "All":
-        q = q.filter(cast(Movie.genres, String).ilike(f"%{genre}%"))
+        if genre not in GENRE_LIST:
+            raise HTTPException(status_code=400, detail="Unknown movie genre")
+        q = q.filter(cast(Movie.genres, String).contains('"' + genre + '"', autoescape=True))
 
     if query.strip():
-        search_pattern = f"%{query.strip().lower()}%"
-        q = q.filter(func.lower(Movie.title).like(search_pattern))
+        q = q.filter(func.lower(Movie.title).contains(query.strip().lower(), autoescape=True))
 
     total = q.count()
 
     # Sorting
     if sort == "rating":
-        q = q.order_by(desc(Movie.rating), desc(Movie.rating_count))
+        q = q.order_by(desc(Movie.rating).nullslast(), desc(Movie.rating_count).nullslast())
     elif sort == "year":
-        q = q.order_by(desc(Movie.year), desc(Movie.rating_count))
+        q = q.order_by(desc(Movie.year).nullslast(), desc(Movie.rating_count).nullslast())
     elif sort == "title":
         q = q.order_by(asc(Movie.title))
     else:  # default 'popular'
-        q = q.order_by(desc(Movie.rating_count), desc(Movie.rating))
+        q = q.order_by(desc(Movie.rating_count).nullslast(), desc(Movie.rating).nullslast())
 
-    movies = q.offset(offset).limit(limit).all()
+    movies = q.order_by(Movie.movie_id).offset(offset).limit(limit).all()
     ensure_movie_posters(movies, db)
     return MoviePageSchema(
         movies=[movie_model_to_schema(m) for m in movies],
@@ -82,14 +83,15 @@ def search_movies(
         db.query(Movie)
         .filter(
             or_(
-                func.lower(Movie.title).like(f"%{q_str}%"),
-                cast(Movie.genres, String).ilike(f"%{q_str}%"),
+                func.lower(Movie.title).contains(q_str, autoescape=True),
+                func.lower(cast(Movie.genres, String)).contains(q_str, autoescape=True),
             )
         )
         .order_by(
             desc(func.lower(Movie.title) == q_str),
-            desc(func.lower(Movie.title).startswith(q_str)),
-            desc(Movie.rating_count),
+            desc(func.lower(Movie.title).startswith(q_str, autoescape=True)),
+            desc(Movie.rating_count).nullslast(),
+            Movie.movie_id,
         )
         .limit(limit)
         .all()

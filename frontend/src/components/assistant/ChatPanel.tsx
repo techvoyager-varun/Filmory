@@ -39,7 +39,11 @@ export function ChatPanel({
       {/* Active Intent / Filters Bar */}
       {activeIntent && (
         <div className="mb-4">
-          <ActiveFilters intent={activeIntent} sessionId={sessionId} onFilterRemoved={onFilterRemoved} />
+          <ActiveFilters
+            intent={activeIntent}
+            sessionId={sessionId}
+            onFilterRemoved={onFilterRemoved}
+          />
         </div>
       )}
 
@@ -55,9 +59,9 @@ export function ChatPanel({
                 How can I help you find a movie?
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Ask me in natural language. Describe a vibe, specific genres, plot twists,
-                year constraints, or reference a movie you loved. Filmory's deep recommender
-                engine and AI will find the perfect match.
+                Ask me in natural language. Describe a vibe, specific genres, plot twists, year
+                constraints, or reference a movie you loved. Filmory uses your request and
+                recommendation models to find matching titles from the catalogue.
               </p>
             </div>
           </div>
@@ -108,10 +112,7 @@ export function ChatPanel({
 
                   {/* Recommended Movies */}
                   {msg.movies && msg.movies.length > 0 && (
-                    <AssistantMovieCards
-                      movies={msg.movies}
-                      sessionId={sessionId}
-                    />
+                    <AssistantMovieCards movies={msg.movies} sessionId={sessionId} />
                   )}
 
                   {/* Grounded Evidence Panel */}
@@ -127,7 +128,12 @@ export function ChatPanel({
                       isUser ? "text-primary-foreground/80 text-right" : "text-muted-foreground",
                     )}
                   >
-                    {msg.timestamp}
+                    {Number.isNaN(Date.parse(msg.timestamp))
+                      ? msg.timestamp
+                      : new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                   </div>
                 </div>
 

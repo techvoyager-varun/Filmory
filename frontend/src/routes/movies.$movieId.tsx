@@ -2,7 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMovie } from "@/api/movies";
 import { getSimilarMovies } from "@/api/recommendations";
-import { LikeButton, MyListButton, PlayButton } from "@/components/MovieActions";
+import {
+  LikeButton,
+  MyListButton,
+  PlayButton,
+  NotInterestedButton,
+} from "@/components/MovieActions";
 import { MovieRow } from "@/components/MovieRow";
 import { Backdrop, Poster } from "@/components/Poster";
 import { RatingBadge } from "@/components/RatingBadge";
@@ -17,7 +22,8 @@ export const Route = createFileRoute("/movies/$movieId")({
       { title: "Movie details — Filmory" },
       {
         name: "description",
-        content: "Full details, cast-free synopsis, rating and similar-title recommendations for this film.",
+        content:
+          "Full details, cast-free synopsis, rating and similar-title recommendations for this film.",
       },
       { property: "og:title", content: "Movie details — Filmory" },
       {
@@ -32,12 +38,22 @@ export const Route = createFileRoute("/movies/$movieId")({
 function MovieDetailsPage() {
   const { movieId } = Route.useParams();
   const id = Number(movieId);
+  const validId = Number.isSafeInteger(id) && id > 0;
 
-  const { data: movie, isLoading, isError, refetch } = useQuery({
+  const {
+    data: movie,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["movie", id],
-    queryFn: () => getMovie(id),
+    queryFn: () => (validId ? getMovie(id) : Promise.resolve(null)),
   });
-  const similar = useQuery({ queryKey: ["similar", id], queryFn: () => getSimilarMovies(id) });
+  const similar = useQuery({
+    queryKey: ["similar", id],
+    queryFn: () => getSimilarMovies(id),
+    enabled: validId,
+  });
 
   if (isLoading) return <HeroSkeleton />;
 
@@ -112,11 +128,12 @@ function MovieDetailsPage() {
               <PlayButton movie={movie} />
               <LikeButton movie={movie} />
               <MyListButton movie={movie} />
+              <NotInterestedButton movie={movie} />
             </div>
 
             <p className="mt-6 text-xs text-muted-foreground">
-              MovieLens id <span className="font-mono text-gold">{movie.movieId}</span> — sent with every
-              recorded interaction.
+              MovieLens id <span className="font-mono text-gold">{movie.movieId}</span> — sent with
+              every recorded interaction.
             </p>
           </div>
         </div>

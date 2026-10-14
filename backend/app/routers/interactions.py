@@ -1,4 +1,5 @@
 import datetime
+from app.core.time import utc_isoformat
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -22,6 +23,8 @@ from app.schemas.schemas import (
 )
 from app.core.deps import get_current_user
 from app.ml.recommender import movie_model_to_schema
+from app.services.preference_signals import refresh_genre_signals
+from app.services.recommendation_feedback import hidden_movie_ids
 
 router = APIRouter(prefix="/api", tags=["Interactions & User Data"])
 
@@ -116,14 +119,28 @@ def record_user_interaction(
     elif payload.type == "list_remove":
         db.query(MyList).filter(MyList.user_id == current_user.id, MyList.movie_id == payload.movieId).delete()
 
+    elif payload.type == "not_interested":
+        # An explicit rejection overrides a current positive like. Saved titles
+        # and watch history remain available to the user.
+        db.query(Like).filter(Like.user_id == current_user.id, Like.movie_id == payload.movieId).delete()
+
+    refresh_genre_signals(current_user.id, db)
     db.commit()
 
     return InteractionResponse(
         userId=str(current_user.id),
         movieId=payload.movieId,
         type=payload.type,
-        timestamp=now.isoformat(),
+        timestamp=utc_isoformat(now),
     )
+
+
+@router.get("/users/me/hidden-movies", response_model=List[int])
+def get_hidden_movies(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return sorted(hidden_movie_ids(current_user.id, db))
 
 
 @router.get("/users/me/history", response_model=List[HistoryEntrySchema])
@@ -146,7 +163,7 @@ def get_my_watch_history(
             results.append(
                 HistoryEntrySchema(
                     movie=movie_model_to_schema(movie),
-                    watchedAt=entry.watched_at.isoformat(),
+                    watchedAt=utc_isoformat(entry.watched_at),
                     progress=entry.progress,
                 )
             )
@@ -195,6 +212,8 @@ def remove_from_my_list(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if db.get(Movie, movie_id) is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
     db.query(MyList).filter(MyList.user_id == current_user.id, MyList.movie_id == movie_id).delete()
     db.add(Interaction(user_id=current_user.id, movie_id=movie_id, type="list_remove"))
     db.commit()
@@ -243,6 +262,7 @@ def toggle_my_like(
                 else:
                     db.add(UserGenrePreference(user_id=current_user.id, genre=genre, score=1.5))
 
+    refresh_genre_signals(current_user.id, db)
     db.commit()
     return get_my_likes(current_user=current_user, db=db)
 
@@ -253,7 +273,10 @@ def unlike_movie(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if db.get(Movie, movie_id) is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
     db.query(Like).filter(Like.user_id == current_user.id, Like.movie_id == movie_id).delete()
     db.add(Interaction(user_id=current_user.id, movie_id=movie_id, type="unlike"))
+    refresh_genre_signals(current_user.id, db)
     db.commit()
     return get_my_likes(current_user=current_user, db=db)

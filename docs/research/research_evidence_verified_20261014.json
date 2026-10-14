@@ -1,0 +1,120 @@
+{
+  "audit_date": "2026-10-14",
+  "checkpoint_hashes": {
+    "ncf_baseline.pth": "3517130ef21fb8bb37b48de12330a5757ad04f821e9c525f475c54e89a87fbfa",
+    "ncf_hybrid.pth": "e8ecd015c9cd2e73f6896fc8051d66d4fdce6e9d143ff236e1e726805ca311cd",
+    "sequential_transformer.pth": "579c5db8d4dd11e5b7ac987bf606f853c8ecd653f683defb00302cbdbfe89d93"
+  },
+  "training_users": 41547,
+  "training_interactions": 5923646,
+  "holdout_exclusion_checked_for_every_training_user": true,
+  "validation_test_users_disjoint": true,
+  "original_sampled_metrics_recomputed": {
+    "baseline": {
+      "users": 400,
+      "hr10": 0.8225,
+      "ndcg10": 0.529812436357654,
+      "mrr": 0.4496145305755789,
+      "hits": 329,
+      "hr10_95_percent_wilson": [
+        0.782040489241534,
+        0.8568240809128447
+      ]
+    },
+    "hybrid": {
+      "users": 400,
+      "hr10": 0.86,
+      "ndcg10": 0.5797847938318981,
+      "mrr": 0.5005097975483176,
+      "hits": 344,
+      "hr10_95_percent_wilson": [
+        0.8225607694538968,
+        0.8905903786254097
+      ]
+    },
+    "transformer": {
+      "users": 400,
+      "hr10": 0.9075,
+      "ndcg10": 0.6650645548127068,
+      "mrr": 0.5929151987647766,
+      "hits": 363,
+      "hr10_95_percent_wilson": [
+        0.8751014146161221,
+        0.9321460655014261
+      ]
+    }
+  },
+  "original_catalogue_metrics_recomputed": {
+    "popularity": {
+      "users": 200,
+      "hits": 4,
+      "hr10": 0.02,
+      "ndcg10": 0.008164971210468316,
+      "recall100": 0.19,
+      "hr10_95_percent_wilson": [
+        0.0078044264163494685,
+        0.050287086905826436
+      ]
+    },
+    "baseline": {
+      "users": 200,
+      "hits": 5,
+      "hr10": 0.025,
+      "ndcg10": 0.008827445459703294,
+      "recall100": 0.19,
+      "hr10_95_percent_wilson": [
+        0.010724719651761264,
+        0.05717834040664198
+      ]
+    },
+    "hybrid": {
+      "users": 200,
+      "hits": 6,
+      "hr10": 0.03,
+      "ndcg10": 0.012452423101818657,
+      "recall100": 0.2,
+      "hr10_95_percent_wilson": [
+        0.013820314340111346,
+        0.06389429245451925
+      ]
+    },
+    "transformer": {
+      "users": 200,
+      "hits": 7,
+      "hr10": 0.035,
+      "ndcg10": 0.01874032695784824,
+      "recall100": 0.355,
+      "hr10_95_percent_wilson": [
+        0.017055542008567192,
+        0.07047061152229073
+      ]
+    }
+  },
+  "selected_checkpoints": {
+    "baseline": {
+      "epoch": 10,
+      "bce": 0.20985948201497395,
+      "loss": 0.23915240226682027
+    },
+    "hybrid": {
+      "epoch": 9,
+      "bce": 0.18961085452270507,
+      "loss": 0.21431333137353262
+    },
+    "transformer": {
+      "epoch": 5,
+      "bce": 0.1361471479654312,
+      "loss": 0.15143864549001057
+    }
+  },
+  "original_ranking_policy_metrics_verified": true,
+  "interval_scope": "Wilson intervals over evaluation users with one frozen model seed; not uncertainty over training runs",
+  "source_paths": [
+    "metrics.json",
+    "split.json",
+    "test_catalogue.jsonl",
+    "ranking_policy_per_user.jsonl",
+    "evaluation_candidates.npz",
+    "sha256_manifest.json"
+  ]
+}

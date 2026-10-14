@@ -1,0 +1,182 @@
+{
+  "checked_at": "2026-10-14T07:28:19.511144+05:30",
+  "phase": "after",
+  "scope": "Live local API functional checks; no model retraining or recommendation-accuracy claim.",
+  "checks": [
+    {
+      "check": "Backend health",
+      "status": "pass",
+      "detail": {
+        "device": "cpu",
+        "models_loaded": true
+      }
+    },
+    {
+      "check": "QA session restoration",
+      "status": "pass",
+      "detail": {
+        "onboarding_completed": true
+      }
+    },
+    {
+      "check": "Persisted onboarding",
+      "status": "pass",
+      "detail": "Selected genres and two favourite films persist through /me."
+    },
+    {
+      "check": "Catalog pagination",
+      "status": "pass",
+      "detail": {
+        "catalogue_total": 27278
+      }
+    },
+    {
+      "check": "Genre filter",
+      "status": "pass",
+      "detail": {
+        "returned": 48
+      }
+    },
+    {
+      "check": "Title-sort stability",
+      "status": "pass",
+      "detail": "Title sort is repeatable and differs from popularity. Ordering follows PostgreSQL collation, not Python Unicode ordering."
+    },
+    {
+      "check": "Rating sort",
+      "status": "pass",
+      "detail": "Descending rating order verified."
+    },
+    {
+      "check": "Year sort",
+      "status": "pass",
+      "detail": "Descending year order verified."
+    },
+    {
+      "check": "Title search",
+      "status": "pass",
+      "detail": {
+        "returned": 4
+      }
+    },
+    {
+      "check": "Empty search",
+      "status": "pass",
+      "detail": "No-result search returns an empty list."
+    },
+    {
+      "check": "Unknown movie ID",
+      "status": "pass",
+      "detail": "404 rather than a fabricated movie."
+    },
+    {
+      "check": "QA recommendations nonempty / unique / finite",
+      "status": "pass",
+      "detail": {
+        "returned": 12,
+        "variants": [
+          "sequence_only"
+        ]
+      }
+    },
+    {
+      "check": "QA recommendations excludes consumed IDs",
+      "status": "pass",
+      "detail": {
+        "excluded_count": 2
+      }
+    },
+    {
+      "check": "Guest feed nonempty / unique / finite",
+      "status": "pass",
+      "detail": {
+        "returned": 12,
+        "variants": [
+          "fallback"
+        ]
+      }
+    },
+    {
+      "check": "Guest feed excludes consumed IDs",
+      "status": "pass",
+      "detail": {
+        "excluded_count": 0
+      }
+    },
+    {
+      "check": "Similar movies nonempty / unique / finite",
+      "status": "pass",
+      "detail": {
+        "returned": 14,
+        "variants": [
+          "fallback"
+        ]
+      }
+    },
+    {
+      "check": "Similar movies excludes consumed IDs",
+      "status": "pass",
+      "detail": {
+        "excluded_count": 1
+      }
+    },
+    {
+      "check": "Mapped demo feed nonempty / unique / finite",
+      "status": "pass",
+      "detail": {
+        "returned": 12,
+        "variants": [
+          "sequence_only"
+        ]
+      }
+    },
+    {
+      "check": "Mapped demo feed excludes consumed IDs",
+      "status": "pass",
+      "detail": {
+        "excluded_count": 0
+      }
+    },
+    {
+      "check": "Model metrics",
+      "status": "pass",
+      "detail": "Sampled and full-catalogue results are available separately."
+    },
+    {
+      "check": "Taste state",
+      "status": "pass",
+      "detail": "Diagnostic taste vectors have matching dimensions."
+    },
+    {
+      "check": "Recorded play history",
+      "status": "pass",
+      "detail": "Two distinct mapped films persist in history."
+    },
+    {
+      "check": "New-account sequence ranking",
+      "status": "pass",
+      "detail": {
+        "returned": 12,
+        "weights": {
+          "ncf": 0.0,
+          "neighbor": 0.65,
+          "transformer": 0.25,
+          "genre": 0.1
+        }
+      }
+    },
+    {
+      "check": "Assistant session saved",
+      "status": "pass",
+      "detail": "QA chat is persisted and visible in session listing."
+    },
+    {
+      "check": "Assistant hard constraints",
+      "status": "pass",
+      "detail": {
+        "returned": 10,
+        "scope": "One live QA query, not a general dialogue-accuracy score."
+      }
+    }
+  ]
+}

@@ -1,0 +1,1504 @@
+{
+  "checkpoint_hashes": {
+    "ncf_baseline.pth": "3517130ef21fb8bb37b48de12330a5757ad04f821e9c525f475c54e89a87fbfa",
+    "ncf_hybrid.pth": "e8ecd015c9cd2e73f6896fc8051d66d4fdce6e9d143ff236e1e726805ca311cd",
+    "sequential_transformer.pth": "579c5db8d4dd11e5b7ac987bf606f853c8ecd653f683defb00302cbdbfe89d93"
+  },
+  "seed": 20261015,
+  "validation_users": [
+    34991,
+    28430,
+    5177,
+    39991,
+    2970,
+    39831,
+    13261,
+    28631,
+    29288,
+    29890,
+    23935,
+    35980,
+    12664,
+    37272,
+    2035,
+    39492,
+    39212,
+    10614,
+    33378,
+    9019,
+    38354,
+    9606,
+    11075,
+    28923,
+    23162,
+    8502,
+    4869,
+    16267,
+    3591,
+    12185,
+    15932,
+    4944,
+    34581,
+    22245,
+    25959,
+    21850,
+    7050,
+    35377,
+    32307,
+    37893,
+    7068,
+    24453,
+    24526,
+    35285,
+    25151,
+    18354,
+    39777,
+    21041,
+    7940,
+    40574,
+    11845,
+    18471,
+    37113,
+    21901,
+    363,
+    30270,
+    3660,
+    17261,
+    28035,
+    19476,
+    34302,
+    37829,
+    28360,
+    27181,
+    7490,
+    25898,
+    32260,
+    26311,
+    17332,
+    37087,
+    2697,
+    15754,
+    13782,
+    26257,
+    15010,
+    22999,
+    3742,
+    26171,
+    6647,
+    9906,
+    32937,
+    11026,
+    5584,
+    12066,
+    11768,
+    31591,
+    22985,
+    29175,
+    37636,
+    23156,
+    19619,
+    26519,
+    36825,
+    3150,
+    36486,
+    33025,
+    18495,
+    25176,
+    36679,
+    3222,
+    39552,
+    20893,
+    21414,
+    11676,
+    5152,
+    17833,
+    902,
+    3415,
+    1987,
+    38570,
+    34012,
+    27345,
+    39398,
+    20332,
+    37982,
+    27288,
+    3837,
+    34180,
+    22100,
+    4569,
+    4283,
+    37974,
+    25400,
+    28889,
+    7720,
+    11597,
+    40623,
+    21253,
+    18228,
+    29947,
+    30697,
+    26395,
+    30388,
+    14009,
+    8285,
+    31321,
+    4050,
+    30598,
+    15024,
+    9405,
+    19496,
+    30823,
+    35165,
+    11775,
+    33887,
+    5604,
+    37204,
+    22,
+    2628,
+    23233,
+    30611,
+    25740,
+    33180,
+    31806,
+    14233,
+    12801,
+    38631,
+    25764,
+    36360,
+    22112,
+    17691,
+    11339,
+    34226,
+    14865,
+    18396,
+    38184,
+    38863,
+    30749,
+    11323,
+    8249,
+    41246,
+    28651,
+    31360,
+    5824,
+    27009,
+    3320,
+    39215,
+    1214,
+    15927,
+    28705,
+    8467,
+    1965,
+    36933,
+    20133,
+    41042,
+    368,
+    28852,
+    9751,
+    7959,
+    25540,
+    20918,
+    1275,
+    32831,
+    26114,
+    37776,
+    33036,
+    24994,
+    39382,
+    6515,
+    35350
+  ],
+  "new_test_users": [
+    38810,
+    33983,
+    39342,
+    22150,
+    32299,
+    9508,
+    33267,
+    37945,
+    188,
+    17059,
+    28100,
+    41134,
+    38578,
+    29025,
+    17759,
+    35072,
+    615,
+    27799,
+    10994,
+    27540,
+    28667,
+    35822,
+    37283,
+    9260,
+    893,
+    36268,
+    41488,
+    3646,
+    33282,
+    26059,
+    7891,
+    1694,
+    3469,
+    35322,
+    8072,
+    7634,
+    30088,
+    1974,
+    27688,
+    3078,
+    20856,
+    4560,
+    38019,
+    16465,
+    27079,
+    34358,
+    17191,
+    18744,
+    15331,
+    37458,
+    9696,
+    34173,
+    21439,
+    16095,
+    29964,
+    18627,
+    33007,
+    781,
+    41225,
+    19344,
+    17498,
+    13076,
+    16044,
+    36343,
+    22057,
+    4524,
+    7625,
+    34630,
+    24343,
+    28236,
+    26224,
+    1041,
+    22008,
+    36829,
+    19605,
+    39385,
+    4034,
+    10340,
+    31710,
+    12127,
+    17122,
+    28180,
+    14453,
+    16855,
+    1853,
+    22707,
+    17106,
+    32990,
+    4858,
+    11410,
+    7828,
+    11050,
+    1480,
+    27848,
+    24105,
+    4625,
+    4841,
+    18279,
+    21598,
+    12589,
+    27356,
+    16943,
+    16133,
+    21545,
+    18711,
+    20529,
+    37320,
+    13443,
+    23234,
+    19107,
+    28939,
+    21524,
+    36175,
+    32377,
+    4169,
+    20720,
+    19804,
+    32815,
+    33948,
+    8358,
+    7529,
+    5756,
+    11517,
+    35655,
+    4634,
+    14336,
+    16427,
+    3152,
+    21047,
+    33065,
+    33569,
+    40821,
+    2034,
+    5615,
+    3109,
+    40651,
+    40566,
+    23666,
+    20885,
+    33311,
+    28954,
+    27334,
+    36491,
+    24398,
+    33157,
+    1481,
+    14681,
+    11270,
+    27990,
+    36098,
+    24277,
+    14503,
+    2685,
+    23462,
+    27435,
+    32936,
+    10965,
+    18834,
+    562,
+    33875,
+    22960,
+    21133,
+    36604,
+    22316,
+    31641,
+    41228,
+    17300,
+    30422,
+    2657,
+    15178,
+    4509,
+    7825,
+    22762,
+    17046,
+    40269,
+    36747,
+    16826,
+    16850,
+    14836,
+    12195,
+    35055,
+    36872,
+    38730,
+    6399,
+    9735,
+    21757,
+    38936,
+    183,
+    29876,
+    8056,
+    28074,
+    4461,
+    5372,
+    26062,
+    28340,
+    40389,
+    11586,
+    461,
+    6348,
+    11086
+  ],
+  "history_lengths": {
+    "2": {
+      "validation": {
+        "legacy_cold_start": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03189705146870859,
+          "coverage10": 0.014626029076896129
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.03,
+          "ndcg10": 0.01359421747208427,
+          "coverage10": 0.011122788579435978,
+          "candidate_recall": 0.26
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.05,
+          "ndcg10": 0.0225667923706921,
+          "coverage10": 0.01234892275354703,
+          "candidate_recall": 0.26
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.05,
+          "ndcg10": 0.023574581652951423,
+          "coverage10": 0.015020143632860396,
+          "candidate_recall": 0.26
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.055,
+          "ndcg10": 0.025698448007310835,
+          "coverage10": 0.014450867052023121,
+          "candidate_recall": 0.26
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03292456688575771,
+          "coverage10": 0.020888071466106148,
+          "candidate_recall": 0.225
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03268186429862394,
+          "coverage10": 0.014363286039586618,
+          "candidate_recall": 0.225
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.032433270996528325,
+          "coverage10": 0.01466981958311438,
+          "candidate_recall": 0.225
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03270915695374853,
+          "coverage10": 0.013881590471185846,
+          "candidate_recall": 0.225
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03076566985671096,
+          "coverage10": 0.018873708180066562,
+          "candidate_recall": 0.2
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03505208782716771,
+          "coverage10": 0.014626029076896129,
+          "candidate_recall": 0.2
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03409993766319499,
+          "coverage10": 0.014538448064459626,
+          "candidate_recall": 0.2
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03270915695374853,
+          "coverage10": 0.013837799964967595,
+          "candidate_recall": 0.2
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.035,
+          "ndcg10": 0.01618355975482229,
+          "coverage10": 0.013706428446312839,
+          "candidate_recall": 0.47
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.028163649146715784,
+          "coverage10": 0.013575056927658084,
+          "candidate_recall": 0.47
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03735354849734293,
+          "coverage10": 0.015414258188824663,
+          "candidate_recall": 0.47
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03472916640783163,
+          "coverage10": 0.015020143632860396,
+          "candidate_recall": 0.47
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.055,
+          "ndcg10": 0.027173457220293774,
+          "coverage10": 0.02207041513399895,
+          "candidate_recall": 0.38
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.033181709608889574,
+          "coverage10": 0.014801191101769137,
+          "candidate_recall": 0.38
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.032373445149797855,
+          "coverage10": 0.014801191101769137,
+          "candidate_recall": 0.38
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03270915695374853,
+          "coverage10": 0.013837799964967595,
+          "candidate_recall": 0.38
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.027806246388135246,
+          "coverage10": 0.02075669994745139,
+          "candidate_recall": 0.415
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03505208782716771,
+          "coverage10": 0.014757400595550885,
+          "candidate_recall": 0.415
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03409993766319499,
+          "coverage10": 0.014582238570677877,
+          "candidate_recall": 0.415
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03270915695374853,
+          "coverage10": 0.013837799964967595,
+          "candidate_recall": 0.415
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.024687600081346992,
+          "coverage10": 0.017822736030828516,
+          "candidate_recall": 0.735
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03400570054647131,
+          "coverage10": 0.015501839201261167,
+          "candidate_recall": 0.735
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03633456407457192,
+          "coverage10": 0.015020143632860396,
+          "candidate_recall": 0.735
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03394893334344536,
+          "coverage10": 0.014450867052023121,
+          "candidate_recall": 0.735
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.055,
+          "ndcg10": 0.025481334088783662,
+          "coverage10": 0.021632510071816432,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.033400828363083834,
+          "coverage10": 0.015063934139078647,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.032433270996528325,
+          "coverage10": 0.014801191101769137,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03270915695374853,
+          "coverage10": 0.013837799964967595,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.027806246388135246,
+          "coverage10": 0.02097565247854265,
+          "candidate_recall": 0.655
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03505208782716771,
+          "coverage10": 0.014757400595550885,
+          "candidate_recall": 0.655
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03409993766319499,
+          "coverage10": 0.014582238570677877,
+          "candidate_recall": 0.655
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03270915695374853,
+          "coverage10": 0.013837799964967595,
+          "candidate_recall": 0.655
+        }
+      },
+      "selected": {
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.65,
+          0.25,
+          0.1
+        ]
+      }
+    },
+    "5": {
+      "validation": {
+        "legacy_cold_start": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03400293532952288,
+          "coverage10": 0.013662637940094587
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.055,
+          "ndcg10": 0.018071809902744426,
+          "coverage10": 0.010860045542126467,
+          "candidate_recall": 0.3
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.024702544177593305,
+          "coverage10": 0.011648274654055001,
+          "candidate_recall": 0.3
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03114384196564709,
+          "coverage10": 0.014100543002277106,
+          "candidate_recall": 0.3
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03258916609723653,
+          "coverage10": 0.013969171483622351,
+          "candidate_recall": 0.3
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.024306278379802947,
+          "coverage10": 0.017822736030828516,
+          "candidate_recall": 0.245
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.033055344684673534,
+          "coverage10": 0.013399894902785077,
+          "candidate_recall": 0.245
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03389731775470007,
+          "coverage10": 0.01300578034682081,
+          "candidate_recall": 0.245
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03547195525140927,
+          "coverage10": 0.012918199334384305,
+          "candidate_recall": 0.245
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.026455349299255592,
+          "coverage10": 0.017559992993519007,
+          "candidate_recall": 0.24
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.085,
+          "ndcg10": 0.03785230355794834,
+          "coverage10": 0.012874408828166053,
+          "candidate_recall": 0.24
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03423080577776777,
+          "coverage10": 0.012918199334384305,
+          "candidate_recall": 0.24
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03578975868409315,
+          "coverage10": 0.012830618321947802,
+          "candidate_recall": 0.24
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.05,
+          "ndcg10": 0.018143243814215653,
+          "coverage10": 0.013312313890348572,
+          "candidate_recall": 0.56
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.032827676509443036,
+          "coverage10": 0.013575056927658084,
+          "candidate_recall": 0.56
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.036252968943482594,
+          "coverage10": 0.013706428446312839,
+          "candidate_recall": 0.56
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.09,
+          "ndcg10": 0.04076180525801635,
+          "coverage10": 0.013531266421439831,
+          "candidate_recall": 0.56
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.02902968976352435,
+          "coverage10": 0.017778945524610266,
+          "candidate_recall": 0.39
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03496165529476945,
+          "coverage10": 0.013399894902785077,
+          "candidate_recall": 0.39
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03423080577776777,
+          "coverage10": 0.012961989840602558,
+          "candidate_recall": 0.39
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03578975868409315,
+          "coverage10": 0.012874408828166053,
+          "candidate_recall": 0.39
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.024584971080977458,
+          "coverage10": 0.017297249956209494,
+          "candidate_recall": 0.48
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.0364069794263589,
+          "coverage10": 0.013137151865475564,
+          "candidate_recall": 0.48
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03432014806050579,
+          "coverage10": 0.012874408828166053,
+          "candidate_recall": 0.48
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03578975868409315,
+          "coverage10": 0.012830618321947802,
+          "candidate_recall": 0.48
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.02636600701651757,
+          "coverage10": 0.016202487300753198,
+          "candidate_recall": 0.795
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.0344454227350616,
+          "coverage10": 0.013750218952531092,
+          "candidate_recall": 0.795
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03458552164912886,
+          "coverage10": 0.013137151865475564,
+          "candidate_recall": 0.795
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.0335911011061568,
+          "coverage10": 0.013049570853039061,
+          "candidate_recall": 0.795
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.027523096632008533,
+          "coverage10": 0.017603783499737256,
+          "candidate_recall": 0.615
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03496165529476945,
+          "coverage10": 0.01326852338413032,
+          "candidate_recall": 0.615
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03423080577776777,
+          "coverage10": 0.01300578034682081,
+          "candidate_recall": 0.615
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03578975868409315,
+          "coverage10": 0.012830618321947802,
+          "candidate_recall": 0.615
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.026090121059297363,
+          "coverage10": 0.017165878437554738,
+          "candidate_recall": 0.715
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.0364069794263589,
+          "coverage10": 0.013137151865475564,
+          "candidate_recall": 0.715
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03432014806050579,
+          "coverage10": 0.012874408828166053,
+          "candidate_recall": 0.715
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03578975868409315,
+          "coverage10": 0.012830618321947802,
+          "candidate_recall": 0.715
+        }
+      },
+      "selected": {
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.8,
+          0.2,
+          0.0
+        ]
+      }
+    },
+    "10": {
+      "validation": {
+        "legacy_cold_start": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.02682057753921382,
+          "coverage10": 0.012874408828166053
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.045,
+          "ndcg10": 0.015717620720107205,
+          "coverage10": 0.009940444911543177,
+          "candidate_recall": 0.32
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.026729076936445405,
+          "coverage10": 0.01068488351725346,
+          "candidate_recall": 0.32
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03117988170642364,
+          "coverage10": 0.012743037309511297,
+          "candidate_recall": 0.32
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03111455273533316,
+          "coverage10": 0.012655456297074794,
+          "candidate_recall": 0.32
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.0306874647937476,
+          "coverage10": 0.01440707654580487,
+          "candidate_recall": 0.22
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028405363386664703,
+          "coverage10": 0.011560693641618497,
+          "candidate_recall": 0.22
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028576157009910483,
+          "coverage10": 0.011823436678928009,
+          "candidate_recall": 0.22
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028636412335348974,
+          "coverage10": 0.011823436678928009,
+          "candidate_recall": 0.22
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.030560746965995884,
+          "coverage10": 0.013881590471185846,
+          "candidate_recall": 0.265
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030577510691720166,
+          "coverage10": 0.011385531616745489,
+          "candidate_recall": 0.265
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028994948625152256,
+          "coverage10": 0.011823436678928009,
+          "candidate_recall": 0.265
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028417293581154718,
+          "coverage10": 0.011911017691364512,
+          "candidate_recall": 0.265
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.04,
+          "ndcg10": 0.016684550943338955,
+          "coverage10": 0.011473112629181994,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03131951751415443,
+          "coverage10": 0.012261341741110527,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03240163407556949,
+          "coverage10": 0.012392713259765284,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03414713065637705,
+          "coverage10": 0.012173760728674023,
+          "candidate_recall": 0.57
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03287564644470961,
+          "coverage10": 0.015414258188824663,
+          "candidate_recall": 0.42
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030577510691720166,
+          "coverage10": 0.01160448414783675,
+          "candidate_recall": 0.42
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030368098351132956,
+          "coverage10": 0.011823436678928009,
+          "candidate_recall": 0.42
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028636412335348974,
+          "coverage10": 0.01186722718514626,
+          "candidate_recall": 0.42
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.031761144729568584,
+          "coverage10": 0.014582238570677877,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030796629445914422,
+          "coverage10": 0.01160448414783675,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028994948625152256,
+          "coverage10": 0.011911017691364512,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028417293581154718,
+          "coverage10": 0.011911017691364512,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028823349046916386,
+          "coverage10": 0.013706428446312839,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.032389087852075484,
+          "coverage10": 0.01234892275354703,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030842333712191833,
+          "coverage10": 0.01208617971623752,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030800138848927124,
+          "coverage10": 0.012173760728674023,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.029062322565459375,
+          "coverage10": 0.015239096163951655,
+          "candidate_recall": 0.65
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03069187996059361,
+          "coverage10": 0.011516903135400245,
+          "candidate_recall": 0.65
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.02908429090789028,
+          "coverage10": 0.01186722718514626,
+          "candidate_recall": 0.65
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028636412335348974,
+          "coverage10": 0.011911017691364512,
+          "candidate_recall": 0.65
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.031761144729568584,
+          "coverage10": 0.014538448064459626,
+          "candidate_recall": 0.745
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030796629445914422,
+          "coverage10": 0.01160448414783675,
+          "candidate_recall": 0.745
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028994948625152256,
+          "coverage10": 0.011911017691364512,
+          "candidate_recall": 0.745
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.028417293581154718,
+          "coverage10": 0.011911017691364512,
+          "candidate_recall": 0.745
+        }
+      },
+      "selected": {
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.8,
+          0.2,
+          0.0
+        ]
+      }
+    },
+    "20": {
+      "validation": {
+        "legacy_cold_start": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030815272871159545,
+          "coverage10": 0.011429322122963742
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.027793117201569916,
+          "coverage10": 0.008889472762305133,
+          "candidate_recall": 0.315
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.029295121074370368,
+          "coverage10": 0.009721492380451918,
+          "candidate_recall": 0.315
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.08,
+          "ndcg10": 0.03404746593102799,
+          "coverage10": 0.011210369591872483,
+          "candidate_recall": 0.315
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.031726613602840514,
+          "coverage10": 0.011122788579435978,
+          "candidate_recall": 0.315
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.031511533539210206,
+          "coverage10": 0.012961989840602558,
+          "candidate_recall": 0.28
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030444959871229558,
+          "coverage10": 0.011078998073217727,
+          "candidate_recall": 0.28
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029917624241223614,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.28
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029344029168390184,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.28
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.028626640460889353,
+          "coverage10": 0.01234892275354703,
+          "candidate_recall": 0.295
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030160194624594232,
+          "coverage10": 0.01094762655456297,
+          "candidate_recall": 0.295
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03070829960495576,
+          "coverage10": 0.011078998073217727,
+          "candidate_recall": 0.295
+        },
+        "{\"candidate_k\": 100, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029403855015120647,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.295
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.027848904357736428,
+          "coverage10": 0.009590120861797162,
+          "candidate_recall": 0.58
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.09,
+          "ndcg10": 0.03639377472405892,
+          "coverage10": 0.01094762655456297,
+          "candidate_recall": 0.58
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.02845759556610978,
+          "coverage10": 0.011122788579435978,
+          "candidate_recall": 0.58
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.02823018822420136,
+          "coverage10": 0.011122788579435978,
+          "candidate_recall": 0.58
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.03342292890927789,
+          "coverage10": 0.013049570853039061,
+          "candidate_recall": 0.51
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030160194624594232,
+          "coverage10": 0.01116657908565423,
+          "candidate_recall": 0.51
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.02847230010963417,
+          "coverage10": 0.01094762655456297,
+          "candidate_recall": 0.51
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029344029168390184,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.51
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03199477265481773,
+          "coverage10": 0.012743037309511297,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030160194624594232,
+          "coverage10": 0.011078998073217727,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.03070829960495576,
+          "coverage10": 0.011078998073217727,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029403855015120647,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.475
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.031039951437742328,
+          "coverage10": 0.011954808197582763,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.075,
+          "ndcg10": 0.03094258140061222,
+          "coverage10": 0.011429322122963742,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.0280535084943924,
+          "coverage10": 0.011429322122963742,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"transformer\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029344029168390184,
+          "coverage10": 0.011210369591872483,
+          "candidate_recall": 0.81
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03193494680808726,
+          "coverage10": 0.012961989840602558,
+          "candidate_recall": 0.72
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030088020218985493,
+          "coverage10": 0.011122788579435978,
+          "candidate_recall": 0.72
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.02847230010963417,
+          "coverage10": 0.011078998073217727,
+          "candidate_recall": 0.72
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"collaborative\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029344029168390184,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.72
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+          "users": 200,
+          "hr10": 0.06,
+          "ndcg10": 0.03177565390062347,
+          "coverage10": 0.012655456297074794,
+          "candidate_recall": 0.77
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.4, 0.5, 0.1]}": {
+          "users": 200,
+          "hr10": 0.07,
+          "ndcg10": 0.030160194624594232,
+          "coverage10": 0.011035207566999475,
+          "candidate_recall": 0.77
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.65, 0.25, 0.1]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029262975473366325,
+          "coverage10": 0.011078998073217727,
+          "candidate_recall": 0.77
+        },
+        "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.8, 0.2, 0.0]}": {
+          "users": 200,
+          "hr10": 0.065,
+          "ndcg10": 0.029403855015120647,
+          "coverage10": 0.010991417060781222,
+          "candidate_recall": 0.77
+        }
+      },
+      "selected": {
+        "mode": "sequence_only",
+        "candidate_k": 300,
+        "strategy": "transformer",
+        "weights": [
+          0.4,
+          0.5,
+          0.1
+        ]
+      }
+    }
+  },
+  "selection_metric": "validation NDCG@10",
+  "protocol": "Hide learned user ID; use only the last 2/5/10/20 train events and their genres; exclude only those visible events; full mapped catalogue; held-out targets not used for fitting"
+}

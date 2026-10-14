@@ -1,7 +1,12 @@
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import { LikeButton, MyListButton, PlayButton } from "@/components/MovieActions";
+import {
+  LikeButton,
+  MyListButton,
+  PlayButton,
+  NotInterestedButton,
+} from "@/components/MovieActions";
 import { Poster } from "@/components/Poster";
 import { MatchBadge, RatingBadge } from "@/components/RatingBadge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +31,6 @@ function MovieCardBase({ movie, rank, progress, subtitle, onRemove, className }:
         className,
       )}
     >
-
       {rank ? (
         <span
           aria-hidden
@@ -62,12 +66,12 @@ function MovieCardBase({ movie, rank, progress, subtitle, onRemove, className }:
             <RatingBadge rating={movie.rating} />
           </div>
 
-
-          <div className="absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-background via-background/85 to-transparent p-2 pt-8 opacity-0 transition duration-300 group-hover/card:translate-y-0 group-hover/card:opacity-100">
-            <div className="flex items-center gap-1.5">
+          <div className="absolute inset-x-0 bottom-0 translate-y-0 bg-gradient-to-t from-background via-background/85 to-transparent p-2 pt-8 opacity-100 transition duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
+            <div className="flex flex-wrap items-center gap-1.5">
               <PlayButton movie={movie} size="icon" />
               <LikeButton movie={movie} size="icon" />
               <MyListButton movie={movie} size="icon" />
+              <NotInterestedButton movie={movie} size="icon" />
             </div>
           </div>
 

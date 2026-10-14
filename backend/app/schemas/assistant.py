@@ -4,7 +4,7 @@ Pydantic schemas for the Ask Filmory conversational assistant.
 from __future__ import annotations
 
 from typing import Any, Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.schemas import ScoredMovieSchema
 
@@ -155,6 +155,13 @@ class ChatRequest(BaseModel):
     """User sends a message to the assistant."""
 
     message: str = Field(..., min_length=1, max_length=2000)
+    @field_validator("message")
+    @classmethod
+    def nonblank_message(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Please enter a movie request")
+        return value
     session_id: Optional[str] = Field(
         default=None,
         description="Existing session ID. None → create a new session.",

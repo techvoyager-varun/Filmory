@@ -46,7 +46,10 @@ export function Navbar() {
       )}
     >
       <nav className="mx-auto flex h-16 max-w-[1600px] items-center gap-6 px-4 md:px-10">
-        <Link to="/" className="flex items-center font-display text-lg font-extrabold tracking-tight">
+        <Link
+          to="/"
+          className="flex items-center font-display text-lg font-extrabold tracking-tight"
+        >
           <FilmoryLogo size={32} className="h-8 w-auto" />
         </Link>
 
@@ -128,27 +131,34 @@ export function Navbar() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button size="icon" variant="ghost" className="rounded-md md:hidden" aria-label="Open menu">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-md md:hidden"
+                aria-label="Open menu"
+              >
                 <Menu className="size-5" aria-hidden />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-64 bg-surface">
               <SheetTitle className="px-4 pt-4 font-display">Filmory</SheetTitle>
               <div className="mt-4 flex flex-col gap-1 px-2">
-                {[...NAV_LINKS, { to: "/history", label: "History" }, { to: "/profile", label: "Profile" }].map(
-                  (link) => (
-                    <Link
-                      key={link.to}
-                      to={link.to}
-                      onClick={() => setOpen(false)}
-                      className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                      activeProps={{ className: "bg-muted text-foreground" }}
-                      activeOptions={{ exact: link.to === "/" }}
-                    >
-                      {link.label}
-                    </Link>
-                  ),
-                )}
+                {[
+                  ...NAV_LINKS,
+                  { to: "/history", label: "History" },
+                  { to: "/profile", label: "Profile" },
+                ].map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    activeProps={{ className: "bg-muted text-foreground" }}
+                    activeOptions={{ exact: link.to === "/" }}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
                 <div className="mt-3 border-t border-border pt-3">
                   {isAuthenticated ? (
                     <Button

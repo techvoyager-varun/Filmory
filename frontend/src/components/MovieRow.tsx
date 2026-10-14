@@ -5,6 +5,7 @@ import { RowSkeleton } from "@/components/LoadingSkeleton";
 import { ErrorState } from "@/components/ErrorState";
 import { Button } from "@/components/ui/button";
 import type { ScoredMovie } from "@/types/movie";
+import { useUserData } from "@/context/UserDataContext";
 
 export interface MovieRowProps {
   title: string;
@@ -16,6 +17,7 @@ export interface MovieRowProps {
   ranked?: boolean;
   progressFor?: (movie: ScoredMovie) => number | undefined;
   subtitleFor?: (movie: ScoredMovie) => string | undefined;
+  hideNotInterested?: boolean;
 }
 
 export function MovieRow({
@@ -28,8 +30,13 @@ export function MovieRow({
   ranked,
   progressFor,
   subtitleFor,
+  hideNotInterested = true,
 }: MovieRowProps) {
   const scroller = useRef<HTMLDivElement>(null);
+  const { isHidden } = useUserData();
+  const visibleMovies = hideNotInterested
+    ? movies.filter((movie) => !isHidden(movie.movieId))
+    : movies;
 
   const scrollBy = (direction: 1 | -1) => {
     const el = scroller.current;
@@ -37,7 +44,7 @@ export function MovieRow({
     el.scrollBy({ left: direction * Math.max(320, el.clientWidth * 0.8), behavior: "smooth" });
   };
 
-  if (!loading && !error && movies.length === 0) return null;
+  if (!loading && !error && visibleMovies.length === 0) return null;
 
   return (
     <section className="content-auto group/row relative py-6" aria-label={title}>
@@ -77,7 +84,7 @@ export function MovieRow({
             }}
             className="scrollbar-none flex gap-3 overflow-x-auto scroll-smooth px-4 pb-2 pt-1 outline-none focus-visible:ring-2 focus-visible:ring-primary md:gap-4 md:px-10"
           >
-            {movies.map((movie, index) => (
+            {visibleMovies.map((movie, index) => (
               <div key={movie.movieId}>
                 <MovieCard
                   movie={movie}
@@ -112,7 +119,6 @@ export function MovieRow({
           </Button>
         </div>
       )}
-
     </section>
   );
 }

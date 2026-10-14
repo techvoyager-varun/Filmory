@@ -68,9 +68,7 @@ export function ChatInput({
     <div className={cn("w-full space-y-3", className)}>
       {/* Quick Prompt Chips */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-        <span className="text-muted-foreground whitespace-nowrap pl-1 font-medium">
-          Try:
-        </span>
+        <span className="text-muted-foreground whitespace-nowrap pl-1 font-medium">Try:</span>
         {QUICK_PROMPTS.map((prompt) => (
           <button
             key={prompt}
@@ -117,7 +115,7 @@ export function ChatInput({
         </div>
       </form>
       <div className="flex items-center justify-between px-2 text-[11px] text-muted-foreground/60">
-        <span>Powered by Gemini 2.0 & Filmory DAMR Recommender</span>
+        <span>Catalogue search · grounded movie recommendations</span>
         <span className="hidden sm:inline-flex items-center gap-1">
           Press <CornerDownLeft className="h-2.5 w-2.5" /> to send, Shift + Enter for newline
         </span>
