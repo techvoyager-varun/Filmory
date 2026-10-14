@@ -12,9 +12,15 @@ export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
       { title: "Create your account — Filmory" },
-      { name: "description", content: "Create a Filmory account and tell us what you like to watch." },
+      {
+        name: "description",
+        content: "Create a Filmory account and tell us what you like to watch.",
+      },
       { property: "og:title", content: "Create your account — Filmory" },
-      { property: "og:description", content: "Join Filmory and get recommendations tuned to your taste." },
+      {
+        property: "og:description",
+        content: "Join Filmory and get recommendations tuned to your taste.",
+      },
     ],
   }),
   component: RegisterPage,
@@ -25,32 +31,53 @@ function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [pending, setPending] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!form.name || !form.email || !form.password) {
-      toast.error("Please fill in every field");
+      setFormError("Please fill in every field");
       return;
     }
     if (form.password !== form.confirm) {
-      toast.error("Passwords don't match");
+      setFormError("Passwords don't match");
       return;
     }
     setPending(true);
-    await register({ name: form.name, email: form.email, password: form.password });
-    toast.success(`Welcome, ${form.name}`);
-    void navigate({ to: "/onboarding" });
+    try {
+      await register({ name: form.name, email: form.email, password: form.password });
+      toast.success(`Welcome, ${form.name}`);
+      void navigate({ to: "/onboarding" });
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Could not create your account. Please retry.",
+      );
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
     <AuthShell title="Create your account" subtitle="A few details and you're in.">
       <form onSubmit={submit} className="space-y-4">
+        {formError ? (
+          <p role="alert" className="text-sm text-destructive">
+            {formError}
+          </p>
+        ) : null}
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
-          <Input id="name" value={form.name} onChange={set("name")} placeholder="Ada Lovelace" className="bg-surface" />
+          <Input
+            id="name"
+            value={form.name}
+            onChange={set("name")}
+            placeholder="Ada Lovelace"
+            className="bg-surface"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

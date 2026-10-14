@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from contextvars import ContextVar
 from typing import Optional
 
 from google import genai
@@ -36,34 +37,37 @@ _client: Optional[genai.Client] = None
 
 def _get_client() -> genai.Client:
     global _client
+    if settings.ASSISTANT_LOCAL_ONLY:
+        raise RuntimeError("Cloud LLM calls are disabled by ASSISTANT_LOCAL_ONLY.")
     if _client is None:
         if not settings.GEMINI_API_KEY:
             raise RuntimeError(
                 "GEMINI_API_KEY is not set. Add it to backend/.env to use the assistant."
             )
-        _client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        _client = genai.Client(api_key=settings.GEMINI_API_KEY,
+                               http_options=genai_types.HttpOptions(timeout=int(settings.ASSISTANT_TIMEOUT_S * 1000)))
     return _client
 
 
 # Last extraction path taken by extract_intent (for evaluation auditing).
 # One of: "llm" | "llm_unparseable" | "llm_error_fallback" | "fallback".
 # Read via last_extraction_source(). Never raises.
-_last_source: str = "fallback"
+_last_source: ContextVar[str] = ContextVar("extraction_source", default="fallback")
 # Wall-clock ms spent inside the most recent generate_content call (intent).
 # 0.0 when the last extraction did not reach the API. Read via
 # last_call_latency_ms(). Lets evaluators separate inference latency from
 # quota-pacing sleeps.
-_last_latency_ms: float = 0.0
+_last_latency_ms: ContextVar[float] = ContextVar("extraction_latency_ms", default=0.0)
 
 
 def last_extraction_source() -> str:
     """Return how the most recent extract_intent call produced its delta."""
-    return _last_source
+    return _last_source.get()
 
 
 def last_call_latency_ms() -> float:
     """Return API time (ms) of the most recent intent call, 0.0 if none."""
-    return _last_latency_ms
+    return _last_latency_ms.get()
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +164,24 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
     msg_trimmed = user_message.strip()
     msg_lower = msg_trimmed.lower()
 
+    # Preserve the current request mode when removing constraints in a follow-up.
+    if re.match(r"^(?:please\s+)?(?:clear|remove|forget|reset|drop)\b", msg_lower):
+        if re.search(r"\ball\s+(?:filters|restrictions|constraints)\b", msg_lower):
+            return IntentDelta(clear_fields=["all"])
+        clear_fields = []
+        for pattern, fields in [
+            (r"\b(?:runtime|length|duration|time limit)\b", ["max_runtime_minutes"]),
+            (r"\b(?:year|years|decade)\b", ["min_year", "max_year"]),
+            (r"\b(?:rating|ratings)\b", ["min_rating"]),
+            (r"\bmood\b", ["mood"]),
+            (r"\bgenre\s+(?:filters?|restrictions?|constraints?)\b", ["preferred_genres", "excluded_genres"]),
+        ]:
+            if re.search(pattern, msg_lower):
+                clear_fields.extend(fields)
+        if clear_fields:
+            # The original search phrase can also contain the cleared limits.
+            return IntentDelta(clear_fields=clear_fields + ["semantic_query"])
+
     # 1. Bare "all movies" / "show movies" without criteria
     bare_queries = {"all movie", "all movies", "show all movies", "show movies", "list movies", "movies", "films"}
     if msg_lower in bare_queries:
@@ -213,6 +235,9 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
         )
     )
     suffix_match = None
+    genre_phrase = r"(?:action|adventure|animation|animated|comedy|comedies|crime|documentary|documentaries|drama|fantasy|horror|mystery|romance|romantic|sci-fi|science fiction|thriller|war|western|westerns|musical|children|imax)"
+    bare_genre_request = bool(re.fullmatch(rf"(?:(?:show|list)\s+)?(?:all\s+)?{genre_phrase}(?:\s+(?:and|or)\s+{genre_phrase})*\s+(?:movies?|films?)", msg_lower))
+    _looks_like_request = _looks_like_request or bare_genre_request
     if not _looks_like_request:
         suffix_match = re.search(r"^(.+?)\s+(?:all\s+movies?|all\s+films?|movies?|films?|series|franchise)$", msg_lower)
     if suffix_match:
@@ -229,7 +254,7 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
         )
 
     prefix_match = re.search(r"^(?:all\s+(?:the\s+)?|list\s+all\s+(?:the\s+)?|show\s+all\s+(?:the\s+)?)(.+?)(?:\s+movies?|\s+films?)?$", msg_lower)
-    if prefix_match:
+    if prefix_match and not bare_genre_request:
         title_candidate = prefix_match.group(1).strip()
         title_candidate = re.sub(r"\s+(?:movies?|films?|series|franchise)$", "", title_candidate).strip()
         if title_candidate and title_candidate not in bare_queries:
@@ -244,12 +269,12 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
     # to personalized_recommendation and skip the exact-year title branch below.
     _range_min: Optional[int] = None
     _range_max: Optional[int] = None
-    _after_m = re.search(r"(?:after|post|since|newer\s+than)\s+(19\d\d|20\d\d)\b", msg_lower)
+    _after_m = re.search(r"\b(after|post|since|newer\s+than)\s+(19\d\d|20\d\d)\b", msg_lower)
     if _after_m:
-        _range_min = int(_after_m.group(1))
-    _before_m = re.search(r"(?:before|pre|older\s+than|up\s+to)\s+(19\d\d|20\d\d)\b", msg_lower)
+        _range_min = int(_after_m.group(2)) + (0 if _after_m.group(1) == 'since' else 1)
+    _before_m = re.search(r"\b(before|pre|older\s+than|up\s+to)\s+(19\d\d|20\d\d)\b", msg_lower)
     if _before_m:
-        _range_max = int(_before_m.group(1))
+        _range_max = int(_before_m.group(2)) - (0 if _before_m.group(1) == 'up to' else 1)
     _dec_m = re.search(r"\b(?:from|of|in|during)?\s*(?:the\s+)?((?:19|20)?\d0)s\b", msg_lower)
     if _dec_m and _range_min is None and _range_max is None:
         _dec_raw = _dec_m.group(1)
@@ -293,7 +318,11 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
         "Sci-Fi": ["sci-fi", "scifi", "sci fi", "science fiction"],
         "Thriller": ["thriller"],
         "War": ["war"],
-        "Western": ["western"],
+        "Western": ["western", "westerns"],
+        "Children": ["children", "kids", "family"],
+        "Musical": ["musical", "musicals"],
+        "Film-Noir": ["film-noir", "film noir"],
+        "IMAX": ["imax"],
     }
     _words = re.findall(r"[a-z]+", msg_lower)
     _has_discovery = (
@@ -307,23 +336,30 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
         )
     )
     preferred = []
+    excluded = []
+    negative_clauses = re.findall(r"\b(?:without|excluding|exclude|except|no|not)\s+(.+?)(?=\b(?:but|with|prefer|include|under|over|rated|rating|after|before|since)\b|[.;]|$)", msg_lower)
     for g, aliases in _genre_aliases.items():
         strict_hit = re.search(rf"\b{re.escape(aliases[0])}\b", msg_lower)
         loose_hit = any(
             re.search(rf"\b{re.escape(a)}\b", msg_lower) for a in aliases[1:]
         )
         if strict_hit or (loose_hit and _has_discovery):
-            preferred.append(g)
+            negated = any(re.search(rf"\b{re.escape(a)}\b", clause) for a in aliases for clause in negative_clauses)
+            (excluded if negated else preferred).append(g)
+    rating_floor = None
+    rating_match = re.search(r"\b(?:rated|rating)\s+(?:(?:at least|above|over|minimum|min)\s+)?(\d+(?:\.\d+)?)\s*(?:out of\s+10|/\s*10)?", msg_lower)
+    if rating_match:
+        rating_floor = min(10.0, float(rating_match.group(1)))
     runtime_cap: Optional[int] = None
     _rt_match = re.search(
-        r"(?:under|less than|below|max|within|up to|shorter than)\s+(\d+)\s*(hours?|hrs?|minutes?|mins?)",
+        r"(?:under|less than|below|max|within|up to|shorter than)\s+(\d+(?:\.\d+)?)\s*(hours?|hrs?|minutes?|mins?)",
         msg_lower,
     )
     if _rt_match:
-        _amount = int(_rt_match.group(1))
+        _amount = float(_rt_match.group(1))
         _unit = _rt_match.group(2)
-        runtime_cap = _amount * 60 if _unit.startswith("hour") or _unit.startswith("hr") else _amount
-    if preferred or runtime_cap is not None or _range_min is not None or _range_max is not None:
+        runtime_cap = int(_amount * 60 if _unit.startswith("hour") or _unit.startswith("hr") else _amount)
+    if preferred or excluded or rating_floor is not None or runtime_cap is not None or _range_min is not None or _range_max is not None:
         _set_fields: dict = {}
         if runtime_cap is not None:
             _set_fields["max_runtime_minutes"] = runtime_cap
@@ -331,9 +367,13 @@ def fallback_extract_intent(user_message: str) -> IntentDelta:
             _set_fields["min_year"] = _range_min
         if _range_max is not None:
             _set_fields["max_year"] = _range_max
+        if rating_floor is not None:
+            _set_fields["min_rating"] = rating_floor
         return IntentDelta(
             request_mode="personalized_recommendation",
             preferred_genres=preferred,
+            excluded_genres=excluded,
+            min_rating=rating_floor,
             semantic_query=msg_trimmed,
             max_runtime_minutes=runtime_cap,
             min_year=_range_min,
@@ -376,9 +416,10 @@ def extract_intent(
     a structured IntentDelta. Falls back to heuristic IntentDelta on failure.
     The path taken is recorded in last_extraction_source().
     """
-    global _last_source
-    global _last_latency_ms
-    _last_latency_ms = 0.0
+    _last_source.set("fallback")
+    _last_latency_ms.set(0.0)
+    if settings.ASSISTANT_LOCAL_ONLY or not settings.GEMINI_API_KEY:
+        return fallback_extract_intent(user_message)
     client = _get_client()
 
     messages: list[genai_types.Content] = []
@@ -416,7 +457,7 @@ def extract_intent(
                 response_mime_type="application/json",
             ),
         )
-        _last_latency_ms = (_time.monotonic() - _t0) * 1000.0
+        _last_latency_ms.set((_time.monotonic() - _t0) * 1000.0)
 
         raw_text = response.text.strip()
         logger.debug("LLM intent response: %s", raw_text[:500])
@@ -424,12 +465,12 @@ def extract_intent(
         # Parse and validate through Pydantic
         data = json.loads(raw_text)
         delta = IntentDelta.model_validate(data)
-        _last_source = "llm"
+        _last_source.set("llm")
         return delta
 
     except json.JSONDecodeError as e:
         logger.warning("Failed to parse LLM intent JSON: %s", e)
-        _last_source = "llm_unparseable"
+        _last_source.set("llm_unparseable")
         return IntentDelta(
             semantic_query=user_message,
             needs_clarification=True,
@@ -438,7 +479,7 @@ def extract_intent(
     except Exception as e:
         logger.error("LLM intent extraction failed: %s", e, exc_info=True)
         # Graceful fallback to heuristic intent parsing
-        _last_source = "llm_error_fallback"
+        _last_source.set("llm_error_fallback")
         return fallback_extract_intent(user_message)
 
 
@@ -460,6 +501,9 @@ def generate_explanation(
     if not evidence_list:
         summary = "I couldn't find movies matching those specific criteria. Try broadening your genres or runtime constraints."
         return summary, StructuredExplanation(summary=summary, items=[])
+
+    if settings.ASSISTANT_LOCAL_ONLY or not settings.GEMINI_API_KEY:
+        return _template_explanation(evidence_list)
 
     valid_movie_ids = {ev.movie_id for ev in evidence_list}
     valid_evidence_keys: dict[int, set[str]] = {
@@ -511,12 +555,15 @@ def generate_explanation(
         for item in candidate_explanation.items:
             if item.movie_id not in valid_movie_ids:
                 logger.warning("LLM hallucinated movie_id %s not in evidence package", item.movie_id)
-                continue
+                raise ValueError("Explanation references a movie outside its evidence bundle")
             # Filter evidence_ids to strictly known keys
             allowed_keys = valid_evidence_keys.get(item.movie_id, set())
-            item.evidence_ids = [eid for eid in item.evidence_ids if eid in allowed_keys]
+            if not item.evidence_ids or any(eid not in allowed_keys for eid in item.evidence_ids):
+                raise ValueError("Explanation has missing or invalid evidence references")
             validated_items.append(item)
 
+        if {item.movie_id for item in validated_items} != valid_movie_ids or len(validated_items) != len(valid_movie_ids):
+            raise ValueError("Explanation must cover every recommended movie exactly once")
         if validated_items:
             candidate_explanation.items = validated_items
             summary = candidate_explanation.summary or "Here are recommendations matching your preferences:"
@@ -525,9 +572,13 @@ def generate_explanation(
     except Exception as e:
         logger.error("LLM explanation generation failed or invalid: %s", e, exc_info=True)
 
-    # Template fallback: 100% deterministic and factually grounded
+    return _template_explanation(evidence_list)
+
+
+def _template_explanation(evidence_list: list[MovieEvidence]) -> tuple[str, StructuredExplanation]:
+    """Deterministic explanations using only the supplied catalogue evidence."""
     items = []
-    for ev in evidence_list[:5]:
+    for ev in evidence_list:
         matched_str = ", ".join(ev.matched_constraints) if ev.matched_constraints else "your preferences"
         exp_text = f"{ev.title} fits {matched_str}."
         items.append(

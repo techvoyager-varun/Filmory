@@ -18,7 +18,7 @@ def create_access_token(subject: str | int, expires_delta: Optional[datetime.tim
     A nonzero ``expires_delta`` overrides the configured token lifetime.
     """
     now = datetime.datetime.now(datetime.timezone.utc)
-    if expires_delta:
+    if expires_delta is not None:
         expire = now + expires_delta
     else:
         expire = now + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

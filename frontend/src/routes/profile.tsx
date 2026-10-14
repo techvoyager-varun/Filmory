@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getRecommendations } from "@/api/recommendations";
+import { getMoviesByIds } from "@/api/movies";
 import { MovieRow } from "@/components/MovieRow";
 import { RequireAuth } from "@/components/RequireAuth";
 import { TasteDriftCard } from "@/components/TasteDriftCard";
@@ -29,7 +30,12 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const { user, logout } = useAuth();
-  const { myList, history } = useUserData();
+  const { myList, history, hiddenMovies } = useUserData();
+  const hidden = useQuery({
+    queryKey: ["hidden-movies", user?.userId ?? "guest", hiddenMovies],
+    queryFn: () => getMoviesByIds(hiddenMovies),
+    enabled: !!user,
+  });
   const recommendations = useQuery({
     queryKey: ["recommendations", user?.userId ?? "guest"],
     queryFn: () => getRecommendations(user?.userId ?? "guest"),
@@ -83,15 +89,25 @@ function ProfilePage() {
       <div className="mt-6">
         <MovieRow
           title="Recommended For You"
-          subtitle="Picked from your ratings and watch history"
+          subtitle="Picked from your preferences, likes and activity"
           movies={recommendations.data ?? []}
           loading={recommendations.isLoading}
           error={recommendations.isError}
           onRetry={() => void recommendations.refetch()}
         />
-        <MovieRow title="My List" movies={myList} />
+        <MovieRow title="My List" movies={myList} hideNotInterested={false} />
+        <MovieRow
+          title="Hidden from Recommendations"
+          subtitle="Use Show again on a movie to undo Not interested. Your saved list and history are kept."
+          movies={hidden.data ?? []}
+          hideNotInterested={false}
+          loading={hidden.isLoading && hiddenMovies.length > 0}
+          error={hidden.isError}
+          onRetry={() => void hidden.refetch()}
+        />
         <MovieRow
           title="Recently Watched"
+          hideNotInterested={false}
           movies={history.map((h) => h.movie)}
           progressFor={(movie) => history.find((h) => h.movie.movieId === movie.movieId)?.progress}
         />

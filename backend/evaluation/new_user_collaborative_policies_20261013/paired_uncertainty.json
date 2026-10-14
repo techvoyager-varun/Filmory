@@ -1,0 +1,19 @@
+{
+  "protocol": "Paired bootstrap over the same 200 users; average each user across four history contexts before resampling",
+  "seed": 20261016,
+  "resamples": 10000,
+  "hr10": {
+    "mean_difference": 0.0025,
+    "95_percent_interval": [
+      -0.01125,
+      0.01375
+    ]
+  },
+  "ndcg10": {
+    "mean_difference": -0.0002972549395918986,
+    "95_percent_interval": [
+      -0.00864564219800356,
+      0.0052381478017480805
+    ]
+  }
+}

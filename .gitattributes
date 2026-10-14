@@ -1,0 +1,3 @@
+# Frozen research artifacts are hashed as bytes; preserve their original newlines.
+backend/training/runs/** -text
+backend/evaluation/** -text

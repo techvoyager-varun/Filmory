@@ -20,7 +20,10 @@ export const Route = createFileRoute("/movies/")({
           "Explore the full 27,000-title Filmory catalog and filter films by genre, rating or release year.",
       },
       { property: "og:title", content: "Browse all movies — Filmory" },
-      { property: "og:description", content: "Filter the Filmory catalog by genre, rating and year." },
+      {
+        property: "og:description",
+        content: "Filter the Filmory catalog by genre, rating and year.",
+      },
     ],
   }),
   component: MoviesPage,
@@ -95,7 +98,9 @@ function MoviesPage() {
             aria-pressed={sort === s}
             className={cn(
               "rounded-md px-3 py-1 capitalize transition-colors",
-              sort === s ? "bg-surface-raised text-gold" : "text-muted-foreground hover:text-foreground",
+              sort === s
+                ? "bg-surface-raised text-gold"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {s}
@@ -123,7 +128,9 @@ function MoviesPage() {
                   disabled={isFetching}
                   onClick={() => setLimit((l) => l + PAGE_SIZE)}
                 >
-                  {isFetching ? "Loading..." : `Load more (${(total - movies.length).toLocaleString()} left)`}
+                  {isFetching
+                    ? "Loading..."
+                    : `Load more (${(total - movies.length).toLocaleString()} left)`}
                 </Button>
               </div>
             ) : null}

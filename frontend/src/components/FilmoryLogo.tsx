@@ -1,13 +1,7 @@
 /**
  * FilmOry logo icon — renders the brand logo from /logo.jpeg.
  */
-export function FilmoryLogo({
-  size = 28,
-  className = "",
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function FilmoryLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <img
       src="/logo.png"

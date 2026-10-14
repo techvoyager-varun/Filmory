@@ -1,0 +1,15 @@
+{
+  "scope": "Opt-in local judged-interest pilot; QA fixtures excluded; not actual watch satisfaction or controlled A/B evidence",
+  "participants": 0,
+  "slates": 0,
+  "completed_slates": 0,
+  "answer_counts": {},
+  "interesting_share_among_decided": null,
+  "limitations": [
+    "Self-selected participants",
+    "Repeated slates from one participant are not independent samples",
+    "Unknown/unrated movies are not automatically negative",
+    "No accuracy or significance claim from a small pilot"
+  ],
+  "rows": []
+}

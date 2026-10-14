@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "scope": "Only the newly created frontend QA account and its child rows. Catalogue, models, demo account and other users untouched.",
+  "removed_test_rows": {
+    "assistant_feedback": 1,
+    "assistant_messages": 2,
+    "assistant_sessions": 1,
+    "interactions": 6,
+    "watch_history": 2,
+    "my_list": 0,
+    "likes": 0,
+    "user_genre_preferences": 4,
+    "user_preferences": 1,
+    "users": 1
+  }
+}

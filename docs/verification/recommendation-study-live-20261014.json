@@ -1,0 +1,12 @@
+{
+  "scope": "Dedicated QA fixture, not human participation",
+  "checks": [
+    "One consent-triggered study",
+    "Ten unique frozen titles",
+    "Three distinct ratings saved",
+    "Policy and serving source snapshot retained",
+    "No likes/watch history side effects",
+    "QA ratings excluded from participant export"
+  ],
+  "status": "passed"
+}

@@ -14,11 +14,13 @@ Coordinates:
 from __future__ import annotations
 
 import datetime
+from app.core.time import utcnow_naive, utc_isoformat
 import logging
 import uuid
 from typing import Any, Optional
 
 import torch
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -52,8 +54,9 @@ from app.schemas.assistant import (
     StructuredExplanation,
 )
 from app.schemas.schemas import ScoredMovieSchema
-from app.services.llm_client import extract_intent, fallback_extract_intent, generate_explanation
+from app.services.llm_client import extract_intent, fallback_extract_intent, generate_explanation, last_extraction_source
 from app.services.semantic_search import search_movies_by_intent
+from app.services.recommendation_feedback import hidden_movie_ids
 
 logger = logging.getLogger("filmory.orchestrator")
 
@@ -76,14 +79,14 @@ def _get_or_create_session(
         )
         if sess:
             return sess
-        logger.warning("Session %s not found for user %s, creating new", session_id, user.id)
+        raise HTTPException(status_code=404, detail="Session not found.")
 
     sess = AssistantSession(
         id=str(uuid.uuid4()),
         user_id=user.id,
         active_intent={},
-        created_at=datetime.datetime.utcnow(),
-        updated_at=datetime.datetime.utcnow(),
+        created_at=utcnow_naive(),
+        updated_at=utcnow_naive(),
     )
     db.add(sess)
     db.flush()
@@ -179,6 +182,13 @@ def _merge_intents(
                 merged["preferred_genres"] = []
             elif field == "mood":
                 merged["mood"] = ""
+            elif field == "semantic_query":
+                merged["semantic_query"] = ""
+            elif field == "reference_titles":
+                merged["reference_titles"] = []
+            elif field.startswith("reference_titles:"):
+                title = field.split(":", 1)[1].casefold()
+                merged["reference_titles"] = [t for t in merged.get("reference_titles", []) if t.casefold() != title]
             elif field.startswith("excluded_genres:"):
                 genre_to_remove = field.split(":", 1)[1]
                 merged["excluded_genres"] = [
@@ -350,15 +360,16 @@ def handle_message(
         session_id=session.id,
         role="user",
         content=message,
-        created_at=datetime.datetime.utcnow(),
+        created_at=utcnow_naive(),
     )
     db.add(user_msg)
     db.flush()
 
     # 2. Extract intent delta
-    ai_interpretation_available = bool(settings.GEMINI_API_KEY)
+    ai_interpretation_available = bool(settings.GEMINI_API_KEY) and not settings.ASSISTANT_LOCAL_ONLY
     try:
         delta = extract_intent(message, conversation_history)
+        ai_interpretation_available = last_extraction_source() == "llm"
         logger.info("[AUDIT:INTENT] Extracted intent delta: %s", delta.model_dump())
     except Exception as e:
         logger.error("Intent extraction failed: %s", e, exc_info=True)
@@ -372,7 +383,7 @@ def handle_message(
             role="assistant",
             content=delta.clarification_question,
             intent_snapshot=delta.model_dump(),
-            created_at=datetime.datetime.utcnow(),
+            created_at=utcnow_naive(),
         )
         db.add(assistant_msg)
         db.commit()
@@ -397,10 +408,11 @@ def handle_message(
     # 4. Merge intent with session state using explicit delta
     merged_intent = _merge_intents(session.active_intent or {}, delta, previous_displayed_movie_ids)
     session.active_intent = merged_intent.model_dump()
-    session.updated_at = datetime.datetime.utcnow()
+    session.updated_at = utcnow_naive()
 
     # 5. Get user's watched movie IDs for exclusion
     watched_ids = set()
+    watched_ids.update(hidden_movie_ids(user.id, db))
     watch_records = db.query(WatchHistory.movie_id).filter(WatchHistory.user_id == user.id).all()
     watched_ids.update(r[0] for r in watch_records)
     watched_ids.update(merged_intent.excluded_movie_ids)
@@ -412,8 +424,10 @@ def handle_message(
 
     # Base notice based on AI interpretation status
     notice: Optional[str] = None
-    if not ai_interpretation_available:
-        notice = "AI interpretation is unavailable. Showing catalog search results."
+    if settings.ASSISTANT_LOCAL_ONLY:
+        notice = "Local mode: using built-in parsing and catalogue evidence. No cloud AI calls."
+    elif not ai_interpretation_available:
+        notice = "AI interpretation is unavailable. Using built-in parsing and catalogue metadata."
 
     # 6. Retrieve candidates via metadata/keyword search enforcing hard constraints
     search_movies, reference_ids = search_movies_by_intent(
@@ -467,10 +481,10 @@ def handle_message(
                         movieId=m.movie_id,
                         title=m.title,
                         genres=m.genres or [],
-                        year=m.year,
-                        runtime=m.runtime,
-                        rating=float(m.rating) if m.rating is not None else None,
-                        posterUrl=m.poster_url,
+                        year=m.year or 0,
+                        runtime=m.runtime or 0,
+                        rating=float(m.rating or 0.0),
+                        posterUrl=m.poster_url or "",
                         score=round(score, 4),
                         explanation=f"Catalog match: '{m.title}'",
                     )
@@ -617,7 +631,7 @@ def handle_message(
         content=explanation,
         intent_snapshot=merged_intent.model_dump(),
         movie_ids=returned_movie_ids,
-        created_at=datetime.datetime.utcnow(),
+        created_at=utcnow_naive(),
     )
     db.add(assistant_msg)
     db.commit()
@@ -660,8 +674,8 @@ def get_user_sessions(user: User, db: Session) -> list[SessionSummary]:
                 session_id=s.id,
                 preview=first_user_msg or "New conversation",
                 message_count=len(s.messages),
-                created_at=s.created_at.isoformat(),
-                updated_at=s.updated_at.isoformat(),
+                created_at=utc_isoformat(s.created_at),
+                updated_at=utc_isoformat(s.updated_at),
             )
         )
     return result
@@ -708,7 +722,7 @@ def get_session_detail(user: User, session_id: str, db: Session) -> Optional[Ses
                 movies=scored,
                 intent=MovieIntent.model_validate(msg.intent_snapshot) if msg.intent_snapshot else None,
                 evidence=[],
-                timestamp=msg.created_at.isoformat(),
+                timestamp=utc_isoformat(msg.created_at),
             )
         )
 
@@ -716,8 +730,8 @@ def get_session_detail(user: User, session_id: str, db: Session) -> Optional[Ses
         session_id=sess.id,
         messages=messages,
         active_intent=MovieIntent.model_validate(sess.active_intent) if sess.active_intent else MovieIntent(),
-        created_at=sess.created_at.isoformat(),
-        updated_at=sess.updated_at.isoformat(),
+        created_at=utc_isoformat(sess.created_at),
+        updated_at=utc_isoformat(sess.updated_at),
     )
 
 
@@ -752,13 +766,24 @@ def submit_feedback(user: User, feedback: FeedbackRequest, db: Session) -> bool:
     if not sess:
         return False
 
+    if feedback.message_id is not None:
+        message = db.query(AssistantMessageRecord).filter(
+            AssistantMessageRecord.id == feedback.message_id,
+            AssistantMessageRecord.session_id == sess.id,
+            AssistantMessageRecord.role == "assistant",
+        ).first()
+        if message is None:
+            raise HTTPException(status_code=400, detail="Feedback message does not belong to this conversation.")
+    if feedback.movie_id is not None and db.get(Movie, feedback.movie_id) is None:
+        raise HTTPException(status_code=400, detail="Feedback movie does not exist.")
+
     fb = AssistantFeedback(
         session_id=feedback.session_id,
         message_id=feedback.message_id,
         movie_id=feedback.movie_id,
         feedback_type=feedback.feedback_type,
         comment=feedback.comment,
-        created_at=datetime.datetime.utcnow(),
+        created_at=utcnow_naive(),
     )
     db.add(fb)
     db.commit()
@@ -783,10 +808,14 @@ def clear_session_filter(
     if not sess:
         return None
 
+    allowed = {"all", "all_restrictions", "semantic_query", "reference_titles", "mood",
+               "preferred_genres", "excluded_genres", "min_year", "max_year", "min_rating", "max_runtime_minutes"}
+    if filter_key not in allowed and not any(filter_key.startswith(k + ":") and filter_key.split(":", 1)[1] for k in ["preferred_genres", "excluded_genres", "reference_titles"]):
+        raise HTTPException(status_code=400, detail="Unknown filter.")
     delta = IntentDelta(clear_fields=[filter_key])
     updated_intent = _merge_intents(sess.active_intent or {}, delta)
     sess.active_intent = updated_intent.model_dump()
-    sess.updated_at = datetime.datetime.utcnow()
+    sess.updated_at = utcnow_naive()
     db.commit()
     logger.info("[AUDIT:FILTER_CLEARED] Cleared filter '%s' on session %s", filter_key, session_id)
     return updated_intent

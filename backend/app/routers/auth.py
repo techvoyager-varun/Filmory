@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.database import get_db
-from app.models.db_models import User, UserPreference, UserGenrePreference
+from app.models.db_models import User, UserPreference, UserGenrePreference, Movie
 from app.schemas.schemas import (
     RegisterRequest,
     LoginRequest,
@@ -41,18 +42,16 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         model_user_id=None, # New user starts without model embedding
     )
     db.add(user)
-    db.commit()
+    try:
+        db.flush()
+        db.add(UserPreference(user_id=user.id, favorite_genres=[], favorite_movie_ids=[], onboarding_completed=False))
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        if db.query(User).filter(User.email == payload.email.lower()).first():
+            raise HTTPException(status_code=409, detail="An account with this email already exists")
+        raise
     db.refresh(user)
-
-    # Initialize empty preferences
-    pref = UserPreference(
-        user_id=user.id,
-        favorite_genres=[],
-        favorite_movie_ids=[],
-        onboarding_completed=False,
-    )
-    db.add(pref)
-    db.commit()
 
     token = create_access_token(user.id)
     return AuthResponse(
@@ -123,6 +122,13 @@ def update_preferences(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    from app.routers.movies import GENRE_LIST
+    if any(g not in GENRE_LIST for g in payload.favoriteGenres):
+        raise HTTPException(status_code=400, detail="Unknown favorite genre")
+    if payload.favoriteMovieIds:
+        existing_ids = {row[0] for row in db.query(Movie.movie_id).filter(Movie.movie_id.in_(payload.favoriteMovieIds))}
+        if existing_ids != set(payload.favoriteMovieIds):
+            raise HTTPException(status_code=400, detail="A favorite movie was not found in the catalogue")
     pref = db.query(UserPreference).filter(UserPreference.user_id == user.id).first()
     if not pref:
         pref = UserPreference(user_id=user.id)
@@ -142,5 +148,7 @@ def update_preferences(
         if not existing_gp:
             db.add(UserGenrePreference(user_id=user.id, genre=g, score=2.0))
 
+    from app.services.preference_signals import refresh_genre_signals
+    refresh_genre_signals(user.id, db)
     db.commit()
     return user_to_schema(user, db)

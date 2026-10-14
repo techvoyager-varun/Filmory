@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ThumbsUp, ThumbsDown, Eye, Check } from "lucide-react";
 import { Poster } from "@/components/Poster";
 import { RatingBadge } from "@/components/RatingBadge";
-import { LikeButton, MyListButton } from "@/components/MovieActions";
+import { LikeButton, MyListButton, NotInterestedButton } from "@/components/MovieActions";
 import { submitFeedback } from "@/api/assistant";
 import type { ScoredMovie } from "@/types/movie";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,10 @@ export function AssistantMovieCards({
 
   if (!movies || movies.length === 0) return null;
 
-  const handleFeedback = async (movieId: number, type: "helpful" | "not_helpful" | "already_watched") => {
+  const handleFeedback = async (
+    movieId: number,
+    type: "helpful" | "not_helpful" | "already_watched",
+  ) => {
     try {
       await submitFeedback({
         session_id: sessionId,
@@ -79,7 +82,7 @@ export function AssistantMovieCards({
                     <span>{movie.year}</span>
                     {movie.score ? (
                       <span className="font-mono text-gold text-[10px]">
-                        {(movie.score * 100).toFixed(0)}% match
+                        Score {movie.score.toFixed(2)}
                       </span>
                     ) : null}
                   </div>
@@ -98,10 +101,11 @@ export function AssistantMovieCards({
                 </div>
 
                 {/* Card Actions & Feedback */}
-                <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between">
-                  <div className="flex items-center gap-1">
+                <div className="mt-2.5 pt-2 border-t border-border/50 flex flex-wrap gap-2 items-center justify-between">
+                  <div className="flex flex-wrap items-center gap-1">
                     <LikeButton movie={movie} size="icon" />
                     <MyListButton movie={movie} size="icon" />
+                    <NotInterestedButton movie={movie} size="icon" />
                   </div>
 
                   {/* Feedback Mini Toolbar */}

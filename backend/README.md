@@ -2,6 +2,27 @@
 
 Filmory is a full-stack AI movie discovery platform powered by deep learning recommendation models trained on the MovieLens catalog.
 
+Ask Filmory defaults to local parsing and catalogue-evidence explanations:
+`ASSISTANT_LOCAL_ONLY=true`. It does not make Gemini requests, even when a key is
+configured. No paid service or new model download is required. Complex language
+may need rephrasing into explicit titles, genres, years and runtime constraints.
+
+Movie feedback uses the existing interaction log: `not_interested` hides a title
+from personalized/assistant recommendations; `show_again` reverses that choice.
+`GET /api/users/me/hidden-movies` returns the current account's hidden IDs. The
+frontend profile offers undo without deleting saved titles or watch history.
+See `docs/verification/recommendation-improvements-2026-10-14.md` at the repository
+root for scope and verification details.
+
+The signed-in homepage also offers an optional **Help evaluate Filmory** pilot.
+Its three owned study endpoints freeze the movie list/policy and save relevance
+judgments separately from recommendation history. Fresh migrations include
+`0003_recommendation_study`; local startup creates the missing study table.
+Export human results with `scripts/export_recommendation_study.py --output
+evaluation/classmate-pilot-01.json` after classmates participate. Dedicated QA
+accounts are excluded and names/emails omitted. Instructions are in
+`docs/verification/classmate-feedback-guide.md` at the repository root.
+
 ---
 
 ## System Architecture
@@ -19,6 +40,20 @@ PyTorch Recommendation Engine (NCF Hybrid + Sequential Transformer + Genre Matri
 ---
 
 ## ML Models & Artifacts
+
+The active trained checkpoints remain immutable. `backend/ml/serving_policy.json`
+binds the new-account serving policy to their SHA-256 hashes. Accounts without a
+learned user embedding start with the existing cold-start recommendations; after
+two distinct mapped movie events, a validation-selected 300-candidate path combines
+Transformer scores with collaborative-neighbor votes. History groups of 2, 5, 10
+and 20 events have separately validated weights. The first expert in this path is
+neighbor voting, not another user's NCF embedding. Mapped accounts retain the
+previous validated default.
+
+See `docs/research/RECOMMENDATION_QUALITY_REVIEW_2026-10-13.md` for the measured
+trade-offs. To roll back this serving change, remove the standalone policy overlay
+and restart the backend; the original checkpoint bundle and old cold-start path
+remain available. A changed bundle requires a new matching policy evaluation.
 
 All models are loaded into memory once during FastAPI startup (`lifespan`) and run on CPU or CUDA GPU automatically:
 
@@ -70,8 +105,8 @@ All models are loaded into memory once during FastAPI startup (`lifespan`) and r
 Create `backend/.env` (or copy from `.env.example`):
 
 ```env
-DATABASE_URL=postgresql+psycopg://postgres:Varunalwar%40025@localhost:5432/filmory
-SECRET_KEY=filmory_super_secret_jwt_key_2026_production_grade
+DATABASE_URL=postgresql+psycopg://postgres:your-url-encoded-password@localhost:5432/filmory
+SECRET_KEY=generate-a-long-random-secret-before-running
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 FRONTEND_ORIGIN=http://localhost:5173
 PORT=8000
@@ -111,6 +146,16 @@ API Documentation will be available at:
 ```bash
 python -m pytest -v tests
 ```
+
+API tests use a disposable SQLite catalogue and disable external AI/poster calls;
+they do not write test users into the configured PostgreSQL database. The active
+model bundle must be present. On Windows with restricted temporary folders, create
+`backend/.test-tmp` and pass a new `--basetemp=.test-tmp/<run-name>` from the backend directory.
+
+Migration `0002_assistant_tables` completes the fresh-install schema. Existing
+databases created by application startup may already contain these tables with no
+Alembic stamp: back up and compare the schema before reconciling their migration
+history. Do not blindly apply or stamp migrations over such a database.
 
 ---
 

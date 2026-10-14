@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
@@ -10,6 +11,7 @@ from app.routers.movies import router as movies_router
 from app.routers.recommendations import router as recommendations_router
 from app.routers.interactions import router as interactions_router
 from app.routers.assistant import router as assistant_router
+from app.routers.recommendation_study import router as study_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -81,9 +83,17 @@ app.include_router(movies_router)
 app.include_router(recommendations_router)
 app.include_router(interactions_router)
 app.include_router(assistant_router)
+app.include_router(study_router)
 
 @app.get("/health", tags=["Health"])
 def health_check():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    if not model_service.is_loaded:
+        raise HTTPException(status_code=503, detail="Recommendation models unavailable")
     return {
         "status": "healthy",
         "service": "Filmory AI Backend",

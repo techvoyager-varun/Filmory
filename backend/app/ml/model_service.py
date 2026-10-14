@@ -2,6 +2,8 @@ import os
 import json
 import pickle
 import logging
+import hashlib
+import math
 import torch
 import torch.nn.functional as F
 from typing import Dict, Any, List, Optional, Tuple, Set
@@ -16,6 +18,14 @@ class ModelService:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.ml_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "ml")
+        pointer = os.path.join(self.ml_dir, "active_bundle.json")
+        if os.path.exists(pointer):
+            with open(pointer, encoding="utf-8") as f:
+                bundle = json.load(f)["path"]
+            resolved = os.path.abspath(os.path.join(self.ml_dir, bundle))
+            if not os.path.isfile(os.path.join(resolved, "model_config.json")):
+                raise RuntimeError("Active model bundle is missing; restore active_bundle.json or retrain")
+            self.ml_dir = resolved
         
         # Mappings
         self.user2idx: Dict[int, int] = {}
@@ -27,6 +37,7 @@ class ModelService:
         
         # Config & matrices
         self.config: Dict[str, Any] = {}
+        self.serving_policy: Dict[str, Any] = {}
         self.movie_genre_matrix: Optional[torch.Tensor] = None
         self.user_genre_matrix: Optional[torch.Tensor] = None
         
@@ -36,7 +47,7 @@ class ModelService:
         self.sequential_transformer: Optional[SequentialTransformer] = None
         
         # Historical interactions / sequences from training (fallback)
-        self.user_interacted: Dict[int, Set[int]] = {}
+        self.user_interacted: Dict[int, List[int]] = {}
         self.user_sequences: Dict[int, List[int]] = {}
         
         self.is_loaded: bool = False
@@ -51,6 +62,7 @@ class ModelService:
         """Load available recommendation artifacts once and prepare models for inference."""
         if self.is_loaded:
             return
+        self.serving_policy = {}
         
         logger.info(f"Loading ML models and artifacts from {self.ml_dir} on device: {self.device}")
         
@@ -125,12 +137,47 @@ class ModelService:
                 num_heads=heads_trans,
                 num_layers=layers_trans,
                 max_len=maxlen_trans,
+                pooling=self.config.get("transformer_pooling", "legacy_length"),
+                dim_feedforward=self.config.get("transformer_dim_feedforward", 2048),
             )
             self.sequential_transformer.load_state_dict(torch.load(trans_path, map_location=self.device, weights_only=True))
             self.sequential_transformer.to(self.device)
             self.sequential_transformer.eval()
             logger.info("Loaded Sequential Transformer model")
 
+        if self.config.get("model_format_version") == 2 and any(x is None for x in [
+            self.ncf_baseline, self.ncf_hybrid, self.sequential_transformer,
+            self.movie_genre_matrix, self.user_genre_matrix,
+        ]):
+            raise RuntimeError("Active training bundle is incomplete; restore artifacts before serving")
+        # Serving experiments live outside the immutable checkpoint bundle.
+        # Reject stale overlays rather than silently applying old tuning to new weights.
+        policy_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "ml", "serving_policy.json")
+        if os.path.exists(policy_path):
+            with open(policy_path, encoding="utf-8") as f:
+                policy = json.load(f)
+            for filename in ("ncf_baseline.pth", "ncf_hybrid.pth", "sequential_transformer.pth"):
+                with open(os.path.join(self.ml_dir, filename), "rb") as f:
+                    digest = hashlib.sha256(f.read()).hexdigest()
+                if policy.get("checkpoint_hashes", {}).get(filename) != digest:
+                    raise RuntimeError("Serving policy does not match the active checkpoints")
+            bins = policy.get("history_bins", [])
+            if not bins or len({entry.get("min_history") for entry in bins}) != len(bins):
+                raise RuntimeError("Invalid serving policy history bins")
+            for entry in bins:
+                if (not isinstance(entry.get("min_history"), int) or not 2 <= entry["min_history"] <= maxlen_trans
+                    or entry.get("mode") not in {"sequence_only", "legacy_cold_start"}):
+                    raise RuntimeError("Invalid serving policy history bin")
+                if entry["mode"] == "legacy_cold_start":
+                    continue
+                weights = entry.get("weights", [])
+                if (entry.get("strategy") not in {"transformer", "mixed", "collaborative"}
+                    or not isinstance(entry.get("candidate_k"), int)
+                    or not 10 <= entry["candidate_k"] <= 1000
+                    or len(weights) != 3 or any(not math.isfinite(w) or w < 0 for w in weights)
+                    or abs(sum(weights) - 1.0) > 1e-6):
+                    raise RuntimeError("Invalid sequence-only serving policy")
+            self.serving_policy = policy
         self.is_loaded = True
         logger.info("All ML artifacts loaded and ready for inference.")
 

@@ -12,9 +12,15 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — Filmory" },
-      { name: "description", content: "Sign in to Filmory to get personalised film recommendations." },
+      {
+        name: "description",
+        content: "Sign in to Filmory to get personalised film recommendations.",
+      },
       { property: "og:title", content: "Sign in — Filmory" },
-      { property: "og:description", content: "Access your Filmory watchlist, history and recommendations." },
+      {
+        property: "og:description",
+        content: "Access your Filmory watchlist, history and recommendations.",
+      },
     ],
   }),
   component: LoginPage,
@@ -26,22 +32,35 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState<"form" | "demo" | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!email || !password) {
-      toast.error("Enter your email and password");
+      setFormError("Enter your email and password");
       return;
     }
     setPending("form");
-    await login({ email, password });
-    toast.success("Welcome back");
-    void navigate({ to: "/" });
+    try {
+      await login({ email, password });
+      toast.success("Welcome back");
+      void navigate({ to: "/" });
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Could not sign in. Please retry.");
+    } finally {
+      setPending(null);
+    }
   };
 
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to pick up where you left off.">
       <form onSubmit={submit} className="space-y-4">
+        {formError ? (
+          <p role="alert" className="text-sm text-destructive">
+            {formError}
+          </p>
+        ) : null}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -81,10 +100,19 @@ function LoginPage() {
           variant="secondary"
           disabled={pending !== null}
           onClick={async () => {
+            setFormError(null);
             setPending("demo");
-            await loginAsDemo();
-            toast.success("Signed in as Demo Viewer");
-            void navigate({ to: "/" });
+            try {
+              await loginAsDemo();
+              toast.success("Signed in as Demo Viewer");
+              void navigate({ to: "/" });
+            } catch (error) {
+              setFormError(
+                error instanceof Error ? error.message : "Could not load the demo. Please retry.",
+              );
+            } finally {
+              setPending(null);
+            }
           }}
           className="w-full rounded-md border border-border py-6"
         >

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import * as authApi from "@/api/auth";
+import { AUTH_EXPIRED_EVENT, getAuthToken } from "@/api/client";
 import type { AuthCredentials, RegisterPayload, User } from "@/types/movie";
 
 interface AuthContextValue {
@@ -21,8 +22,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setUser(authApi.getCurrentUser());
-    setReady(true);
+    let mounted = true;
+    let restoreRevision = 0;
+    const restore = async () => {
+      const revision = ++restoreRevision;
+      const token = getAuthToken();
+      setReady(false);
+      try {
+        const next = await authApi.restoreSession();
+        if (mounted && revision === restoreRevision && token === getAuthToken()) setUser(next);
+      } catch {
+        if (mounted && revision === restoreRevision && token === getAuthToken()) setUser(null);
+      } finally {
+        if (mounted && revision === restoreRevision) setReady(true);
+      }
+    };
+    const expired = () => {
+      restoreRevision += 1;
+      authApi.logout();
+      setUser(null);
+      setReady(true);
+    };
+    const storageChanged = (event: StorageEvent) => {
+      if (event.key === "filmory.token" || event.key === null) void restore();
+    };
+    void restore();
+    window.addEventListener(AUTH_EXPIRED_EVENT, expired);
+    window.addEventListener("storage", storageChanged);
+    return () => {
+      mounted = false;
+      window.removeEventListener(AUTH_EXPIRED_EVENT, expired);
+      window.removeEventListener("storage", storageChanged);
+    };
   }, []);
 
   const login = useCallback(async (credentials: AuthCredentials) => {

@@ -185,6 +185,8 @@ def run_evaluation(
     logger.info("Loaded split manifest: %d users", len(manifest["users"]))
 
     model_service.load_all()
+    if model_service.config.get("model_format_version") == 2:
+        raise RuntimeError("Historical split manifests are incompatible with fresh training bundles. Use check_ranking_policy.py and the bundle's saved pre-training split.")
     dev = model_service.device
     n_items = len(model_service.movie2idx)
 
@@ -257,7 +259,7 @@ def run_evaluation(
         if not (0 <= pos_item < n_items):
             continue
         u_gvec = train_genre_vector(train_hist)
-        seq_1based = [int(m) + 1 for m in train_hist]
+        seq_1based = [int(m) for m in train_hist]  # legacy variable name; canonical contract is zero-based
         profile = build_state(train_hist, state_variant)
 
         # ---- Track A: full-catalog retrieval comparison ----

@@ -7,11 +7,13 @@ import { getGenres, getMovies } from "@/api/movies";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ErrorState";
 import { GridSkeleton } from "@/components/LoadingSkeleton";
+import { Poster } from "@/components/Poster";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import type { Movie } from "@/types/movie";
 
 const STEPS = ["Welcome", "Genres", "Favourites", "Summary"] as const;
+const EMPTY_MOVIES: Movie[] = [];
 
 function toggle<T>(list: T[], value: T) {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -28,7 +30,7 @@ export function OnboardingWizard() {
   const [movieIds, setMovieIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
 
-  const movies = moviesQuery.data ?? [];
+  const movies = moviesQuery.data ?? EMPTY_MOVIES;
   const picked = useMemo(
     () => movies.filter((m) => movieIds.includes(m.movieId)),
     [movies, movieIds],
@@ -38,9 +40,15 @@ export function OnboardingWizard() {
 
   const finish = async () => {
     setSaving(true);
-    await savePreferences(genres, movieIds);
-    toast.success("Preferences saved", { description: "Your home feed is ready." });
-    void navigate({ to: "/" });
+    try {
+      await savePreferences(genres, movieIds);
+      toast.success("Preferences saved", { description: "Your home feed is ready." });
+      void navigate({ to: "/" });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save preferences");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -68,7 +76,7 @@ export function OnboardingWizard() {
           <section>
             <h1 className="text-3xl font-extrabold md:text-4xl">Pick your genres</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Choose at least three so we can shape your first recommendations.
+              Choose one or more genres to shape your first recommendations.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {(genresQuery.data ?? []).map((genre) => {
@@ -231,8 +239,8 @@ function WelcomeStep() {
     <section>
       <h1 className="text-4xl font-extrabold md:text-5xl">Tell us what you like</h1>
       <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-        Three quick steps and your home feed stops guessing. Pick the genres you gravitate to, star a
-        few favourites, and review your taste profile before we save it.
+        Three quick steps and your home feed stops guessing. Pick the genres you gravitate to, star
+        a few favourites, and review your taste profile before we save it.
       </p>
       <ul className="mt-8 space-y-3 text-sm text-muted-foreground">
         {[
@@ -271,10 +279,8 @@ function PosterPick({
         active ? "border-primary" : "border-transparent hover:border-border",
       )}
     >
-      <img
-        src={movie.posterUrl}
-        alt={`${movie.title} poster`}
-        loading="lazy"
+      <Poster
+        movie={movie}
         className={cn(
           "aspect-[2/3] w-full rounded-sm object-cover transition",
           active ? "brightness-110" : "brightness-75 group-hover:brightness-100",

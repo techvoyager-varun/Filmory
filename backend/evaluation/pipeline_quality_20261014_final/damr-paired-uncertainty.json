@@ -1,0 +1,81 @@
+{
+  "scope": "Secondary exploratory ablations, not a basis for post-test policy selection",
+  "comparisons_to_current": {
+    "DAMR gate": {
+      "users": 1000,
+      "resamples": 10000,
+      "seed": 2026101403,
+      "hr10": {
+        "mean_difference": 0.002,
+        "95_percent_interval": [
+          -0.004,
+          0.008
+        ]
+      },
+      "ndcg10": {
+        "mean_difference": 0.0007047394852515398,
+        "95_percent_interval": [
+          -0.0015101677411952755,
+          0.002969428945377562
+        ]
+      }
+    },
+    "DAMR + momentum": {
+      "users": 1000,
+      "resamples": 10000,
+      "seed": 2026101403,
+      "hr10": {
+        "mean_difference": 0.002,
+        "95_percent_interval": [
+          -0.005,
+          0.009
+        ]
+      },
+      "ndcg10": {
+        "mean_difference": 0.0013316592114593511,
+        "95_percent_interval": [
+          -0.0010324944492445293,
+          0.0037639476146247705
+        ]
+      }
+    },
+    "DAMR + agreement": {
+      "users": 1000,
+      "resamples": 10000,
+      "seed": 2026101403,
+      "hr10": {
+        "mean_difference": -0.002,
+        "95_percent_interval": [
+          -0.01,
+          0.006
+        ]
+      },
+      "ndcg10": {
+        "mean_difference": -0.0007477396172233787,
+        "95_percent_interval": [
+          -0.00371639003232917,
+          0.0020866574860065896
+        ]
+      }
+    },
+    "DAMR + diversity": {
+      "users": 1000,
+      "resamples": 10000,
+      "seed": 2026101403,
+      "hr10": {
+        "mean_difference": -0.007,
+        "95_percent_interval": [
+          -0.019,
+          0.005
+        ]
+      },
+      "ndcg10": {
+        "mean_difference": -0.001751890739197574,
+        "95_percent_interval": [
+          -0.006400910213855109,
+          0.002867773757887376
+        ]
+      }
+    }
+  }
+}

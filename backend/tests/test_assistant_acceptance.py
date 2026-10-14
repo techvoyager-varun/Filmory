@@ -379,8 +379,11 @@ def test_unknown_title_honest_empty_response(auth_headers):
 # ---------------------------------------------------------------------------
 # Test 16: Gemini Disabled Fallback Notice
 # ---------------------------------------------------------------------------
-def test_gemini_disabled_fallback_notice(auth_headers):
+def test_gemini_disabled_fallback_notice(auth_headers, monkeypatch):
     """Verify that when Gemini extraction fails, notice discloses AI unavailability."""
+    from app.config import settings
+    # This scenario tests an opted-in cloud service outage, not intentional local mode.
+    monkeypatch.setattr(settings, 'ASSISTANT_LOCAL_ONLY', False)
     with patch("app.services.assistant_orchestrator.extract_intent", side_effect=Exception("API Down")):
         with TestClient(app) as client:
             res = client.post(

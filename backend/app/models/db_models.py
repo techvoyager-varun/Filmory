@@ -1,4 +1,5 @@
 import datetime
+from app.core.time import utcnow_naive
 from sqlalchemy import (
     Column,
     Integer,
@@ -24,8 +25,8 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     model_user_id = Column(Integer, nullable=True, index=True) # Explicit mapping to MovieLens model user index
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
+    updated_at = Column(DateTime, default=utcnow_naive, onupdate=utcnow_naive, nullable=False)
 
     interactions = relationship("Interaction", back_populates="user", cascade="all, delete-orphan")
     watch_history = relationship("WatchHistory", back_populates="user", cascade="all, delete-orphan")
@@ -62,7 +63,7 @@ class Interaction(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     movie_id = Column(BigInteger, ForeignKey("movies.movie_id", ondelete="CASCADE"), nullable=False, index=True)
     type = Column(String(50), nullable=False) # play, like, unlike, list_add, list_remove
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=utcnow_naive, nullable=False, index=True)
 
     user = relationship("User", back_populates="interactions")
     movie = relationship("Movie", back_populates="interactions")
@@ -78,7 +79,7 @@ class WatchHistory(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     movie_id = Column(BigInteger, ForeignKey("movies.movie_id", ondelete="CASCADE"), nullable=False, index=True)
-    watched_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False, index=True)
+    watched_at = Column(DateTime, default=utcnow_naive, nullable=False, index=True)
     progress = Column(Integer, default=100) # 0 - 100 percentage
 
     user = relationship("User", back_populates="watch_history")
@@ -95,7 +96,7 @@ class MyList(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     movie_id = Column(BigInteger, ForeignKey("movies.movie_id", ondelete="CASCADE"), nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
 
     user = relationship("User", back_populates="my_list")
     movie = relationship("Movie", back_populates="my_list_entries")
@@ -111,7 +112,7 @@ class Like(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     movie_id = Column(BigInteger, ForeignKey("movies.movie_id", ondelete="CASCADE"), nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
 
     user = relationship("User", back_populates="likes")
     movie = relationship("Movie", back_populates="likes")
@@ -144,7 +145,7 @@ class UserPreference(Base):
     favorite_genres = Column(JSON, default=list, nullable=False)
     favorite_movie_ids = Column(JSON, default=list, nullable=False)
     onboarding_completed = Column(Boolean, default=False, nullable=False)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow_naive, onupdate=utcnow_naive, nullable=False)
 
     user = relationship("User", back_populates="preferences")
 
@@ -158,8 +159,8 @@ class AssistantSession(Base):
     id = Column(String(36), primary_key=True)  # UUID
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     active_intent = Column(JSON, default=dict, nullable=False)  # Accumulated filters
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
+    updated_at = Column(DateTime, default=utcnow_naive, onupdate=utcnow_naive, nullable=False)
 
     user = relationship("User")
     messages = relationship("AssistantMessageRecord", back_populates="session", cascade="all, delete-orphan",
@@ -175,7 +176,7 @@ class AssistantMessageRecord(Base):
     content = Column(Text, nullable=False)
     intent_snapshot = Column(JSON, nullable=True)
     movie_ids = Column(JSON, default=list)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
 
     session = relationship("AssistantSession", back_populates="messages")
 
@@ -189,7 +190,7 @@ class AssistantFeedback(Base):
     movie_id = Column(BigInteger, nullable=True)
     feedback_type = Column(String(50), nullable=False)  # helpful | not_helpful | wrong_movie | bad_explanation
     comment = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
 
 
 class MovieTextEmbedding(Base):
@@ -199,8 +200,22 @@ class MovieTextEmbedding(Base):
     embedding_model = Column(String(100), nullable=False)
     embedding_dimension = Column(Integer, nullable=False)
     document_hash = Column(String(64), nullable=False, index=True)  # SHA-256
-    indexed_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    indexed_at = Column(DateTime, default=utcnow_naive, nullable=False)
 
     movie = relationship("Movie")
+
+
+class RecommendationStudy(Base):
+    """Opt-in local pilot: freeze the displayed slate before collecting ratings."""
+    __tablename__ = "recommendation_studies"
+    id = Column(String(36), primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    movies = Column(JSON, nullable=False)
+    policy_snapshot = Column(JSON, nullable=False)
+    answers = Column(JSON, default=dict, nullable=False)
+    created_at = Column(DateTime, default=utcnow_naive, nullable=False)
+    updated_at = Column(DateTime, default=utcnow_naive, onupdate=utcnow_naive, nullable=False)
+
+    user = relationship("User")
 
 

@@ -16,18 +16,18 @@ import type { ModelMetrics } from "@/types/movie";
 export const Route = createFileRoute("/model")({
   head: () => ({
     meta: [
-      { title: "How Filmory Recommends — the 4-Stage Engine" },
+      { title: "How Filmory Recommends — Models and Ranking Policies" },
       {
         name: "description",
         content:
-          "Filmory's 4-stage recommendation pipeline: NCF Hybrid candidates, Sequential Transformer scoring, genre affinity, and the DAMR drift-aware re-ranker — with measured accuracy.",
+          "Filmory's collaborative and sequential recommendation models, optional DAMR reranking, and measured ranking results.",
       },
     ],
   }),
   component: ModelPage,
 });
 
-export default function ModelPage() {
+function ModelPage() {
   const metrics = useQuery({
     queryKey: ["model-metrics"],
     queryFn: getModelMetrics,
@@ -45,10 +45,11 @@ export default function ModelPage() {
           How Filmory Recommends
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          Every recommendation you see is produced by a 4-stage pipeline that fuses three trained
-          neural experts with a drift-aware re-ranker. This page shows exactly how it works — and
-          how accurate it is, measured with the standard leave-one-out protocol used by the NCF and
-          SASRec papers.
+          Filmory combines collaborative and sequential models with genre preferences and optional
+          diversity re-ranking. New users start with preference-based picks. After recording enough
+          known movies, their recent history feeds a Transformer and collaborative-neighbor ranking
+          path without requiring a trained user ID. The results below distinguish sampled ranking
+          from full-catalogue prediction.
         </p>
       </header>
 
@@ -79,16 +80,16 @@ export default function ModelPage() {
 const STAGES = [
   {
     id: 1,
-    name: "NCF Hybrid",
-    role: "Candidate generation",
-    body: "A hybrid Neural Collaborative Filtering network scores all 22,836 unseen movies for you in one forward pass and keeps the top 100. Learned 8-dim user & item embeddings + genre projections capture who you are.",
-    detail: "Stage 1 expert → ncfScore",
+    name: "Candidate Retrieval",
+    role: "Validation-selected retrieval",
+    body: "The active mapped-user bundle uses the Transformer to retrieve unseen movie candidates. Hybrid NCF supplies a collaborative score for fusion. New accounts use genre-based neighbor retrieval initially, then a history-based policy after enough distinct known movies.",
+    detail: "Candidate pool → collaborative, sequence and genre scores",
   },
   {
     id: 2,
     name: "Sequential Transformer",
     role: "Sequence scoring",
-    body: "A 2-layer, 4-head transformer (SASRec-style) reads your last 20 watches in order, producing a 'what does this user want next' vector. Each candidate is scored by cosine similarity against it.",
+    body: "A 2-layer, 4-head transformer reads up to 20 ordered interactions. Candidate item embeddings are scored against the history representation with the same dot-product rule used during training.",
     detail: "Stage 2 expert → transformerScore",
   },
   {
@@ -102,7 +103,7 @@ const STAGES = [
     id: 4,
     name: "DAMR",
     role: "Drift-Aware Momentum Re-Ranker",
-    body: "Filmory's own Stage 4. It estimates how much your taste is moving right now, re-weights the three experts per request, adds a momentum bonus toward the direction of change, an agreement-confidence factor, a quality prior, and MMR diversity — then picks the final 10.",
+    body: "The default personalized ranking policy is a normalized fixed ensemble selected by validation NDCG. DAMR remains an optional experimental re-ranker with adaptive weights, momentum, agreement, and diversity. Its benefit is reported separately rather than assumed.",
     detail: "Stage 4 → score",
     highlight: true,
   },
@@ -150,7 +151,7 @@ function PipelineSection() {
         ))}
       </div>
       <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4 font-mono text-xs leading-relaxed text-muted-foreground">
-        candidates&nbsp;&nbsp;= NCF_top100(cat · 22,836 items)
+        candidates&nbsp;&nbsp;= selected_retriever_top100(mapped unseen items)
         <br />
         final(i)&nbsp;&nbsp;&nbsp;&nbsp;= w<sub>ncf</sub>·s<sub>ncf</sub>(i) + w<sub>tr</sub>·s
         <sub>tr</sub>(i) + w<sub>gen</sub>·s<sub>gen</sub>(i) + η·δ·momentum(i)
@@ -170,7 +171,7 @@ function DamrSection() {
       symbol: "δ",
       name: "Drift",
       formula: "1 − cos(G_short, G_long)",
-      body: "How far your current taste has moved from your lifetime identity. Time-decayed genre profile (τ = 7 days) vs. the uniform profile over all your watches.",
+      body: "Difference between short- and long-history genre directions. Timestamped activity uses decay over days; stored histories use interaction positions when timestamps are unavailable.",
     },
     {
       symbol: "φ",
@@ -195,12 +196,11 @@ function DamrSection() {
     <section className="mt-14">
       <SectionTitle icon={<Wand2 className="size-4" />} title="Stage 4 up close: DAMR" />
       <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-        Fixed fusion weights are wrong for many users: a horror-bingeing comedy fan should
-        temporarily trust the sequence expert, a 500-watch veteran should trust the NCF embedding, a
-        brand-new account should lean on genres. DAMR measures four interpretable state scalars from
-        your history and computes the expert weights <em>per request</em> — the old fixed ensemble
-        is the provable special case at the calibration anchor. It also adds the one thing NCF and
-        the Transformer cannot express: the <em>direction</em> your taste is moving.
+        DAMR uses a rule-based gate to adjust expert weights from history-derived features. At its
+        calibration anchor the gate reproduces the configured fixed weights, using the same
+        normalized scores. Whether these adjustments improve ranking requires a controlled
+        comparison. Genre-profile change is a preference proxy rather than a verified prediction of
+        future taste.
       </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {states.map((s) => (
@@ -218,17 +218,17 @@ function DamrSection() {
         <DamrStep
           icon={<TrendingUp className="size-4" />}
           title="Taste-momentum term"
-          body="M = G_short − G_long is the direction your taste is moving. Candidates aligned with M get a bonus scaled by drift: η·δ·cos(genre, M). Only this term extrapolates where you're going, not where you've been."
+          body="M = G_short − G_long measures genre-direction change. Candidates receive a bonus η·δ·max(0, cos(genre, M)). This is a ranking heuristic whose benefit must be measured."
         />
         <DamrStep
           icon={<Brain className="size-4" />}
           title="Expert-agreement confidence"
-          body="Movies all three experts agree on get a small boost; movies only one expert likes get damped. Cheap, interpretable, and it visibly stabilises the list."
+          body="The dispersion of normalized expert scores controls a confidence multiplier. Greater disagreement reduces relevance. Agreement alone does not establish prediction correctness."
         />
         <DamrStep
           icon={<ListOrdered className="size-4" />}
           title="Quality prior + MMR diversity"
-          body="An IMDb-style Bayesian weighted rating keeps obscure 2-star titles out, and Maximal Marginal Relevance over NCF-embedding + genre similarity stops the top-10 being 10 near-identical movies."
+          body="An optional Bayesian rating prior adds a quality signal. Maximum marginal relevance penalizes similarity to already selected movies, trading relevance against list diversity."
         />
       </div>
     </section>
@@ -282,9 +282,9 @@ function MetricsSection({
     <section className="mt-14">
       <SectionTitle icon={<Gauge className="size-4" />} title="Measured accuracy" />
       <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-        Implicit-feedback recommenders aren't measured with classification accuracy (99.9% of
-        user–movie pairs are negatives, so predicting "no" everywhere is trivially "accurate"). The
-        standard is hit-rate based ranking measurement — here is Filmory's, evaluated offline.
+        Ranking metrics measure where held-out interactions appear in a recommendation list.
+        Classification accuracy can be misleading when negatives dominate, so the results below
+        report hit rate and ranking quality with an explicit candidate protocol.
       </p>
 
       {loading ? (
@@ -316,6 +316,15 @@ function MetricsSection({
             protocol: {metrics.protocol} · users evaluated: {metrics.num_users_evaluated} ·
             catalogue: {metrics.dataset.num_items.toLocaleString()} items ·{" "}
             {new Date(metrics.generated_at).toISOString().slice(0, 10)}
+          </p>
+          {metrics.limitations?.map((limitation) => (
+            <p key={limitation} className="mt-2 text-xs text-muted-foreground">
+              {limitation}
+            </p>
+          ))}
+          <p className="mt-3 text-sm text-muted-foreground">
+            The table below ranks one held-out positive against 99 sampled negatives. Its hit rate
+            is not a calibrated probability of liking a movie or full-catalogue accuracy.
           </p>
           <div className="mt-4 overflow-x-auto rounded-xl border border-border">
             <table className="w-full min-w-[720px] text-left text-sm">
@@ -375,12 +384,37 @@ function MetricsSection({
             </table>
           </div>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            Reading the table: popularity is a strong baseline under uniformly sampled negatives (it
-            is rarely punished by unseen titles), which is why the NCF paper reports it too. Among
-            the personalised systems, the full 4-stage DAMR pipeline gives the best hit rate, and
-            the diversity columns show the MMR/quality components trading almost no relevance for
-            list variety.
+            Compare relevance and diversity separately. A higher diversity score can come with lower
+            hit rate. These model-level results do not establish the quality of the complete
+            assistant or recommendation re-ranking pipeline.
           </p>
+          {metrics.full_catalogue && (
+            <div className="mt-6 overflow-x-auto rounded-xl border border-border">
+              <h3 className="p-4 font-semibold">Full-catalogue evaluation</h3>
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr>
+                    <th className="p-3">Model</th>
+                    <th className="p-3">Users</th>
+                    <th className="p-3">HR@10</th>
+                    <th className="p-3">NDCG@10</th>
+                    <th className="p-3">Recall@100</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(metrics.full_catalogue).map(([name, result]) => (
+                    <tr key={name}>
+                      <td className="p-3">{name}</td>
+                      <td className="p-3">{result.users}</td>
+                      <td className="p-3">{fmt(result.hr10)}</td>
+                      <td className="p-3">{fmt(result.ndcg10)}</td>
+                      <td className="p-3">{fmt(result.recall100)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
     </section>
@@ -453,7 +487,10 @@ function ScoreFieldsSection() {
           </thead>
           <tbody className="text-xs">
             {[
-              ["score", "Final relevance after Stage 4 (DAMR) re-ranking — the match %."],
+              [
+                "score",
+                "Final ranking score under the selected policy; not a calibrated match probability.",
+              ],
               ["ncfScore", "Stage 1: long-term taste identity from the NCF Hybrid expert."],
               ["transformerScore", "Stage 2: fit with your last-20-watch sequence."],
               ["genreScore", "Stage 3: alignment with your live genre-preference vector."],

@@ -30,6 +30,7 @@ export interface ScoredMovie extends Movie {
   ncfScore?: number;
   /** Stage 2 — Sequential Transformer expert score */
   transformerScore?: number;
+  neighborScore?: number;
   /** Stage 3 — genre-affinity expert score */
   genreScore?: number;
   /** Stage 4 (DAMR) transparency fields */
@@ -39,7 +40,7 @@ export interface ScoredMovie extends Movie {
   diversityPenalty?: number;
   expertWeights?: ExpertWeights;
   userState?: UserStateInfo;
-  variant?: "damr" | "mmr" | "static";
+  variant?: "damr" | "mmr" | "static" | "normalized_fixed" | "sequence_only";
   rank?: number;
   listDiversity?: number;
 }
@@ -47,6 +48,7 @@ export interface ScoredMovie extends Movie {
 /** Output of the DAMR drift-adaptive expert gate (sums to 1). */
 export interface ExpertWeights {
   ncf: number;
+  neighbor?: number;
   transformer: number;
   genre: number;
 }
@@ -90,9 +92,15 @@ export interface ModelMetrics {
   };
   /** model name -> { "HR@10": ..., "NDCG@10": ..., MRR, AUC, "ILD@10", "Coverage@10" } */
   results: Record<string, Record<string, number | null>>;
+  limitations?: string[];
+  full_catalogue?: Record<
+    string,
+    { users: number; hr10: number; ndcg10: number; recall100: number }
+  >;
 }
 
-export type InteractionType = "play" | "like" | "unlike" | "list_add" | "list_remove";
+export type InteractionType =
+  "play" | "like" | "unlike" | "list_add" | "list_remove" | "not_interested" | "show_again";
 
 export interface Interaction {
   userId: string;

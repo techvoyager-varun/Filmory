@@ -1,6 +1,7 @@
 import { Filter, Search, Heart, Tag, Clock, Star, Calendar, Ban, Film, X } from "lucide-react";
 import type { MovieIntent } from "@/types/assistant";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ActiveFiltersProps {
   intent: MovieIntent | null | undefined;
@@ -9,7 +10,12 @@ interface ActiveFiltersProps {
   className?: string | undefined;
 }
 
-export function ActiveFilters({ intent, sessionId, onFilterRemoved, className }: ActiveFiltersProps) {
+export function ActiveFilters({
+  intent,
+  sessionId,
+  onFilterRemoved,
+  className,
+}: ActiveFiltersProps) {
   if (!intent) return null;
 
   const hasAnyFilter =
@@ -32,7 +38,9 @@ export function ActiveFilters({ intent, sessionId, onFilterRemoved, className }:
       const updated = await clearSessionFilter(sessionId, filterKey);
       onFilterRemoved?.(updated);
     } catch (err) {
-      console.error("Failed to clear filter:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Could not clear this filter. Please retry.",
+      );
     }
   };
 

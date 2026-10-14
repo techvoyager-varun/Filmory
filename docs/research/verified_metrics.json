@@ -1,0 +1,500 @@
+{
+  "scope": "Reaggregation of saved observations; not a fresh experiment or independent validation of original runs.",
+  "source_sha256": {
+    "recommender_per_user.jsonl": "6917d6fcc71a795c3800e42c686e5790cabe15312bcca578c90b60e3a8094940",
+    "split_manifest.json": "c2dfa7bee92c261f1074f059a29d7b79b823ed8ffe9391a901757de3d316e15d",
+    "provenance.json": "74b6eea692642d8d615093c6742c7cabf16ba84f667e6e339a4b8e125c8336ab",
+    "assistant_queries.jsonl": "c9b6c76d678c7e10d1e5cc72e11a9391518e8ca6c5d59f0a1d4d33d18f5e5f99",
+    "assistant_queries_hidden.jsonl": "cf4ac1277d386905ace8470f25df7f730bb8378dbc458c867b04d93384d3983b",
+    "assistant_per_query.jsonl": "96e270386baf298bb469be8be84053e8624bc71347fa897096a0dc03468ea009",
+    "assistant_per_query_hidden.jsonl": "637acb2f482603b1673aa38aa160a2ded0cc85a90ea254dae911c226211b4216",
+    "assistant_per_query_live.jsonl": "0dfba8773d5aac5f38dd7f463e424dbb90f4e40bb7aa59973609b82295fe2955",
+    "assistant_per_query_hidden_live.jsonl": "164bbdaac4f3e4dd2e2c483c2dc2e467cc67deba9505553382a7a0f66ae9f619"
+  },
+  "checkpoint_hashes_match_recorded_provenance": {
+    "ml/ncf_baseline.pth": true,
+    "ml/ncf_hybrid.pth": true,
+    "ml/sequential_transformer.pth": true,
+    "ml/user_sequences.pkl": true,
+    "ml/user_interacted.pkl": true,
+    "ml/movie_genre_matrix.pt": true,
+    "ml/user_genre_matrix.pt": true,
+    "ml/model_config.json": true,
+    "ml/movie2idx.pkl": true,
+    "ml/user2idx.pkl": true,
+    "ml/idx2movie.pkl": true,
+    "ml/idx2user.pkl": true,
+    "ml/genre2idx.pkl": true,
+    "ml/idx2genre.pkl": true,
+    "ml/movies_metadata.csv": true
+  },
+  "recommender": {
+    "test_users": 200,
+    "tune_users": 100,
+    "frozen_mixture": {
+      "baseline": 0.75,
+      "hybrid": 0.0,
+      "popularity": 0.25
+    },
+    "validation_recall100": 0.38,
+    "retrieval": {
+      "popularity": {
+        "hits": 47,
+        "n": 200,
+        "mean": 0.235,
+        "ci95": [
+          0.18157345326946356,
+          0.29841492986724655
+        ]
+      },
+      "baseline": {
+        "hits": 57,
+        "n": 200,
+        "mean": 0.285,
+        "ci95": [
+          0.22694905173277297,
+          0.3511547308121051
+        ]
+      },
+      "hybrid": {
+        "hits": 0,
+        "n": 200,
+        "mean": 0.0,
+        "ci95": [
+          0,
+          0.018846005918320894
+        ]
+      },
+      "mixture": {
+        "hits": 52,
+        "n": 200,
+        "mean": 0.26,
+        "ci95": [
+          0.20413736892786316,
+          0.32490871391293097
+        ]
+      }
+    },
+    "hybrid_target_rank_range": [
+      198,
+      10598
+    ],
+    "mixture_damr_e2e": {
+      "hr10": {
+        "hits": 1,
+        "n": 200,
+        "mean": 0.005,
+        "ci95": [
+          0.0008831459893662054,
+          0.02777439986977148
+        ]
+      },
+      "ndcg10": 0.0015775
+    },
+    "systems": {
+      "Popularity": {
+        "hr10": {
+          "hits": 160,
+          "n": 200,
+          "mean": 0.8,
+          "ci95": [
+            0.7391436038882958,
+            0.8495487925607118
+          ]
+        },
+        "ndcg10": 0.525502,
+        "ild10": 0.8590995000000001,
+        "coverage_pct": 6.314590996671922
+      },
+      "NCF Baseline": {
+        "hr10": {
+          "hits": 179,
+          "n": 200,
+          "mean": 0.895,
+          "ci95": [
+            0.8448186177864638,
+            0.9302930375380627
+          ]
+        },
+        "ndcg10": 0.6054175,
+        "ild10": 0.8617365000000001,
+        "coverage_pct": 6.87073042564372
+      },
+      "NCF Hybrid": {
+        "hr10": {
+          "hits": 76,
+          "n": 200,
+          "mean": 0.38,
+          "ci95": [
+            0.3155889366123922,
+            0.4489341048080049
+          ]
+        },
+        "ndcg10": 0.155744,
+        "ild10": 0.768411,
+        "coverage_pct": 6.349623401646523
+      },
+      "Transformer": {
+        "hr10": {
+          "hits": 76,
+          "n": 200,
+          "mean": 0.38,
+          "ci95": [
+            0.3155889366123922,
+            0.4489341048080049
+          ]
+        },
+        "ndcg10": 0.2098445,
+        "ild10": 0.8673430000000001,
+        "coverage_pct": 6.40655105973025
+      },
+      "Fixed Ensemble": {
+        "hr10": {
+          "hits": 50,
+          "n": 200,
+          "mean": 0.25,
+          "ci95": [
+            0.19508076816296532,
+            0.3143422347961952
+          ]
+        },
+        "ndcg10": 0.11424949999999999,
+        "ild10": 0.7685965,
+        "coverage_pct": 6.949553336836574
+      },
+      "DAMR gate-only": {
+        "hr10": {
+          "hits": 68,
+          "n": 200,
+          "mean": 0.34,
+          "ci95": [
+            0.2779143922159556,
+            0.40811632967790723
+          ]
+        },
+        "ndcg10": 0.155509,
+        "ild10": 0.7972414999999999,
+        "coverage_pct": 6.9714485899457
+      },
+      "DAMR gate+momentum": {
+        "hr10": {
+          "hits": 73,
+          "n": 200,
+          "mean": 0.365,
+          "ci95": [
+            0.3014041621876483,
+            0.4336842594102984
+          ]
+        },
+        "ndcg10": 0.166048,
+        "ild10": 0.797115,
+        "coverage_pct": 6.958311438080224
+      },
+      "DAMR gate+momentum+agreement": {
+        "hr10": {
+          "hits": 72,
+          "n": 200,
+          "mean": 0.36,
+          "ci95": [
+            0.29669087731339805,
+            0.42858600434373184
+          ]
+        },
+        "ndcg10": 0.16269100000000003,
+        "ild10": 0.7946934999999999,
+        "coverage_pct": 6.967069539323875
+      },
+      "Full DAMR": {
+        "hr10": {
+          "hits": 79,
+          "n": 200,
+          "mean": 0.395,
+          "ci95": [
+            0.3298398699878317,
+            0.4641177912550158
+          ]
+        },
+        "ndcg10": 0.16735150000000001,
+        "ild10": 0.9385304999999999,
+        "coverage_pct": 7.466281310211946
+      }
+    },
+    "raw_fixed_vs_full_hr": {
+      "difference": 0.145,
+      "paired_bootstrap_ci95": [
+        0.07,
+        0.215
+      ],
+      "resamples": 10000,
+      "seed": 42,
+      "warning": "Observational comparison; normalization differs between raw fixed fusion and DAMR. Checkpoint leakage persists."
+    }
+  },
+  "assistant": {
+    "dev_offline": {
+      "queries": 21,
+      "routing": {
+        "hits": 21,
+        "n": 21,
+        "mean": 1.0,
+        "ci95": [
+          0.8453561767357979,
+          0.9999999999999999
+        ]
+      },
+      "extraction_recall_macro": 0.8166599999999999,
+      "extraction_cases": 10,
+      "resolution_recall_macro": 0.9,
+      "resolution_cases": 10,
+      "oracle_constraint_compliance_macro": 1.0,
+      "returned_movies": 105,
+      "constraint_violations": 0,
+      "template_evidence_reference_validity": {
+        "hits": 21,
+        "n": 21,
+        "mean": 1.0,
+        "ci95": [
+          0.8453561767357979,
+          0.9999999999999999
+        ]
+      },
+      "clarification_expected_subset": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "expected_empty_subset": {
+        "hits": 4,
+        "n": 4,
+        "mean": 1.0,
+        "ci95": [
+          0.5100999795960008,
+          1
+        ]
+      },
+      "followup": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "primary_sources": {
+        "not_recorded": 21
+      },
+      "followup_sources": {},
+      "logged_model_labels": [],
+      "pipeline_p50_ms": 104.13,
+      "pipeline_p95_ms": 586.06,
+      "recorded_primary_llm_p50_ms": null,
+      "recorded_primary_llm_p95_ms": null
+    },
+    "hidden_offline": {
+      "queries": 15,
+      "routing": {
+        "hits": 15,
+        "n": 15,
+        "mean": 1.0,
+        "ci95": [
+          0.7961107336956521,
+          1
+        ]
+      },
+      "extraction_recall_macro": 0.8571428571428571,
+      "extraction_cases": 7,
+      "resolution_recall_macro": 0.8333333333333334,
+      "resolution_cases": 6,
+      "oracle_constraint_compliance_macro": 1.0,
+      "returned_movies": 80,
+      "constraint_violations": 0,
+      "template_evidence_reference_validity": {
+        "hits": 15,
+        "n": 15,
+        "mean": 1.0,
+        "ci95": [
+          0.7961107336956521,
+          1
+        ]
+      },
+      "clarification_expected_subset": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "expected_empty_subset": {
+        "hits": 4,
+        "n": 4,
+        "mean": 1.0,
+        "ci95": [
+          0.5100999795960008,
+          1
+        ]
+      },
+      "followup": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "primary_sources": {
+        "not_recorded": 15
+      },
+      "followup_sources": {},
+      "logged_model_labels": [],
+      "pipeline_p50_ms": 89.98,
+      "pipeline_p95_ms": 441.11799999999977,
+      "recorded_primary_llm_p50_ms": null,
+      "recorded_primary_llm_p95_ms": null
+    },
+    "dev_live": {
+      "queries": 21,
+      "routing": {
+        "hits": 21,
+        "n": 21,
+        "mean": 1.0,
+        "ci95": [
+          0.8453561767357979,
+          0.9999999999999999
+        ]
+      },
+      "extraction_recall_macro": 0.8,
+      "extraction_cases": 10,
+      "resolution_recall_macro": 0.9,
+      "resolution_cases": 10,
+      "oracle_constraint_compliance_macro": 1.0,
+      "returned_movies": 105,
+      "constraint_violations": 0,
+      "template_evidence_reference_validity": {
+        "hits": 21,
+        "n": 21,
+        "mean": 1.0,
+        "ci95": [
+          0.8453561767357979,
+          0.9999999999999999
+        ]
+      },
+      "clarification_expected_subset": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "expected_empty_subset": {
+        "hits": 4,
+        "n": 4,
+        "mean": 1.0,
+        "ci95": [
+          0.5100999795960008,
+          1
+        ]
+      },
+      "followup": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "primary_sources": {
+        "llm": 14,
+        "llm_error_fallback": 7
+      },
+      "followup_sources": {
+        "llm": 2
+      },
+      "logged_model_labels": [
+        "gemini-3.6-flash"
+      ],
+      "pipeline_p50_ms": 7043.51,
+      "pipeline_p95_ms": 14025.22,
+      "recorded_primary_llm_p50_ms": 3366.8999999999996,
+      "recorded_primary_llm_p95_ms": 5140.97
+    },
+    "hidden_live": {
+      "queries": 15,
+      "routing": {
+        "hits": 13,
+        "n": 15,
+        "mean": 0.8666666666666667,
+        "ci95": [
+          0.6211750079348376,
+          0.9626395301086407
+        ]
+      },
+      "extraction_recall_macro": 1.0,
+      "extraction_cases": 7,
+      "resolution_recall_macro": 0.8333333333333334,
+      "resolution_cases": 6,
+      "oracle_constraint_compliance_macro": 1.0,
+      "returned_movies": 102,
+      "constraint_violations": 0,
+      "template_evidence_reference_validity": {
+        "hits": 15,
+        "n": 15,
+        "mean": 1.0,
+        "ci95": [
+          0.7961107336956521,
+          1
+        ]
+      },
+      "clarification_expected_subset": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "expected_empty_subset": {
+        "hits": 2,
+        "n": 4,
+        "mean": 0.5,
+        "ci95": [
+          0.15003570882017148,
+          0.8499642911798285
+        ]
+      },
+      "followup": {
+        "hits": 2,
+        "n": 2,
+        "mean": 1.0,
+        "ci95": [
+          0.34237195288961925,
+          1
+        ]
+      },
+      "primary_sources": {
+        "llm": 13,
+        "llm_error_fallback": 2
+      },
+      "followup_sources": {
+        "llm": 1,
+        "llm_error_fallback": 2
+      },
+      "logged_model_labels": [],
+      "pipeline_p50_ms": 17442.12,
+      "pipeline_p95_ms": 33266.17499999999,
+      "recorded_primary_llm_p50_ms": null,
+      "recorded_primary_llm_p95_ms": null
+    }
+  }
+}

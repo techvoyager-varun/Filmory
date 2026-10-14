@@ -1,15 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { PlusCircle, MessageSquare, Trash2, PanelLeft, Film } from "lucide-react";
+import { PlusCircle, MessageSquare, Trash2, PanelLeft, Film, X } from "lucide-react";
 import { RequireAuth } from "@/components/RequireAuth";
 import { ChatPanel } from "@/components/assistant/ChatPanel";
 import { Button } from "@/components/ui/button";
-import {
-  listSessions,
-  getSession,
-  deleteSession,
-  sendMessage,
-} from "@/api/assistant";
+import { listSessions, getSession, deleteSession, sendMessage } from "@/api/assistant";
 import type { MessageSchema, MovieIntent, SessionSummary } from "@/types/assistant";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +15,7 @@ export const Route = createFileRoute("/ask-filmory")({
       {
         name: "description",
         content:
-          "Chat with Filmory's conversational movie assistant powered by Gemini 2.0 and DAMR recommendations.",
+          "Find movies with conversational search, catalogue filters, and personalized recommendations.",
       },
       { property: "og:title", content: "Ask Filmory — AI Movie Assistant" },
       {
@@ -45,10 +40,25 @@ function AskFilmoryPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const requestRevision = useRef(0);
+  const activeSession = useRef(sessionId);
+  activeSession.current = sessionId;
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [sidebarOpen]);
 
   // Load session list on mount
   useEffect(() => {
     fetchSessions();
+    return () => {
+      requestRevision.current += 1;
+    };
   }, []);
 
   const fetchSessions = async () => {
@@ -61,6 +71,8 @@ function AskFilmoryPage() {
   };
 
   const handleStartNewChat = () => {
+    requestRevision.current += 1;
+    setIsLoading(false);
     setSessionId("");
     setMessages([]);
     setActiveIntent(null);
@@ -69,18 +81,21 @@ function AskFilmoryPage() {
   };
 
   const handleSelectSession = async (id: string) => {
+    const revision = ++requestRevision.current;
     try {
       setIsLoading(true);
       setError(null);
       const detail = await getSession(id);
+      if (revision !== requestRevision.current) return;
       setSessionId(detail.session_id);
       setMessages(detail.messages || []);
       setActiveIntent(detail.active_intent || null);
       setSidebarOpen(false);
-    } catch (err: any) {
-      setError(err?.message || "Failed to load session");
+    } catch (err: unknown) {
+      if (revision !== requestRevision.current) return;
+      setError(err instanceof Error ? err.message : "Failed to load session");
     } finally {
-      setIsLoading(false);
+      if (revision === requestRevision.current) setIsLoading(false);
     }
   };
 
@@ -89,16 +104,17 @@ function AskFilmoryPage() {
     try {
       await deleteSession(id);
       setSessions((prev) => prev.filter((s) => s.session_id !== id));
-      if (sessionId === id) {
+      if (activeSession.current === id) {
         handleStartNewChat();
       }
-    } catch (err: any) {
-      console.error("Failed to delete session:", err);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete session");
     }
   };
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    const revision = ++requestRevision.current;
 
     const userMessage: MessageSchema = {
       role: "user",
@@ -115,6 +131,10 @@ function AskFilmoryPage() {
         message: text,
         session_id: sessionId || null,
       });
+      if (revision !== requestRevision.current) {
+        void fetchSessions();
+        return;
+      }
 
       setSessionId(response.session_id);
       setActiveIntent(response.intent);
@@ -125,16 +145,24 @@ function AskFilmoryPage() {
         movies: response.movies,
         intent: response.intent,
         evidence: response.evidence,
+        structured_explanation: response.structured_explanation,
+        notice: response.notice,
+        request_mode: response.request_mode,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
       // Refresh sessions in background to update previews
       fetchSessions();
-    } catch (err: any) {
-      setError(err?.message || "Failed to get response from AI assistant. Please try again.");
+    } catch (err: unknown) {
+      if (revision !== requestRevision.current) return;
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to get response from AI assistant. Please try again.",
+      );
     } finally {
-      setIsLoading(false);
+      if (revision === requestRevision.current) setIsLoading(false);
     }
   };
 
@@ -146,6 +174,8 @@ function AskFilmoryPage() {
           <Button
             size="icon"
             variant="outline"
+            aria-label={sidebarOpen ? "Close conversations" : "Open conversations"}
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((prev) => !prev)}
             className="md:hidden h-9 w-9 rounded-xl border-border"
           >
@@ -162,7 +192,7 @@ function AskFilmoryPage() {
                 </h1>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/10 border border-gold/30 px-2.5 py-0.5 text-[10px] font-semibold text-gold">
                   <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-                  Gemini + DAMR
+                  Personalized discovery
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -174,6 +204,7 @@ function AskFilmoryPage() {
 
         <Button
           onClick={handleStartNewChat}
+          aria-label="Start a new chat"
           size="sm"
           className="rounded-xl gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 text-xs shadow"
         >
@@ -184,6 +215,14 @@ function AskFilmoryPage() {
 
       {/* Main Grid Layout: Sessions Sidebar + Chat Area */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+        {sidebarOpen ? (
+          <button
+            type="button"
+            aria-label="Dismiss conversation drawer"
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          />
+        ) : null}
         {/* Sessions Sidebar (Desktop) */}
         <aside
           className={cn(
@@ -197,12 +236,22 @@ function AskFilmoryPage() {
                 <MessageSquare className="h-3.5 w-3.5 text-gold" />
                 <span>Saved Conversations</span>
               </span>
-              <button
-                onClick={handleStartNewChat}
-                className="text-xs text-gold hover:underline font-medium"
-              >
-                + New
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleStartNewChat}
+                  className="text-xs text-gold hover:underline font-medium"
+                >
+                  + New
+                </button>
+                <button
+                  type="button"
+                  aria-label="Close conversation drawer"
+                  onClick={() => setSidebarOpen(false)}
+                  className="rounded p-1 text-muted-foreground hover:bg-surface-raised md:hidden"
+                >
+                  <X className="size-4" aria-hidden />
+                </button>
+              </div>
             </div>
 
             <div className="mt-3 space-y-1.5 max-h-[60vh] overflow-y-auto scrollbar-thin pr-1">
@@ -216,7 +265,6 @@ function AskFilmoryPage() {
                   return (
                     <div
                       key={s.session_id}
-                      onClick={() => handleSelectSession(s.session_id)}
                       className={cn(
                         "group relative flex items-center justify-between rounded-xl px-3 py-2 text-xs transition cursor-pointer",
                         isActive
@@ -224,16 +272,21 @@ function AskFilmoryPage() {
                           : "text-muted-foreground hover:bg-surface hover:text-foreground",
                       )}
                     >
-                      <div className="truncate pr-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSelectSession(s.session_id)}
+                        aria-label={`Open conversation: ${s.preview || "Movie inquiry"}`}
+                        className="min-w-0 flex-1 truncate pr-2 text-left"
+                      >
                         <p className="truncate text-xs">{s.preview || "Movie inquiry"}</p>
                         <span className="text-[10px] text-muted-foreground/60">
                           {s.message_count} messages
                         </span>
-                      </div>
+                      </button>
                       <button
                         type="button"
                         onClick={(e) => handleDeleteSession(e, s.session_id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground/60 hover:text-red-400 transition"
+                        className="p-1 text-muted-foreground/60 hover:text-red-400 transition md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
                         title="Delete session"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -253,7 +306,9 @@ function AskFilmoryPage() {
             activeIntent={activeIntent}
             isLoading={isLoading}
             onSendMessage={handleSendMessage}
-            onFilterRemoved={(updated) => setActiveIntent(updated)}
+            onFilterRemoved={(updated) => {
+              if (activeSession.current === sessionId) setActiveIntent(updated);
+            }}
             sessionId={sessionId}
             error={error}
           />

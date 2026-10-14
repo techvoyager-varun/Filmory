@@ -5,6 +5,7 @@ import { getByGenre, getPopular, getRecommendations, getTrending } from "@/api/r
 import { HeroBanner } from "@/components/HeroBanner";
 import { HeroSkeleton } from "@/components/LoadingSkeleton";
 import { MovieRow } from "@/components/MovieRow";
+import { RecommendationReview } from "@/components/RecommendationReview";
 import { useAuth } from "@/context/AuthContext";
 import { useUserData } from "@/context/UserDataContext";
 import type { ScoredMovie } from "@/types/movie";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { user } = useAuth();
-  const { history } = useUserData();
+  const { history, isHidden } = useUserData();
   const userId = user?.userId ?? "guest";
 
   const recommendations = useQuery({
@@ -41,7 +42,9 @@ function Home() {
   const popular = useQuery({ queryKey: ["popular"], queryFn: getPopular });
   const catalog = useQuery({ queryKey: ["movies"], queryFn: getMovies });
 
-  const heroMovies: ScoredMovie[] = (recommendations.data ?? catalog.data ?? []).slice(0, 5);
+  const heroMovies: ScoredMovie[] = (recommendations.data ?? catalog.data ?? [])
+    .filter((movie) => !isHidden(movie.movieId))
+    .slice(0, 5);
   const recentlyWatched = history.map((entry) => entry.movie);
 
   return (
@@ -51,15 +54,21 @@ function Home() {
       <div className="relative z-10 -mt-4 md:-mt-6">
         <MovieRow
           title="Recommended For You"
-          subtitle="Matched to your taste profile"
+          subtitle={
+            user
+              ? "Matched to your taste profile"
+              : "Popular picks — sign in for personalized recommendations"
+          }
           movies={recommendations.data ?? []}
           loading={recommendations.isLoading}
           error={recommendations.isError}
           onRetry={() => void recommendations.refetch()}
         />
 
+        <RecommendationReview />
+
         <MovieRow
-          title="Top 10 This Week"
+          title="Most-Rated Movies"
           movies={(trending.data ?? []).slice(0, 10)}
           loading={trending.isLoading}
           error={trending.isError}
@@ -81,16 +90,14 @@ function Home() {
 
         <MovieRow
           title="Recently Watched"
+          hideNotInterested={false}
           movies={recentlyWatched}
-          progressFor={(movie) =>
-            history.find((h) => h.movie.movieId === movie.movieId)?.progress
-          }
+          progressFor={(movie) => history.find((h) => h.movie.movieId === movie.movieId)?.progress}
         />
       </div>
     </div>
   );
 }
-
 
 const GENRE_RAILS = ["Sci-Fi", "Comedy", "Thriller", "Animation", "Documentary"];
 

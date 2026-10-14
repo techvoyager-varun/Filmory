@@ -16,7 +16,6 @@ export function RatingBadge({ rating, className }: { rating: number; className?:
 }
 
 export function MatchBadge({ score, className }: { score: number; className?: string }) {
-  const percent = Math.round(score * 100);
   return (
     <span
       className={cn(
@@ -24,7 +23,7 @@ export function MatchBadge({ score, className }: { score: number; className?: st
         className,
       )}
     >
-      {percent}% Match
+      Score {score.toFixed(2)}
     </span>
   );
 }
