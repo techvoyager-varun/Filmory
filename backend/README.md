@@ -41,6 +41,11 @@ PyTorch Recommendation Engine (NCF Hybrid + Sequential Transformer + Genre Matri
 
 ## ML Models & Artifacts
 
+The active pointer selects `training/runs/20261001_clean_extended`, not the legacy
+checkpoints directly under `ml`. Restore the complete active bundle on a new
+checkout: its large binaries/data are local and ignored by Git. Current setup,
+measured results and artifact requirements are in the [root README](../README.md).
+
 The active trained checkpoints remain immutable. `backend/ml/serving_policy.json`
 binds the new-account serving policy to their SHA-256 hashes. Accounts without a
 learned user embedding start with the existing cold-start recommendations; after
@@ -58,13 +63,13 @@ remain available. A changed bundle requires a new matching policy evaluation.
 All models are loaded into memory once during FastAPI startup (`lifespan`) and run on CPU or CUDA GPU automatically:
 
 1. **NCF Baseline (`ncf_baseline.pth`)**
-   - 8-dim User Embedding × 8-dim Item Embedding → MLP (16 → 64 → 32 → 1)
+   - Active 16-dim user and item embeddings → MLP (32 → 64 → 32 → 1).
 
 2. **NCF Hybrid (`ncf_hybrid.pth`)**
-   - 8-dim User Embedding + 8-dim Item Embedding + 8-dim User Genre Projection + 8-dim Item Genre Projection → MLP (32 → 64 → 32 → 1)
+   - Active 16-dim user/item embeddings and 16-dim genre projections → MLP (64 → 64 → 32 → 1), with L1-normalized user genres and training-compatible feature order.
 
 3. **Sequential Transformer (`sequential_transformer.pth`)**
-   - 64-dim Item Embeddings + 20-step Position Embeddings + 2-layer 4-head Transformer Encoder → Sequence Representation
+   - 64-dim embeddings, 20-step position embeddings, 2-layer 4-head encoder, 256-dim feed-forward block, separate padding ID and last-valid-position pooling.
 
 4. **Matrix Artifacts**
    - `movie_genre_matrix.pt`: 22,836 movies × 20 genres
@@ -73,25 +78,32 @@ All models are loaded into memory once during FastAPI startup (`lifespan`) and r
 
 ---
 
-## 3 Recommendation Flows
+## Recommendation Flows
 
 ### 1. Personalized Recommendations (`GET /api/recommendations/me`)
-- **Stage 1**: Candidate generation via Hybrid NCF → Top 100 candidate movies
-- **Stage 2**: Sequential Transformer scoring on the Top 100 using the user's recent watch sequence
-- **Stage 3**: Fresh dynamic genre preference signal from real-time interactions
-- **Ensemble**: `0.55 * NCF + 0.25 * Transformer + 0.20 * Genre`
-- **Output**: Top 10 ranked movies returned to frontend
+- `variant=auto` selects the active mapped-user bundle's Transformer retrieval and
+  normalized fixed fusion on 100 candidates: Hybrid NCF / Transformer / genre
+  weights 0.55 / 0.25 / 0.20.
+- New accounts start with collaborative-neighbor cold start, then use the frozen
+  sequence/neighbor history-bin policy after at least two distinct mapped positive
+  movies. NCF baseline is a comparison model, not a borrowed requester identity.
+- Personalized results exclude played, liked, saved and hidden titles. The
+  homepage requests 12 results; the endpoint's default is 10.
+- DAMR is a supported alternative and used by assistant discovery; it is not the
+  current default homepage policy. Title lookup bypasses discovery reranking.
 
 ### 2. Movie-to-Movie Similarity (`GET /api/similar/{movieId}`)
-- Computes cosine similarity between learned NCF item embeddings and the 20-dim movie genre matrix.
+- Combines learned NCF item-embedding and genre cosine similarity. Unmapped
+  catalogue titles use a genre-overlap fallback.
 - Powers the "You May Also Like" rail on movie details pages without requiring authentication.
 
 ### 3. New-User Cold Start (`POST /api/cold-start`)
-- For users with fewer than 5 interactions:
-  - Generates a target genre vector from onboarding choices
-  - Calculates cosine similarity against 41,547 existing user genre profiles
-  - Gathers and ranks movies watched by the most similar users
-  - Filters out already selected favorites
+- Explicit genres/favourite films and eligible activity define a target profile;
+  similarity to training-user genre profiles yields neighbor votes for movies.
+- All selected genres are preserved. The authenticated `auto` path uses this
+  fallback until the mapped positive history permits the sequence policy.
+- `/api/cold-start` accepts an explicit request and is separate from the automatic
+  account/history branch.
 
 ---
 
@@ -108,9 +120,12 @@ Create `backend/.env` (or copy from `.env.example`):
 DATABASE_URL=postgresql+psycopg://postgres:your-url-encoded-password@localhost:5432/filmory
 SECRET_KEY=generate-a-long-random-secret-before-running
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
-FRONTEND_ORIGIN=http://localhost:5173
-PORT=8000
-HOST=0.0.0.0
+FRONTEND_ORIGIN=http://127.0.0.1:5173
+ASSISTANT_LOCAL_ONLY=true
+GEMINI_API_KEY=
+TMDB_API_KEY=
+PORT=8100
+HOST=127.0.0.1
 ```
 
 > **Note:** If your PostgreSQL password contains special characters like `@`, URL-encode it (`@` → `%40`).
@@ -134,13 +149,21 @@ alembic upgrade head
 python -m app.scripts.seed_movies
 ```
 
+These migration/seed instructions are for a fresh `filmory` database created
+using PostgreSQL/pgAdmin. For an existing installation, review migration history
+as described below before applying them. The complete active model bundle must
+already be present.
+
 ### 5. Start Backend Server
 ```bash
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8100
 ```
 API Documentation will be available at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+- Swagger UI: `http://127.0.0.1:8100/docs`
+- ReDoc: `http://127.0.0.1:8100/redoc`
+
+Set the frontend's `VITE_API_BASE_URL` to `http://127.0.0.1:8100`; its fallback is
+localhost:8000. The root README includes the corresponding frontend commands.
 
 ### 6. Run Automated Tests
 ```bash
@@ -152,7 +175,7 @@ they do not write test users into the configured PostgreSQL database. The active
 model bundle must be present. On Windows with restricted temporary folders, create
 `backend/.test-tmp` and pass a new `--basetemp=.test-tmp/<run-name>` from the backend directory.
 
-Migration `0002_assistant_tables` completes the fresh-install schema. Existing
+Migrations `0002_assistant_tables` and `0003_recommendation_study` complete the fresh-install schema. Existing
 databases created by application startup may already contain these tables with no
 Alembic stamp: back up and compare the schema before reconciling their migration
 history. Do not blindly apply or stamp migrations over such a database.
@@ -175,15 +198,16 @@ history. Do not blindly apply or stamp migrations over such a database.
 - `GET /api/search?query=...` — Search by title or genre
 
 ### Recommendations (`/api`)
-- `GET /api/recommendations/{userId}` — Personalized recommendations (3-stage model)
+- `GET /api/recommendations/{userId}?variant=auto` — Account/history-dependent recommendations
 - `GET /api/similar/{movieId}` — Movie-to-movie item embedding similarity
-- `GET /api/trending` — Trending titles based on interaction popularity
+- `GET /api/trending` — Most-rated catalogue titles (the homepage labels this Most-Rated Movies)
 - `GET /api/popular` — Top-rated movies with significant audience counts
 - `GET /api/movies-by-genre?genre=...` — Genre rail
 - `POST /api/cold-start` — Cold start recommendations from genre profile
 
 ### User Activity & Interactions (`/api`)
-- `POST /api/interactions` — Record `play`, `like`, `unlike`, `list_add`, `list_remove`
+- `POST /api/interactions` — Record `play`, `like`, `unlike`, `list_add`, `list_remove`, `not_interested`, `show_again`
+- `GET /api/users/me/hidden-movies` — Current account's reversible exclusions
 - `GET /api/users/me/history` — User's chronological watch history
 - `GET /api/users/me/my-list` — User's saved watchlist
 - `POST /api/users/me/my-list/{movieId}` — Add to watchlist
@@ -191,3 +215,14 @@ history. Do not blindly apply or stamp migrations over such a database.
 - `GET /api/users/me/likes` — Liked movie IDs
 - `POST /api/users/me/likes/{movieId}` — Toggle like
 - `DELETE /api/users/me/likes/{movieId}` — Unlike movie
+
+### Assistant and optional study
+- Owned chat/session/feedback/filter routes under `/api/assistant`; local-only
+  parsing/explanations are the default.
+- `POST /api/recommendation-study` — Start a consented frozen review.
+- `GET /api/recommendation-study/{study_id}` — Read an owned review.
+- `PUT /api/recommendation-study/{study_id}/answers` — Save/replace a judgment.
+
+For the exact request schemas, use the running `/docs` Swagger page. Playback is
+simulated, and user relevance/genre balance are not guaranteed. See the root
+README and dated verification reports for current checks and limitations.
