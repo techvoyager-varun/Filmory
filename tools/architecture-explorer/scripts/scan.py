@@ -14,6 +14,7 @@ OUT = HERE / 'src' / 'architecture.json'
 SKIP = {'node_modules', '.venv', 'venv', '__pycache__', '.git', '.output', '.nitro',
         '.pytest_cache', '.test-tmp', 'dist', '.wrangler'}
 SOURCE_SUFFIXES = {'.py', '.ts', '.tsx', '.js', '.mjs', '.css', '.html', '.yml', '.yaml'}
+LOCAL_ONLY = {'backend/scripts/update_research_draft.py'}
 
 def read(path):
     return (ROOT / path).read_text(encoding='utf-8-sig')
@@ -33,7 +34,8 @@ def inventory():
             children[:] = [name for name in children if name not in SKIP]
             for name in names:
                 p = Path(directory) / name
-                if p.suffix in SOURCE_SUFFIXES: paths.append(p)
+                if p.suffix in SOURCE_SUFFIXES and p.relative_to(ROOT).as_posix() not in LOCAL_ONLY:
+                    paths.append(p)
     for p in [ROOT / 'frontend/package.json', ROOT / 'backend/requirements.txt',
               ROOT / 'backend/ml/active_bundle.json', ROOT / 'backend/ml/serving_policy.json']:
         paths.append(p)
@@ -139,7 +141,7 @@ def build():
     node('train', 'Offline training & evaluation', 'offline', 'Fresh training splits sequences into training/validation/test, writes checkpoints/config/logs and sampled/full-catalog metrics. Evaluation scripts select policies and produce research evidence.', 'PyTorch|NumPy|Pandas|Python CLI', ['backend/scripts/train_models.py','backend/scripts/prepare_training_data.py'] + [x['path'] for x in files if x['path'].startswith('backend/scripts/') and x['path'] not in ['backend/scripts/train_models.py','backend/scripts/prepare_training_data.py']], 'torch.save(model.state_dict()', 'Only source/metadata inspection was done here; training/evaluation was not rerun. This explorer does not modify weights.')
     node('bundle', 'Active artifacts & policy', 'offline', 'active_bundle.json points to the clean_extended run. Its config selects Transformer retrieval and normalized_fixed serving. serving_policy.json holds checkpoint-bound history-bin policies for new accounts.', 'PyTorch checkpoints|ID maps|Metrics JSON', ['backend/ml/active_bundle.json','backend/ml/serving_policy.json','backend/training/runs/20261001_clean_extended/model_config.json','backend/training/runs/20261001_clean_extended/metrics.json'], '20261001_clean_extended', 'Pointer/config files exist. Checkpoint bytes were not loaded or revalidated by the explorer scanner.', 'artifact')
     node('schema-tools', 'Migrations & catalog seeding', 'offline', 'Alembic imports Base.metadata for schema migrations, including assistant and recommendation study tables. Seed scripts populate catalog and demo records; a separate script enriches database posters.', 'Alembic|SQLAlchemy|Python CLI', ['backend/migrations/env.py','backend/migrations/versions/0001_initial_tables.py','backend/migrations/versions/0002_assistant_tables.py','backend/migrations/versions/0003_recommendation_study.py',B+'scripts/seed_movies.py',B+'scripts/enrich_database_posters.py',B+'scripts/tmdb_helper.py'], 'target_metadata = Base.metadata', 'Migration state of a live database was not checked.')
-    node('checks', 'Tests, CI & research docs', 'offline', 'Backend pytest and frontend node tests cover behavior; GitHub CodeQL/Codacy workflows are declared. Research reports/manuscript describe evaluations, but are not executable call relationships.', 'pytest|Node test runner|CodeQL|Codacy|LaTeX', ['backend/tests/conftest.py'] + [x['path'] for x in files if ('/tests/' in x['path'] or x['path'].startswith('.github/')) and x['path'] != 'backend/tests/conftest.py'] + ['docs/research/filmory_paper.tex','docs/research/PAPER_AUDIT.md','docs/research/FULL_PROJECT_AUDIT.md'], 'import', 'Tests/CI status and manuscript claims were not re-certified in this architecture-only task.')
+    node('checks', 'Tests, CI & evaluation docs', 'offline', 'Backend pytest and frontend node tests cover behavior; GitHub CodeQL/Codacy workflows are declared. Engineering reports describe evaluations, but are not executable call relationships.', 'pytest|Node test runner|CodeQL|Codacy', ['backend/tests/conftest.py'] + [x['path'] for x in files if ('/tests/' in x['path'] or x['path'].startswith('.github/')) and x['path'] != 'backend/tests/conftest.py'] + ['docs/research/FULL_PROJECT_AUDIT.md'], 'import', 'Tests/CI status and evaluation claims were not re-certified in this architecture-only task.')
 
     # Each arrow represents the stated call/import/FK/config use, not inferred runtime success.
     edge('shell','auth-ui','provides session context',F+'routes/__root.tsx','<AuthProvider>', 'composition')

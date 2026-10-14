@@ -2067,7 +2067,6 @@
         "backend/scripts/prepare_evaluation_split.py",
         "backend/scripts/record_provenance.py",
         "backend/scripts/summarize_evaluation.py",
-        "backend/scripts/update_research_draft.py",
         "backend/scripts/write_pipeline_quality_report.py"
       ],
       "evidence": [
@@ -2149,15 +2148,14 @@
     },
     {
       "id": "checks",
-      "title": "Tests, CI & research docs",
+      "title": "Tests, CI & evaluation docs",
       "layer": "offline",
-      "description": "Backend pytest and frontend node tests cover behavior; GitHub CodeQL/Codacy workflows are declared. Research reports/manuscript describe evaluations, but are not executable call relationships.",
+      "description": "Backend pytest and frontend node tests cover behavior; GitHub CodeQL/Codacy workflows are declared. Engineering reports describe evaluations, but are not executable call relationships.",
       "technologies": [
         "pytest",
         "Node test runner",
         "CodeQL",
-        "Codacy",
-        "LaTeX"
+        "Codacy"
       ],
       "files": [
         "backend/tests/conftest.py",
@@ -2174,8 +2172,6 @@
         "backend/tests/test_recommender_integration.py",
         "backend/tests/test_training_continuation.py",
         "frontend/tests/api.test.mjs",
-        "docs/research/filmory_paper.tex",
-        "docs/research/PAPER_AUDIT.md",
         "docs/research/FULL_PROJECT_AUDIT.md"
       ],
       "evidence": [
@@ -2186,7 +2182,7 @@
           "excerpt": "import csv"
         }
       ],
-      "note": "Tests/CI status and manuscript claims were not re-certified in this architecture-only task.",
+      "note": "Tests/CI status and evaluation claims were not re-certified in this architecture-only task.",
       "status": "source",
       "routes": [],
       "endpoints": [],
@@ -8276,35 +8272,6 @@
         {
           "name": "eval_candidates",
           "line": 224
-        }
-      ]
-    },
-    {
-      "path": "backend/scripts/update_research_draft.py",
-      "lines": 56,
-      "sha256": "710bb16f369b0c9bfcfa066edcae94e078cd6c23eaab1eb9417afe34eea15e06",
-      "imports": [
-        {
-          "module": "json",
-          "line": 2
-        },
-        {
-          "module": "re",
-          "line": 3
-        },
-        {
-          "module": "pathlib",
-          "line": 4
-        }
-      ],
-      "symbols": [
-        {
-          "name": "replace_block",
-          "line": 8
-        },
-        {
-          "name": "main",
-          "line": 15
         }
       ]
     },
