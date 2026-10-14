@@ -1,0 +1,11 @@
+{
+  "users": 41547,
+  "train_interactions": 5923646,
+  "holdout_disjoint": true,
+  "evaluation_profiles_train_only": true,
+  "source_hashes_match": true,
+  "notebook_code_parses": true
+}
+frontend-lint-after.json 0 8
+frontend-lint-before.json 1160 9
+frontend-lint-final.json 0 8

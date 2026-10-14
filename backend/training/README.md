@@ -2,6 +2,10 @@
 
 `filmory_training_v2.ipynb` is the corrected standalone notebook. The supplied original is retained in `source_notebook.ipynb` for reviewed model-contract comparisons. Never run arbitrary notebook attachment code without review.
 
+The corrected notebook is regenerated from the current reviewed Python sources with `scripts/build_training_notebook.py`. It has no saved experimental outputs and does not contain prefilled performance claims. Reviewing or regenerating it does not start training.
+
+`source_notebook.ipynb` is an archival copy, with historical outputs and IPython shell commands (including a multiline ZIP command). Those cells are not plain Python scripts and are not evidence that the corrected pipeline was rerun. Use the corrected notebook for new experiments. The `20261001_finetune_low_lr` directory is an incomplete, inactive experiment with no completed metric report; its logs must not be represented as a successful training run.
+
 Fresh training:
 ```powershell
 cd E:/Filmory/backend

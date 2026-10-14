@@ -1,0 +1,15 @@
+Legacy cold-start: 50/200
+Legacy cold-start: 100/200
+Legacy cold-start: 150/200
+Legacy cold-start: 200/200
+{
+  "users": 200,
+  "hr10": 0.075,
+  "ndcg10": 0.035314568603477856,
+  "protocol": "Same additional test users; simulate accounts without learned user embeddings; replay existing train histories and their top-three genres",
+  "limitations": [
+    "History replay is not a real-new-user experiment",
+    "No live satisfaction measurements",
+    "Metadata-only disposable catalogue; no synthetic ratings used for ranking"
+  ]
+}

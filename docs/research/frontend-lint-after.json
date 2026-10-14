@@ -1,0 +1,684 @@
+[
+  {
+    "filePath": "E:\\Filmory\\frontend\\eslint.config.js",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\api\\assistant.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\api\\auth.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\api\\client.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\api\\interactions.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\api\\movies.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\api\\recommendations.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\EmptyState.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ErrorState.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\FilmoryLogo.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\Footer.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\HeroBanner.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\LoadingSkeleton.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\MovieActions.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\MovieCard.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\MovieGrid.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\MovieRow.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\Navbar.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\Poster.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\RatingBadge.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\RequireAuth.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\SearchBar.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\TasteDriftCard.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\assistant\\ActiveFilters.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\assistant\\AssistantMovieCards.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\assistant\\ChatInput.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\assistant\\ChatPanel.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\assistant\\EvidencePanel.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\onboarding\\OnboardingWizard.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\accordion.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\alert-dialog.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\alert.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\aspect-ratio.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\avatar.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\badge.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 32,
+        "column": 17
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\breadcrumb.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\button.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 49,
+        "column": 18
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\calendar.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\card.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\carousel.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\chart.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\checkbox.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\collapsible.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\command.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\context-menu.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\dialog.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\drawer.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\dropdown-menu.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\form.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 163,
+        "column": 3
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\hover-card.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\input-otp.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\input.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\label.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\menubar.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\navigation-menu.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 111,
+        "column": 3
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\pagination.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\popover.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\progress.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\radio-group.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\resizable.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\scroll-area.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\select.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\separator.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\sheet.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\sidebar.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 743,
+        "column": 3
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\skeleton.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\slider.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\sonner.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\switch.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\table.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\tabs.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\textarea.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\toggle-group.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\toggle.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 42,
+        "column": 18
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\components\\ui\\tooltip.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\context\\AuthContext.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 73,
+        "column": 17
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\context\\UserDataContext.tsx",
+    "errorCount": 0,
+    "warningCount": 1,
+    "messages": [
+      {
+        "ruleId": "react-refresh/only-export-components",
+        "severity": 1,
+        "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+        "line": 140,
+        "column": 17
+      }
+    ]
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\data\\movies.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\hooks\\use-mobile.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\lib\\error-capture.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\lib\\error-page.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\lib\\lovable-error-reporting.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\lib\\utils.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routeTree.gen.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\router.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\__root.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\ask-filmory.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\history.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\index.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\login.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\model.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\movies.$movieId.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\movies.index.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\my-list.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\onboarding.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\profile.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\register.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\routes\\search.tsx",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\server.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\start.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\types\\assistant.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\src\\types\\movie.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  },
+  {
+    "filePath": "E:\\Filmory\\frontend\\vite.config.ts",
+    "errorCount": 0,
+    "warningCount": 0,
+    "messages": []
+  }
+]

@@ -1,0 +1,104 @@
+History 2: 100/200
+History 2: 200/200
+Selected history 2 {'mode': 'legacy_cold_start'}
+History 5: 100/200
+History 5: 200/200
+Selected history 5 {'mode': 'legacy_cold_start'}
+History 10: 100/200
+History 10: 200/200
+Selected history 10 {'mode': 'sequence_only', 'candidate_k': 1000, 'strategy': 'mixed', 'weights': [0.0, 0.75, 0.25]}
+E:\Filmory\backend\.venv\Lib\site-packages\torch\nn\modules\transformer.py:529: UserWarning: The PyTorch API of nested tensors is in prototype stage and will change in the near future. We recommend specifying layout=torch.jagged when constructing a nested tensor, as this layout receives active development, has better operator coverage, and works with torch.compile. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\NestedTensorImpl.cpp:181.)
+  output = torch._nested_tensor_from_mask(
+History 20: 100/200
+History 20: 200/200
+Selected history 20 {'mode': 'sequence_only', 'candidate_k': 300, 'strategy': 'mixed', 'weights': [0.0, 0.75, 0.25]}
+History 2: 100/200
+History 2: 200/200
+History 5: 100/200
+History 5: 200/200
+History 10: 100/200
+History 10: 200/200
+History 20: 100/200
+History 20: 200/200
+{
+  "2": {
+    "selected": {
+      "mode": "legacy_cold_start"
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.025,
+        "ndcg10": 0.010969096281891768,
+        "coverage10": 0.0151077246452969
+      }
+    }
+  },
+  "5": {
+    "selected": {
+      "mode": "legacy_cold_start"
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.025,
+        "ndcg10": 0.00914524889238717,
+        "coverage10": 0.014012961989840603
+      }
+    }
+  },
+  "10": {
+    "selected": {
+      "mode": "sequence_only",
+      "candidate_k": 1000,
+      "strategy": "mixed",
+      "weights": [
+        0.0,
+        0.75,
+        0.25
+      ]
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.035,
+        "ndcg10": 0.017328711437193615,
+        "coverage10": 0.013531266421439831
+      },
+      "{\"candidate_k\": 1000, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+        "users": 200,
+        "hr10": 0.05,
+        "ndcg10": 0.022288682632588926,
+        "coverage10": 0.015895953757225433,
+        "candidate_recall": 0.645
+      }
+    }
+  },
+  "20": {
+    "selected": {
+      "mode": "sequence_only",
+      "candidate_k": 300,
+      "strategy": "mixed",
+      "weights": [
+        0.0,
+        0.75,
+        0.25
+      ]
+    },
+    "new_test": {
+      "legacy_cold_start": {
+        "users": 200,
+        "hr10": 0.025,
+        "ndcg10": 0.013311915559053837,
+        "coverage10": 0.012129970222455771
+      },
+      "{\"candidate_k\": 300, \"strategy\": \"mixed\", \"weights\": [0.0, 0.75, 0.25]}": {
+        "users": 200,
+        "hr10": 0.035,
+        "ndcg10": 0.01368997571063252,
+        "coverage10": 0.013399894902785077,
+        "candidate_recall": 0.36
+      }
+    }
+  }
+}
