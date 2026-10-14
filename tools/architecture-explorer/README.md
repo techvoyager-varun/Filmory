@@ -67,7 +67,7 @@ The snapshot records its capture root for absolute-path copying. On a different 
 
 ## Findings and limits
 
-The current map aggregates **43 modules**, **76 relationships**, **12 frontend routes**, **37 declared API endpoints** (including root and health), and **13 ORM tables** across **203 scanned source/config files**. The default call view hides the schema FK arrows.
+The current map aggregates **43 modules**, **76 relationships**, **12 frontend routes**, **37 declared API endpoints** (including root and health), and **13 ORM tables** across **202 scanned source/config files**. The default call view hides the schema FK arrows.
 
 - Actual frontend requests use the typed `api/client.ts` seam, JSON fetch and localStorage bearer tokens; this is not a cookie-only auth architecture.
 - `variant=auto` is resolved from the active configuration. The selected mapped-user bundle uses Transformer retrieval and `normalized_fixed`; new accounts can use checkpoint-bound history-bin sequence/neighbor policies. DAMR remains a separate supported/discovery branch. The repository's older overview text does not describe every current branch precisely.
@@ -79,6 +79,6 @@ The current map aggregates **43 modules**, **76 relationships**, **12 frontend r
 - SQLAlchemy defaults to PostgreSQL, while tests can use SQLite. Live database availability, migration state and actual stored rows were not queried.
 - Model pointer/config and artifact readers are verified; scanner does not deserialize checkpoints or rerun training/evaluation. `/api/metrics` reads offline metrics, not live accuracy.
 - Play is a simulated activity event. No video streaming service is evidenced.
-- CI workflows/tests and research documents are present; this diagram does not certify their current run status, paper claims, recommendation quality, data licensing or plagiarism scores.
+- CI workflows/tests and evaluation documents are present; this diagram does not certify their current run status, recommendation quality or data licensing. Local-only preparation files are excluded from the snapshot.
 
 Implementation follows the official [React Flow node/subflow API](https://reactflow.dev/api-reference/types/node) and [React Flow instance API](https://reactflow.dev/api-reference/types/react-flow-instance). This is an architecture viewer inspired by n8n's visual style, not an n8n workflow executor.

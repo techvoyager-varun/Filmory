@@ -133,6 +133,7 @@ flowchart LR
 | [backend/scripts](backend/scripts) | Training, evaluation, evidence audit and study-export utilities. |
 | [backend/training](backend/training/README.md) | Corrected/original notebooks and run metadata. |
 | [backend/evaluation](backend/evaluation) | Protocols, validation/test rows, selections, summaries and immutable snapshots. |
+| [docs/research](docs/research) | Evaluation evidence, engineering reviews and dated experiment reports. |
 | [docs/verification](docs/verification) | Frontend, recommendation, test and supplementary checks. |
 | [tools/architecture-explorer](tools/architecture-explorer/README.md) | Independent React Flow viewer, dependencies and port. |
 
@@ -278,3 +279,11 @@ Accepted recommendation variants: `auto`, `normalized_fixed`, `damr`, `mmr` and
 Activity, chats and studies require authentication/ownership. See the
 [backend guide](backend/README.md).
 
+## Next evaluation
+
+Use the [classmate feedback guide](docs/verification/classmate-feedback-guide.md)
+for the opt-in pilot; exports exclude QA accounts and omit names/emails. The
+[training guide](backend/training/README.md) separates current results, historical
+diagnostics and the inactive unfinished continuation. Future ranking changes
+should use validation selection and separate held-out full-catalogue HR@10/
+NDCG@10 checks before replacing the current policy.

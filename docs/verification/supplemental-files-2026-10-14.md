@@ -1,16 +1,12 @@
 # Supplemental file review — 14 October 2026
 
-Scope: research draft/audits, original and corrected notebooks, the separate
+Scope: original and corrected notebooks, the separate
 architecture explorer, dated review records, and previously uncommitted
 training/evaluation metadata and validation rows. This pass did not start model
-training, change serving weights, collect human feedback, or submit a manuscript
-to a journal/plagiarism service.
+training, change serving weights, or collect human feedback.
 
 ## Checks
 
-- Existing `docs/research/filmory_paper.tex`: built-in desktop compiler returned
-  success. Verified metric tables are sourced from retained evidence; the draft
-  remains provisional, with publication and Turnitin limitations documented.
 - Corrected notebook regenerated with `backend/scripts/build_training_notebook.py`.
   Its six code cells parse as Python, have no saved outputs, and embedded training
   and architecture sources match the reviewed current files. No cells were run.

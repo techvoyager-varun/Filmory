@@ -45,3 +45,14 @@ backend/training/runs/**/movies_metadata.csv
 backend/training/data/
 backend/.test-tmp/
 frontend/.test-tmp/
+
+# Local-only manuscript and paper preparation files
+/docs/research/*.tex
+/docs/research/*.bib
+/docs/research/*.pdf
+/docs/research/PAPER_AUDIT*.md
+/docs/research/paper-*.txt
+/docs/research/paper-*.json
+/docs/research/README.md
+/docs/research/audit_evidence.py
+/backend/scripts/update_research_draft.py
