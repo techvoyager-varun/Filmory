@@ -3670,8 +3670,8 @@
   "files": [
     {
       "path": ".github/workflows/codacy.yml",
-      "lines": 64,
-      "sha256": "2bde1f46c0ff1d33aeeea34c32004fc4228f7857c5fb3ae97ffef0f10827e898",
+      "lines": 72,
+      "sha256": "4f4fa86747d4fccca6ae0d6960d64791261ce56884a2d279de8992ba664faf14",
       "imports": [],
       "symbols": []
     },
